@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -21,11 +22,13 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
   }, []);
 
   const onTick = useCallback((tick: Tick) => {
-    const quoteStr = tick.quote.toString();
-    const decimalPart = quoteStr.split('.')[1] || '';
-    const precision = decimalPart.length;
-    const digit = parseInt(tick.quote.toFixed(precision).slice(-1));
+    // Derive digits based on the standard display precision for Volatility Indices in this app.
+    // We standardize on 2 decimal places to match the UI's price display.
+    // This ensures that trailing zeros (e.g., .10) are correctly identified as '0'.
+    const quoteStr = tick.quote.toFixed(2);
+    const digit = parseInt(quoteStr.slice(-1));
     
+    // digit 0 is valid and parseInt correctly returns it. isNaN(0) is false.
     if (isNaN(digit)) return;
 
     setLatestPrice(tick.quote);
