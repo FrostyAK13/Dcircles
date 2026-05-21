@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo } from 'react';
@@ -48,6 +47,7 @@ export default function DigitFlowApp() {
     const maxVal = Math.max(...percentages);
     const minVal = Math.min(...percentages);
     
+    // Find only the first instance to match Deriv's logic of highlighting a single high/low
     return {
       high: distribution.findIndex(d => d.percentage === maxVal),
       low: distribution.findIndex(d => d.percentage === minVal)
@@ -81,7 +81,7 @@ export default function DigitFlowApp() {
               <LargePriceDisplay price={latestPrice} />
               
               <div className="space-y-6">
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60">
+                <h3 className="text-sm font-medium text-muted-foreground/60">
                   Last digit prediction
                 </h3>
                 

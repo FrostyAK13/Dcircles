@@ -1,4 +1,3 @@
-
 "use client"
 
 import { cn } from "@/lib/utils";
@@ -21,6 +20,9 @@ export function DigitCard({
   isLatest,
   onClick
 }: DigitCardProps) {
+  // Format percentage: hide .0 if it's a whole number
+  const formattedPercentage = percentage % 1 === 0 ? percentage : percentage.toFixed(1);
+
   return (
     <div 
       onClick={onClick}
@@ -49,7 +51,7 @@ export function DigitCard({
         "text-xs sm:text-sm font-bold tabular-nums",
         isHigh ? "text-emerald-500" : isLow ? "text-rose-500" : "text-muted-foreground/80"
       )}>
-        {percentage.toFixed(1)}%
+        {formattedPercentage}%
       </span>
     </div>
   );

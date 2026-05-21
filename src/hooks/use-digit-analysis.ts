@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -13,22 +12,23 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
   const [windowSize, setWindowSize] = useState<number>(1000); 
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
 
-  useEffect(() => {
-    // Seed with 1000 digits to ensure meaningful percentages on load
-    const seed = Array.from({ length: 1000 }, () => Math.floor(Math.random() * 10));
-    setTicks(seed);
-    setLatestDigit(seed[seed.length - 1]);
-    setLatestPrice(100.00); 
+  const onHistory = useCallback((prices: number[]) => {
+    const historicalDigits = prices.map(price => {
+      const quoteStr = price.toFixed(2);
+      return parseInt(quoteStr.slice(-1));
+    }).filter(d => !isNaN(d));
+
+    setTicks(historicalDigits);
+    if (historicalDigits.length > 0) {
+      setLatestDigit(historicalDigits[historicalDigits.length - 1]);
+      setLatestPrice(prices[prices.length - 1]);
+    }
   }, []);
 
   const onTick = useCallback((tick: Tick) => {
-    // Derive digits based on the standard display precision for Volatility Indices in this app.
-    // We standardize on 2 decimal places to match the UI's price display.
-    // This ensures that trailing zeros (e.g., .10) are correctly identified as '0'.
     const quoteStr = tick.quote.toFixed(2);
     const digit = parseInt(quoteStr.slice(-1));
     
-    // digit 0 is valid and parseInt correctly returns it. isNaN(0) is false.
     if (isNaN(digit)) return;
 
     setLatestPrice(tick.quote);
@@ -43,10 +43,10 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
   }, []);
 
   useEffect(() => {
-    const ws = new DerivWS(symbol, onTick, setStatus);
+    const ws = new DerivWS(symbol, onTick, setStatus, onHistory);
     ws.connect();
     return () => ws.disconnect();
-  }, [symbol, onTick]);
+  }, [symbol, onTick, onHistory]);
 
   const distribution = useMemo(() => {
     const windowTicks = ticks.slice(-windowSize);
@@ -67,8 +67,10 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
     });
 
     const total = windowTicks.length;
+    // Calculate percentages to one decimal place
     let percentages = counts.map(count => Math.round((count / total) * 1000) / 10);
     
+    // Ensure sum is 100%
     const sum = percentages.reduce((a, b) => a + b, 0);
     if (sum !== 100 && total > 0) {
       const diff = Math.round((100 - sum) * 10) / 10;

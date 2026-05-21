@@ -12,6 +12,10 @@ export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'er
 
 export interface TickResponse {
   tick?: Tick;
+  history?: {
+    prices: number[];
+    times: number[];
+  };
   msg_type: string;
   error?: {
     code: string;
@@ -22,14 +26,21 @@ export interface TickResponse {
 export class DerivWS {
   private ws: WebSocket | null = null;
   private onTickCallback: (tick: Tick) => void;
+  private onHistoryCallback?: (prices: number[]) => void;
   private onStatusCallback: (status: ConnectionStatus) => void;
   private symbol: string;
   private reconnectTimeout: NodeJS.Timeout | null = null;
 
-  constructor(symbol: string, onTick: (tick: Tick) => void, onStatus: (status: ConnectionStatus) => void) {
+  constructor(
+    symbol: string, 
+    onTick: (tick: Tick) => void, 
+    onStatus: (status: ConnectionStatus) => void,
+    onHistory?: (prices: number[]) => void
+  ) {
     this.symbol = symbol;
     this.onTickCallback = onTick;
     this.onStatusCallback = onStatus;
+    this.onHistoryCallback = onHistory;
   }
 
   connect() {
@@ -45,9 +56,15 @@ export class DerivWS {
 
     this.ws.onmessage = (event) => {
       const response: TickResponse = JSON.parse(event.data);
+      
+      if (response.history && this.onHistoryCallback) {
+        this.onHistoryCallback(response.history.prices);
+      }
+      
       if (response.tick) {
         this.onTickCallback(response.tick);
       }
+      
       if (response.error) {
         console.error('Deriv API Error:', response.error);
         this.onStatusCallback('error');
@@ -66,6 +83,17 @@ export class DerivWS {
 
   private subscribeToTicks() {
     if (this.ws?.readyState === WebSocket.OPEN) {
+      // Fetch history first
+      this.ws.send(JSON.stringify({
+        ticks_history: this.symbol,
+        adjust_start_time: 1,
+        count: 1000,
+        end: 'latest',
+        start: 1,
+        style: 'ticks'
+      }));
+
+      // Then subscribe to live updates
       this.ws.send(JSON.stringify({
         ticks: this.symbol,
         subscribe: 1
