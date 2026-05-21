@@ -7,8 +7,8 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Presentation } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Banknote } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 
 export default function DigitFlowApp() {
@@ -59,10 +59,14 @@ export default function DigitFlowApp() {
         <Card className="border-none bg-card/10 shadow-none">
           <CardHeader className="px-0 flex flex-row items-center justify-between">
             <CardTitle className="text-xl font-medium text-foreground/80">Set your trade</CardTitle>
-            <Button variant="outline" className="rounded-full gap-2 px-6">
-              <Presentation className="w-4 h-4" />
-              Guide
-            </Button>
+            {latestPrice !== null && (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20">
+                <Banknote className="w-4 h-4 text-accent" />
+                <span className="text-lg font-bold tabular-nums text-accent">
+                  {latestPrice.toFixed(4)}
+                </span>
+              </div>
+            )}
           </CardHeader>
           <CardContent className="px-0">
             <div className="bg-secondary/20 rounded-[2rem] p-6 sm:p-10 space-y-6">
