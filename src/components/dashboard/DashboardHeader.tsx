@@ -9,11 +9,10 @@ interface DashboardHeaderProps {
   status: ConnectionStatus;
   symbol: string;
   totalTicks: number;
-  speed: number;
   price: number | null;
 }
 
-export function DashboardHeader({ status, symbol, totalTicks, speed, price }: DashboardHeaderProps) {
+export function DashboardHeader({ status, symbol, totalTicks, price }: DashboardHeaderProps) {
   const statusColors = {
     connected: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
     connecting: "bg-amber-500/10 text-amber-500 border-amber-500/20",
@@ -54,11 +53,6 @@ export function DashboardHeader({ status, symbol, totalTicks, speed, price }: Da
         <Badge variant="secondary" className="px-3 py-1 flex items-center gap-2 bg-secondary/50 text-foreground border-transparent">
           <Database className="w-3.5 h-3.5 text-primary" />
           {totalTicks} <span className="opacity-60 ml-1">Ticks</span>
-        </Badge>
-
-        <Badge variant="secondary" className="px-3 py-1 flex items-center gap-2 bg-secondary/50 text-foreground border-transparent">
-          <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-          {speed > 0 ? `${(1000/speed).toFixed(1)} t/s` : '0.0 t/s'}
         </Badge>
       </div>
     </div>

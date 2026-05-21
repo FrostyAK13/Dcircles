@@ -7,7 +7,6 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Banknote } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 
@@ -20,7 +19,6 @@ export default function DigitFlowApp() {
     setWindowSize, 
     totalTicks, 
     status, 
-    tickSpeed, 
     currentSymbol 
   } = useDigitAnalysis('R_100');
 
@@ -50,7 +48,6 @@ export default function DigitFlowApp() {
         status={status} 
         symbol={currentSymbol} 
         totalTicks={totalTicks} 
-        speed={tickSpeed} 
         price={latestPrice}
       />
       
