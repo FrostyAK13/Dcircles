@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from 'react';
@@ -7,7 +8,7 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 
 export default function DigitFlowApp() {
   const { 
@@ -65,26 +66,34 @@ export default function DigitFlowApp() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="h-[200px] w-full">
+              <div className="h-[240px] w-full pt-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
+                  <BarChart data={chartData} margin={{ top: 20, right: 10, left: 10, bottom: 10 }}>
                     <XAxis 
                       dataKey="name" 
                       axisLine={false} 
                       tickLine={false} 
-                      tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 12}} 
+                      tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 12, fontWeight: 600}} 
                     />
-                    <YAxis hide />
+                    <YAxis hide domain={[0, 'auto']} />
                     <Tooltip 
                       cursor={{fill: 'hsl(var(--secondary))', opacity: 0.4}}
                       contentStyle={{backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px'}}
                       labelStyle={{color: 'hsl(var(--primary))', fontWeight: 'bold'}}
+                      formatter={(value: number) => [`${value}%`, 'Percentage']}
                     />
-                    <Bar dataKey="val" radius={[4, 4, 0, 0]}>
+                    <Bar dataKey="val" radius={[4, 4, 0, 0]} animationDuration={300}>
+                      <LabelList 
+                        dataKey="val" 
+                        position="top" 
+                        formatter={(value: number) => `${value}%`}
+                        style={{ fill: 'hsl(var(--foreground))', fontSize: '10px', fontWeight: 'bold', opacity: 0.8 }}
+                      />
                       {chartData.map((entry, index) => (
                         <Cell 
                           key={`cell-${index}`} 
                           fill={index === stats.high ? 'rgb(16, 185, 129)' : index === stats.low ? 'rgb(244, 63, 94)' : 'hsl(var(--primary))'} 
+                          className="transition-all duration-300"
                         />
                       ))}
                     </Bar>
@@ -128,7 +137,7 @@ export default function DigitFlowApp() {
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                    <span className="font-medium">Selected</span>
+                    <span className="font-medium">Standard</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <div className="w-2.5 h-2.5 rounded-full bg-accent" />
