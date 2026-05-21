@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from 'react';
@@ -12,7 +13,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelL
 function LargePriceDisplay({ price }: { price: number | null }) {
   if (price === null) return null;
   
-  const priceStr = price.toFixed(4);
+  const priceStr = price.toFixed(2);
   const mainPart = priceStr.slice(0, -1);
   const lastDigit = priceStr.slice(-1);
 

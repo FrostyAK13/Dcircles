@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Activity, Signal, Zap, Database } from "lucide-react";
@@ -40,7 +41,7 @@ export function DashboardHeader({ status, symbol, totalTicks, price }: Dashboard
         
         {price !== null && (
           <Badge variant="secondary" className="px-3 py-1 bg-accent/10 text-accent border-accent/20 tabular-nums font-bold">
-            {price.toFixed(4)}
+            {price.toFixed(2)}
           </Badge>
         )}
 
