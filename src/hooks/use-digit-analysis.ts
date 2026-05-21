@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { DerivWS, type Tick, type ConnectionStatus } from '@/app/lib/deriv-ws';
 
 export const HISTORY_BUFFER_SIZE = 1000;
@@ -11,6 +12,8 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
   const [latestPrice, setLatestPrice] = useState<number | null>(null);
   const [windowSize, setWindowSize] = useState<number>(1000); 
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
+  
+  const wsRef = useRef<DerivWS | null>(null);
 
   const onHistory = useCallback((prices: number[]) => {
     const historicalDigits = prices.map(price => {
@@ -43,9 +46,19 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
   }, []);
 
   useEffect(() => {
+    // Reset state on symbol change to avoid mixing market data
+    setTicks([]);
+    setLatestDigit(null);
+    setLatestPrice(null);
+    
     const ws = new DerivWS(symbol, onTick, setStatus, onHistory);
+    wsRef.current = ws;
     ws.connect();
-    return () => ws.disconnect();
+    
+    return () => {
+      ws.disconnect();
+      wsRef.current = null;
+    };
   }, [symbol, onTick, onHistory]);
 
   const distribution = useMemo(() => {
@@ -67,10 +80,8 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
     });
 
     const total = windowTicks.length;
-    // Calculate percentages to one decimal place
     let percentages = counts.map(count => Math.round((count / total) * 1000) / 10);
     
-    // Ensure sum is 100%
     const sum = percentages.reduce((a, b) => a + b, 0);
     if (sum !== 100 && total > 0) {
       const diff = Math.round((100 - sum) * 10) / 10;
