@@ -7,8 +7,26 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { Banknote } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
+
+function LargePriceDisplay({ price }: { price: number | null }) {
+  if (price === null) return null;
+  
+  const priceStr = price.toFixed(4);
+  const mainPart = priceStr.slice(0, -1);
+  const lastDigit = priceStr.slice(-1);
+
+  return (
+    <div className="flex flex-col items-center justify-center py-4 mb-2">
+      <div className="text-4xl sm:text-6xl font-bold tracking-tighter flex items-baseline tabular-nums">
+        <span className="opacity-90">{mainPart}</span>
+        <span className="relative inline-block border-b-4 border-foreground ml-1">
+          {lastDigit}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function DigitFlowApp() {
   const { 
@@ -54,35 +72,31 @@ export default function DigitFlowApp() {
       <main className="flex-1 p-4 md:p-8 max-w-6xl mx-auto w-full space-y-8">
         {/* Set Your Trade Section */}
         <Card className="border-none bg-card/10 shadow-none">
-          <CardHeader className="px-0 flex flex-row items-center justify-between">
+          <CardHeader className="px-0 pt-0 pb-2">
             <CardTitle className="text-xl font-medium text-foreground/80">Set your trade</CardTitle>
-            {latestPrice !== null && (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20">
-                <Banknote className="w-4 h-4 text-accent" />
-                <span className="text-lg font-bold tabular-nums text-accent">
-                  {latestPrice.toFixed(4)}
-                </span>
-              </div>
-            )}
           </CardHeader>
           <CardContent className="px-0">
-            <div className="bg-secondary/20 rounded-[2rem] p-6 sm:p-10 space-y-6">
-              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 mb-6">
-                Last digit prediction
-              </h3>
+            <div className="bg-secondary/20 rounded-[2.5rem] p-6 sm:p-10 space-y-4">
+              <LargePriceDisplay price={latestPrice} />
               
-              <div className="grid grid-cols-5 gap-3 sm:gap-6">
-                {distribution.map((d) => (
-                  <DigitCard
-                    key={d.digit}
-                    digit={d.digit}
-                    percentage={d.percentage}
-                    isHigh={d.digit === stats.high}
-                    isLow={d.digit === stats.low}
-                    isLatest={d.digit === latestDigit}
-                    onClick={() => setSelectedDigit(d.digit === selectedDigit ? null : d.digit)}
-                  />
-                ))}
+              <div className="space-y-6">
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60">
+                  Last digit prediction
+                </h3>
+                
+                <div className="grid grid-cols-5 gap-3 sm:gap-6">
+                  {distribution.map((d) => (
+                    <DigitCard
+                      key={d.digit}
+                      digit={d.digit}
+                      percentage={d.percentage}
+                      isHigh={d.digit === stats.high}
+                      isLow={d.digit === stats.low}
+                      isLatest={d.digit === latestDigit}
+                      onClick={() => setSelectedDigit(d.digit === selectedDigit ? null : d.digit)}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </CardContent>
