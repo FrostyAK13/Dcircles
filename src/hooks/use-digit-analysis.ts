@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
@@ -8,6 +7,7 @@ export const HISTORY_BUFFER_SIZE = 1000;
 
 export function useDigitAnalysis(symbol: string = 'R_100') {
   const [ticks, setTicks] = useState<number[]>([]);
+  const [prices, setPrices] = useState<number[]>([]);
   const [latestDigit, setLatestDigit] = useState<number | null>(null);
   const [latestPrice, setLatestPrice] = useState<number | null>(null);
   const [windowSize, setWindowSize] = useState<number>(1000); 
@@ -15,16 +15,17 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
   
   const wsRef = useRef<DerivWS | null>(null);
 
-  const onHistory = useCallback((prices: number[]) => {
-    const historicalDigits = prices.map(price => {
+  const onHistory = useCallback((historicalPrices: number[]) => {
+    const historicalDigits = historicalPrices.map(price => {
       const quoteStr = price.toFixed(2);
       return parseInt(quoteStr.slice(-1));
     }).filter(d => !isNaN(d));
 
     setTicks(historicalDigits);
+    setPrices(historicalPrices);
     if (historicalDigits.length > 0) {
       setLatestDigit(historicalDigits[historicalDigits.length - 1]);
-      setLatestPrice(prices[prices.length - 1]);
+      setLatestPrice(historicalPrices[historicalPrices.length - 1]);
     }
   }, []);
 
@@ -36,18 +37,21 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
 
     setLatestPrice(tick.quote);
     setLatestDigit(digit);
+    
     setTicks(prev => {
       const next = [...prev, digit];
-      if (next.length > HISTORY_BUFFER_SIZE) {
-        return next.slice(-HISTORY_BUFFER_SIZE);
-      }
-      return next;
+      return next.length > HISTORY_BUFFER_SIZE ? next.slice(-HISTORY_BUFFER_SIZE) : next;
+    });
+
+    setPrices(prev => {
+      const next = [...prev, tick.quote];
+      return next.length > HISTORY_BUFFER_SIZE ? next.slice(-HISTORY_BUFFER_SIZE) : next;
     });
   }, []);
 
   useEffect(() => {
-    // Reset state on symbol change to avoid mixing market data
     setTicks([]);
+    setPrices([]);
     setLatestDigit(null);
     setLatestPrice(null);
     
@@ -100,6 +104,8 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
 
   return {
     distribution,
+    ticks,
+    prices,
     latestDigit,
     latestPrice,
     windowSize,

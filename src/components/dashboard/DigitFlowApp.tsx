@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useDigitAnalysis, HISTORY_BUFFER_SIZE } from '@/hooks/use-digit-analysis';
 import { DashboardHeader } from './DashboardHeader';
 import { DigitCard } from './DigitCard';
@@ -9,6 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { Progress } from '@/components/ui/progress';
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -45,30 +46,84 @@ function LargePriceDisplay({ price }: { price: number | null }) {
   );
 }
 
+function ComparisonRow({ label1, label2, val1, val2 }: { label1: string, label2: string, val1: number, val2: number }) {
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
+        <span className="text-primary">{label1} {val1}%</span>
+        <span className="text-accent">{label2} {val2}%</span>
+      </div>
+      <div className="relative h-2 w-full bg-secondary/50 rounded-full overflow-hidden">
+        <div 
+          className="absolute h-full bg-primary transition-all duration-300" 
+          style={{ width: `${val1}%` }} 
+        />
+        <div 
+          className="absolute h-full bg-accent transition-all duration-300 right-0" 
+          style={{ width: `${val2}%` }} 
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function DigitFlowApp() {
   const [symbol, setSymbol] = useState('R_100');
   const { 
     distribution, 
+    ticks,
+    prices,
     latestDigit,
     latestPrice,
     windowSize, 
     setWindowSize, 
     totalTicks, 
-    status, 
-    currentSymbol 
+    status 
   } = useDigitAnalysis(symbol);
 
   const [selectedDigit, setSelectedDigit] = useState<number | null>(null);
 
   const stats = useMemo(() => {
     const sorted = [...distribution].sort((a, b) => b.percentage - a.percentage);
+    
+    // Comparisons
+    const windowTicks = ticks.slice(-windowSize);
+    const windowPrices = prices.slice(-windowSize);
+    
+    const evenCount = windowTicks.filter(d => d % 2 === 0).length;
+    const overCount = windowTicks.filter(d => d > 4).length;
+    
+    let riseCount = 0;
+    for (let i = 1; i < windowPrices.length; i++) {
+      if (windowPrices[i] > windowPrices[i-1]) riseCount++;
+    }
+    
+    let matchCount = 0;
+    for (let i = 1; i < windowTicks.length; i++) {
+      if (windowTicks[i] === windowTicks[i-1]) matchCount++;
+    }
+
+    const total = windowTicks.length || 1;
+    const totalMovements = Math.max(windowPrices.length - 1, 1);
+    const totalSequences = Math.max(windowTicks.length - 1, 1);
+
     return {
       high: sorted[0]?.digit,
       secondHigh: sorted[1]?.digit,
       low: sorted[9]?.digit,
-      secondLow: sorted[8]?.digit
+      secondLow: sorted[8]?.digit,
+      comparisons: {
+        even: Math.round((evenCount / total) * 100),
+        odd: Math.round(((total - evenCount) / total) * 100),
+        over: Math.round((overCount / total) * 100),
+        under: Math.round(((total - overCount) / total) * 100),
+        rise: Math.round((riseCount / totalMovements) * 100),
+        fall: Math.round(((totalMovements - riseCount) / totalMovements) * 100),
+        matches: Math.round((matchCount / totalSequences) * 100),
+        differs: Math.round(((totalSequences - matchCount) / totalSequences) * 100),
+      }
     };
-  }, [distribution]);
+  }, [distribution, ticks, prices, windowSize]);
 
   const chartData = useMemo(() => {
     return distribution.map(d => ({
@@ -89,7 +144,6 @@ export default function DigitFlowApp() {
         />
         
         <main className="flex-1 p-4 md:p-8 max-w-6xl mx-auto w-full space-y-8 overflow-y-auto">
-          {/* Set Your Trade Section */}
           <Card className="border-none bg-transparent shadow-none">
             <CardHeader className="px-0 pt-0 pb-2">
               <CardTitle className="text-xl font-medium text-foreground/80">Set your trade</CardTitle>
@@ -123,7 +177,6 @@ export default function DigitFlowApp() {
             </CardContent>
           </Card>
 
-          {/* Analytics Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-2 border-border/50 bg-card/10 overflow-hidden icy-glass">
               <CardHeader className="pb-2">
@@ -183,8 +236,8 @@ export default function DigitFlowApp() {
               </CardContent>
             </Card>
 
-            <Card className="border-border/50 bg-card/10 flex flex-col justify-center icy-glass">
-              <CardContent className="pt-6 space-y-6">
+            <Card className="border-border/50 bg-card/10 flex flex-col icy-glass">
+              <CardContent className="pt-6 space-y-8">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-widest">Analysis Window</Label>
@@ -198,6 +251,14 @@ export default function DigitFlowApp() {
                     step={1}
                     className="py-4"
                   />
+                </div>
+
+                <div className="space-y-6">
+                  <h4 className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest border-b border-white/5 pb-2">Comparisons</h4>
+                  <ComparisonRow label1="Even" label2="Odd" val1={stats.comparisons.even} val2={stats.comparisons.odd} />
+                  <ComparisonRow label1="Over" label2="Under" val1={stats.comparisons.over} val2={stats.comparisons.under} />
+                  <ComparisonRow label1="Rise" label2="Fall" val1={stats.comparisons.rise} val2={stats.comparisons.fall} />
+                  <ComparisonRow label1="Matches" label2="Differs" val1={stats.comparisons.matches} val2={stats.comparisons.differs} />
                 </div>
                 
                 <div className="p-4 rounded-xl bg-secondary/30 border border-white/5">
@@ -218,10 +279,6 @@ export default function DigitFlowApp() {
                     <div className="flex items-center gap-2 text-xs">
                       <div className="w-2 h-2 rounded-full bg-orange-400" />
                       <span className="font-medium text-orange-400">2nd Lowest</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs mt-1">
-                      <div className="w-2 h-2 rounded-full bg-primary-foreground border border-primary" />
-                      <span className="font-medium">Latest Digit</span>
                     </div>
                   </div>
                 </div>
