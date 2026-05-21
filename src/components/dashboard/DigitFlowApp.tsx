@@ -56,9 +56,15 @@ interface DetailedComparisonProps {
   count1: number;
   count2: number;
   pattern: { label: string; color: string }[];
+  showDigitSelector?: boolean;
+  selectedDigit?: number;
+  onDigitSelect?: (digit: number) => void;
 }
 
-function DetailedComparison({ title, label1, label2, val1, val2, count1, count2, pattern }: DetailedComparisonProps) {
+function DetailedComparison({ 
+  title, label1, label2, val1, val2, count1, count2, pattern,
+  showDigitSelector, selectedDigit, onDigitSelect 
+}: DetailedComparisonProps) {
   return (
     <Card className="border-border/50 bg-card/10 overflow-hidden icy-glass">
       <CardHeader className="pb-2 border-b border-white/5">
@@ -67,6 +73,28 @@ function DetailedComparison({ title, label1, label2, val1, val2, count1, count2,
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-6 space-y-6">
+        {showDigitSelector && (
+          <div className="space-y-2">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold block">Prediction Digit</span>
+            <div className="flex flex-wrap gap-1 justify-center bg-black/20 p-2 rounded-xl">
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => onDigitSelect?.(num)}
+                  className={cn(
+                    "w-6 h-6 rounded-md text-[10px] font-bold transition-all",
+                    selectedDigit === num 
+                      ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(251,191,36,0.4)]" 
+                      : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                  )}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Counts */}
         <div className="flex justify-around items-center text-center">
           <div className="space-y-1">
@@ -135,6 +163,9 @@ function DetailedComparison({ title, label1, label2, val1, val2, count1, count2,
 
 export default function DigitFlowApp() {
   const [symbol, setSymbol] = useState('R_100');
+  const [ouDigit, setOuDigit] = useState(4);
+  const [mdDigit, setMdDigit] = useState(0);
+
   const { 
     distribution, 
     ticks,
@@ -157,21 +188,18 @@ export default function DigitFlowApp() {
     const windowPrices = prices.slice(-windowSize);
     
     const evenCount = windowTicks.filter(d => d % 2 === 0).length;
-    const overCount = windowTicks.filter(d => d > 4).length;
+    const overCount = windowTicks.filter(d => d > ouDigit).length;
+    const underCount = windowTicks.filter(d => d < ouDigit).length;
+    const matchCount = windowTicks.filter(d => d === mdDigit).length;
+    const differCount = windowTicks.filter(d => d !== mdDigit).length;
     
     let riseCount = 0;
     for (let i = 1; i < windowPrices.length; i++) {
       if (windowPrices[i] > windowPrices[i-1]) riseCount++;
     }
-    
-    let matchCount = 0;
-    for (let i = 1; i < windowTicks.length; i++) {
-      if (windowTicks[i] === windowTicks[i-1]) matchCount++;
-    }
 
     const total = windowTicks.length || 1;
     const totalMovements = Math.max(windowPrices.length - 1, 1);
-    const totalSequences = Math.max(windowTicks.length - 1, 1);
 
     // Patterns (Last 20)
     const lastTicks = ticks.slice(-20);
@@ -183,16 +211,16 @@ export default function DigitFlowApp() {
         color: d % 2 === 0 ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground'
       })),
       ou: lastTicks.map(d => ({
-        label: d > 4 ? 'O' : 'U',
-        color: d > 4 ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'
+        label: d > ouDigit ? 'O' : d < ouDigit ? 'U' : d.toString(),
+        color: d > ouDigit ? 'bg-emerald-500 text-white' : d < ouDigit ? 'bg-rose-500 text-white' : 'bg-muted text-muted-foreground'
       })),
       rf: lastPrices.slice(1).map((p, i) => ({
         label: p > lastPrices[i] ? 'R' : 'F',
         color: p > lastPrices[i] ? 'bg-primary text-primary-foreground' : 'bg-rose-500 text-white'
       })),
-      md: lastTicks.slice(1).map((d, i) => ({
-        label: d === lastTicks[i] ? 'M' : 'D',
-        color: d === lastTicks[i] ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground'
+      md: lastTicks.map(d => ({
+        label: d === mdDigit ? 'M' : 'D',
+        color: d === mdDigit ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground'
       }))
     };
 
@@ -205,25 +233,25 @@ export default function DigitFlowApp() {
         even: evenCount,
         odd: total - evenCount,
         over: overCount,
-        under: total - overCount,
+        under: underCount,
         rise: riseCount,
         fall: totalMovements - riseCount,
         matches: matchCount,
-        differs: totalSequences - matchCount,
+        differs: differCount,
       },
       comparisons: {
         even: Math.round((evenCount / total) * 100),
         odd: Math.round(((total - evenCount) / total) * 100),
         over: Math.round((overCount / total) * 100),
-        under: Math.round(((total - overCount) / total) * 100),
+        under: Math.round((underCount / total) * 100),
         rise: Math.round((riseCount / totalMovements) * 100),
         fall: Math.round(((totalMovements - riseCount) / totalMovements) * 100),
-        matches: Math.round((matchCount / totalSequences) * 100),
-        differs: Math.round(((totalSequences - matchCount) / totalSequences) * 100),
+        matches: Math.round((matchCount / total) * 100),
+        differs: Math.round((differCount / total) * 100),
       },
       patterns
     };
-  }, [distribution, ticks, prices, windowSize]);
+  }, [distribution, ticks, prices, windowSize, ouDigit, mdDigit]);
 
   const chartData = useMemo(() => {
     return distribution.map(d => ({
@@ -387,6 +415,9 @@ export default function DigitFlowApp() {
               count1={stats.counts.over}
               count2={stats.counts.under}
               pattern={stats.patterns.ou}
+              showDigitSelector
+              selectedDigit={ouDigit}
+              onDigitSelect={setOuDigit}
             />
             <DetailedComparison 
               title="Rise / Fall"
@@ -407,6 +438,9 @@ export default function DigitFlowApp() {
               count1={stats.counts.matches}
               count2={stats.counts.differs}
               pattern={stats.patterns.md}
+              showDigitSelector
+              selectedDigit={mdDigit}
+              onDigitSelect={setMdDigit}
             />
           </div>
 
