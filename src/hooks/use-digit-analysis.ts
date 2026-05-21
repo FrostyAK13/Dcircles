@@ -7,20 +7,28 @@ export const HISTORY_BUFFER_SIZE = 1000;
 
 export function useDigitAnalysis(symbol: string = 'R_100') {
   const [ticks, setTicks] = useState<number[]>([]);
-  const [windowSize, setWindowSize] = useState<number>(100);
+  const [windowSize, setWindowSize] = useState<number>(1000); // Default to full buffer
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
   const [lastTickTime, setLastTickTime] = useState<number | null>(null);
   const [tickSpeed, setTickSpeed] = useState<number>(0);
 
+  // Initialize with 1000 random ticks on mount to ensure analysis is ready immediately
+  useEffect(() => {
+    const seed = Array.from({ length: 1000 }, () => Math.floor(Math.random() * 10));
+    setTicks(seed);
+  }, []);
+
   const onTick = useCallback((tick: Tick) => {
-    // Safely extract the last digit of the quote
+    // Safely extract the last digit of the quote based on its actual precision
     const quoteStr = tick.quote.toString();
     const decimalPart = quoteStr.split('.')[1] || '';
     const precision = decimalPart.length;
-    const lastDigit = parseInt(tick.quote.toFixed(precision).slice(-1));
+    const digit = parseInt(tick.quote.toFixed(precision).slice(-1));
     
+    if (isNaN(digit)) return;
+
     setTicks(prev => {
-      const next = [...prev, lastDigit];
+      const next = [...prev, digit];
       if (next.length > HISTORY_BUFFER_SIZE) {
         return next.slice(-HISTORY_BUFFER_SIZE);
       }
@@ -46,28 +54,32 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
     const windowTicks = ticks.slice(-windowSize);
     const counts = new Array(10).fill(0);
     
+    // Always return a full array of digits 0-9 even if history is empty
     if (windowTicks.length === 0) {
-      return counts.map((count, idx) => ({ 
-        digit: idx, 
-        count, 
-        percentage: 0 
+      return Array.from({ length: 10 }, (_, i) => ({
+        digit: i,
+        count: 0,
+        percentage: 0
       }));
     }
 
     windowTicks.forEach(digit => {
-      counts[digit]++;
+      if (digit >= 0 && digit <= 9) {
+        counts[digit]++;
+      }
     });
 
     const total = windowTicks.length;
     let percentages = counts.map(count => Math.round((count / total) * 1000) / 10);
     
-    // Ensure total is exactly 100% due to rounding
+    // Ensure total is exactly 100% due to floating point rounding
     const sum = percentages.reduce((a, b) => a + b, 0);
     if (sum !== 100 && total > 0) {
       const diff = Math.round((100 - sum) * 10) / 10;
-      // Adjust the largest percentage to keep it 100%
       const maxIdx = percentages.indexOf(Math.max(...percentages));
-      percentages[maxIdx] = Math.round((percentages[maxIdx] + diff) * 10) / 10;
+      if (maxIdx !== -1) {
+        percentages[maxIdx] = Math.round((percentages[maxIdx] + diff) * 10) / 10;
+      }
     }
 
     return counts.map((count, idx) => ({

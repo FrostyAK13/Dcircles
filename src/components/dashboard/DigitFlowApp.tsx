@@ -23,8 +23,7 @@ export default function DigitFlowApp() {
   const [selectedDigit, setSelectedDigit] = useState<number | null>(null);
 
   const stats = useMemo(() => {
-    if (distribution.every(d => d.count === 0)) return { high: -1, low: -1 };
-    
+    // distribution always has 10 elements due to robust mapping in the hook
     const percentages = distribution.map(d => d.percentage);
     const maxVal = Math.max(...percentages);
     const minVal = Math.min(...percentages);
@@ -100,13 +99,13 @@ export default function DigitFlowApp() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-widest">Analysis Window</Label>
-                  <span className="text-xs font-bold text-accent bg-accent/10 px-2 py-0.5 rounded">1 - 500</span>
+                  <span className="text-xs font-bold text-accent bg-accent/10 px-2 py-0.5 rounded">1 - {HISTORY_BUFFER_SIZE}</span>
                 </div>
                 <Slider 
                   value={[windowSize]} 
                   onValueChange={(vals) => setWindowSize(vals[0])}
                   min={1} 
-                  max={500} 
+                  max={HISTORY_BUFFER_SIZE} 
                   step={1}
                   className="py-4"
                 />
