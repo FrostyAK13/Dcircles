@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useDigitAnalysis, HISTORY_BUFFER_SIZE } from '@/hooks/use-digit-analysis';
 import { DashboardHeader } from './DashboardHeader';
 import { DigitCard } from './DigitCard';
@@ -36,9 +35,9 @@ function LargePriceDisplay({ price }: { price: number | null }) {
 
   return (
     <div className="flex flex-col items-center justify-center py-4 mb-2">
-      <div className="text-4xl sm:text-6xl font-bold tracking-tighter flex items-baseline tabular-nums">
+      <div className="text-4xl sm:text-6xl font-bold tracking-tighter flex items-baseline tabular-nums text-primary">
         <span className="opacity-90">{mainPart}</span>
-        <span className="relative inline-block border-b-4 border-foreground ml-1">
+        <span className="relative inline-block border-b-4 border-primary ml-1">
           {lastDigit}
         </span>
       </div>
@@ -91,12 +90,12 @@ export default function DigitFlowApp() {
         
         <main className="flex-1 p-4 md:p-8 max-w-6xl mx-auto w-full space-y-8 overflow-y-auto">
           {/* Set Your Trade Section */}
-          <Card className="border-none bg-card/10 shadow-none">
+          <Card className="border-none bg-transparent shadow-none">
             <CardHeader className="px-0 pt-0 pb-2">
               <CardTitle className="text-xl font-medium text-foreground/80">Set your trade</CardTitle>
             </CardHeader>
             <CardContent className="px-0">
-              <div className="bg-secondary/20 rounded-[2.5rem] p-6 sm:p-10 space-y-4">
+              <div className="bg-secondary/10 rounded-[2.5rem] p-6 sm:p-10 space-y-4 icy-glass">
                 <LargePriceDisplay price={latestPrice} />
                 
                 <div className="space-y-6">
@@ -126,7 +125,7 @@ export default function DigitFlowApp() {
 
           {/* Analytics Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-2 border-border/50 bg-card/20 overflow-hidden">
+            <Card className="lg:col-span-2 border-border/50 bg-card/10 overflow-hidden icy-glass">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -149,7 +148,7 @@ export default function DigitFlowApp() {
                       />
                       <YAxis hide domain={[0, 'auto']} />
                       <Tooltip 
-                        cursor={{fill: 'hsl(var(--secondary))', opacity: 0.4}}
+                        cursor={{fill: 'hsl(var(--secondary))', opacity: 0.2}}
                         contentStyle={{backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px'}}
                         labelStyle={{color: 'hsl(var(--primary))', fontWeight: 'bold'}}
                         formatter={(value: number) => [`${value}%`, 'Percentage']}
@@ -163,9 +162,9 @@ export default function DigitFlowApp() {
                         />
                         {chartData.map((entry, index) => {
                           const digit = parseInt(entry.name);
-                          let fill = 'hsl(var(--primary))';
-                          if (digit === stats.high) fill = 'rgb(16, 185, 129)';
-                          else if (digit === stats.secondHigh) fill = 'rgb(56, 189, 248)';
+                          let fill = 'hsl(var(--muted))';
+                          if (digit === stats.high) fill = 'hsl(var(--primary))';
+                          else if (digit === stats.secondHigh) fill = 'hsl(var(--accent))';
                           else if (digit === stats.low) fill = 'rgb(244, 63, 94)';
                           else if (digit === stats.secondLow) fill = 'rgb(245, 158, 11)';
 
@@ -184,12 +183,12 @@ export default function DigitFlowApp() {
               </CardContent>
             </Card>
 
-            <Card className="border-border/50 bg-card/20 flex flex-col justify-center">
+            <Card className="border-border/50 bg-card/10 flex flex-col justify-center icy-glass">
               <CardContent className="pt-6 space-y-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-widest">Analysis Window</Label>
-                    <span className="text-xs font-bold text-accent bg-accent/10 px-2 py-0.5 rounded">1 - {HISTORY_BUFFER_SIZE}</span>
+                    <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">1 - {HISTORY_BUFFER_SIZE}</span>
                   </div>
                   <Slider 
                     value={[windowSize]} 
@@ -201,27 +200,27 @@ export default function DigitFlowApp() {
                   />
                 </div>
                 
-                <div className="p-4 rounded-xl bg-secondary/30 border border-border/50">
+                <div className="p-4 rounded-xl bg-secondary/30 border border-white/5">
                   <h4 className="text-[10px] font-bold uppercase text-muted-foreground mb-3 tracking-widest">Legend</h4>
                   <div className="grid grid-cols-1 gap-y-2">
                     <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <span className="font-medium">1st Highest</span>
+                      <div className="w-2 h-2 rounded-full bg-primary" />
+                      <span className="font-medium text-primary">1st Highest</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 rounded-full bg-sky-400" />
-                      <span className="font-medium">2nd Highest</span>
+                      <div className="w-2 h-2 rounded-full bg-accent" />
+                      <span className="font-medium text-accent">2nd Highest</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 rounded-full bg-rose-500" />
-                      <span className="font-medium">1st Lowest</span>
+                      <div className="w-2 h-2 rounded-full bg-rose-400" />
+                      <span className="font-medium text-rose-400">1st Lowest</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 rounded-full bg-amber-500" />
-                      <span className="font-medium">2nd Lowest</span>
+                      <div className="w-2 h-2 rounded-full bg-orange-400" />
+                      <span className="font-medium text-orange-400">2nd Lowest</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs mt-1">
-                      <div className="w-2 h-2 rounded-full bg-foreground" />
+                      <div className="w-2 h-2 rounded-full bg-primary-foreground border border-primary" />
                       <span className="font-medium">Latest Digit</span>
                     </div>
                   </div>
@@ -230,12 +229,12 @@ export default function DigitFlowApp() {
             </Card>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em] pt-8 pb-4 border-t border-border/10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em] pt-8 pb-4 border-t border-white/5">
             <span>&copy; {new Date().getFullYear()} frostytraders</span>
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live Feed
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                Live Golden Feed
               </span>
             </div>
           </div>

@@ -41,8 +41,8 @@ export function DigitCard({
         className={cn(
           "w-full aspect-[4/3] sm:aspect-video rounded-2xl flex items-center justify-center transition-all duration-200 border-2",
           isLatest 
-            ? "bg-foreground text-background border-foreground scale-105 shadow-[0_0_20px_rgba(255,255,255,0.2)]" 
-            : "bg-secondary/40 text-foreground border-border/50 hover:border-primary/50"
+            ? "bg-primary text-primary-foreground border-primary scale-105 golden-glow" 
+            : "bg-secondary/40 text-foreground border-border/50 hover:border-primary/50 icy-glass"
         )}
       >
         <span className="text-2xl sm:text-3xl font-bold tracking-tighter">
@@ -52,9 +52,9 @@ export function DigitCard({
       
       <span className={cn(
         "text-xs sm:text-sm font-bold tabular-nums",
-        isHigh ? "text-emerald-500" : 
-        isSecondHigh ? "text-sky-400" :
-        isLow ? "text-rose-500" : 
+        isHigh ? "text-primary" : 
+        isSecondHigh ? "text-accent" :
+        isLow ? "text-rose-400" : 
         isSecondLow ? "text-orange-400" :
         "text-muted-foreground/80"
       )}>
