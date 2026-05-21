@@ -10,6 +10,7 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -46,24 +47,89 @@ function LargePriceDisplay({ price }: { price: number | null }) {
   );
 }
 
-function ComparisonRow({ label1, label2, val1, val2 }: { label1: string, label2: string, val1: number, val2: number }) {
+interface DetailedComparisonProps {
+  title: string;
+  label1: string;
+  label2: string;
+  val1: number;
+  val2: number;
+  count1: number;
+  count2: number;
+  pattern: { label: string; color: string }[];
+}
+
+function DetailedComparison({ title, label1, label2, val1, val2, count1, count2, pattern }: DetailedComparisonProps) {
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest">
-        <span className="text-primary">{label1} {val1}%</span>
-        <span className="text-accent">{label2} {val2}%</span>
-      </div>
-      <div className="relative h-2 w-full bg-secondary/50 rounded-full overflow-hidden">
-        <div 
-          className="absolute h-full bg-primary transition-all duration-300" 
-          style={{ width: `${val1}%` }} 
-        />
-        <div 
-          className="absolute h-full bg-accent transition-all duration-300 right-0" 
-          style={{ width: `${val2}%` }} 
-        />
-      </div>
-    </div>
+    <Card className="border-border/50 bg-card/10 overflow-hidden icy-glass">
+      <CardHeader className="pb-2 border-b border-white/5">
+        <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-6 space-y-6">
+        {/* Counts */}
+        <div className="flex justify-around items-center text-center">
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label1}</span>
+            <div className="text-2xl font-bold text-primary">{count1}</div>
+          </div>
+          <div className="h-8 w-px bg-white/5" />
+          <div className="space-y-1">
+            <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label2}</span>
+            <div className="text-2xl font-bold text-accent">{count2}</div>
+          </div>
+        </div>
+
+        {/* Pattern Display */}
+        <div className="space-y-2">
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold block">{title} Pattern</span>
+          <div className="flex flex-wrap gap-1.5 justify-center p-3 bg-black/20 rounded-xl">
+            {pattern.map((p, i) => (
+              <div 
+                key={i} 
+                className={cn(
+                  "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm transition-transform duration-300 animate-in fade-in zoom-in",
+                  p.color
+                )}
+              >
+                {p.label}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Probability Bars */}
+        <div className="space-y-3">
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold block">Probability Analysis</span>
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest px-1">
+                <span className="text-primary">{label1}</span>
+                <span className="text-primary">{val1}%</span>
+              </div>
+              <div className="h-6 w-full bg-black/30 rounded-md overflow-hidden p-0.5">
+                <div 
+                  className="h-full bg-primary rounded-sm transition-all duration-700 ease-out" 
+                  style={{ width: `${val1}%` }} 
+                />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest px-1">
+                <span className="text-accent">{label2}</span>
+                <span className="text-accent">{val2}%</span>
+              </div>
+              <div className="h-6 w-full bg-black/30 rounded-md overflow-hidden p-0.5">
+                <div 
+                  className="h-full bg-accent rounded-sm transition-all duration-700 ease-out" 
+                  style={{ width: `${val2}%` }} 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -107,11 +173,44 @@ export default function DigitFlowApp() {
     const totalMovements = Math.max(windowPrices.length - 1, 1);
     const totalSequences = Math.max(windowTicks.length - 1, 1);
 
+    // Patterns (Last 20)
+    const lastTicks = ticks.slice(-20);
+    const lastPrices = prices.slice(-21);
+
+    const patterns = {
+      eo: lastTicks.map(d => ({
+        label: d % 2 === 0 ? 'E' : 'O',
+        color: d % 2 === 0 ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground'
+      })),
+      ou: lastTicks.map(d => ({
+        label: d > 4 ? 'O' : 'U',
+        color: d > 4 ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'
+      })),
+      rf: lastPrices.slice(1).map((p, i) => ({
+        label: p > lastPrices[i] ? 'R' : 'F',
+        color: p > lastPrices[i] ? 'bg-primary text-primary-foreground' : 'bg-rose-500 text-white'
+      })),
+      md: lastTicks.slice(1).map((d, i) => ({
+        label: d === lastTicks[i] ? 'M' : 'D',
+        color: d === lastTicks[i] ? 'bg-primary text-primary-foreground' : 'bg-accent text-accent-foreground'
+      }))
+    };
+
     return {
       high: sorted[0]?.digit,
       secondHigh: sorted[1]?.digit,
       low: sorted[9]?.digit,
       secondLow: sorted[8]?.digit,
+      counts: {
+        even: evenCount,
+        odd: total - evenCount,
+        over: overCount,
+        under: total - overCount,
+        rise: riseCount,
+        fall: totalMovements - riseCount,
+        matches: matchCount,
+        differs: totalSequences - matchCount,
+      },
       comparisons: {
         even: Math.round((evenCount / total) * 100),
         odd: Math.round(((total - evenCount) / total) * 100),
@@ -121,7 +220,8 @@ export default function DigitFlowApp() {
         fall: Math.round(((totalMovements - riseCount) / totalMovements) * 100),
         matches: Math.round((matchCount / totalSequences) * 100),
         differs: Math.round(((totalSequences - matchCount) / totalSequences) * 100),
-      }
+      },
+      patterns
     };
   }, [distribution, ticks, prices, windowSize]);
 
@@ -143,21 +243,22 @@ export default function DigitFlowApp() {
           onSymbolChange={setSymbol}
         />
         
-        <main className="flex-1 p-4 md:p-8 max-w-6xl mx-auto w-full space-y-8 overflow-y-auto">
+        <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 overflow-y-auto">
+          {/* Main Trade Area */}
           <Card className="border-none bg-transparent shadow-none">
             <CardHeader className="px-0 pt-0 pb-2">
               <CardTitle className="text-xl font-medium text-foreground/80">Set your trade</CardTitle>
             </CardHeader>
             <CardContent className="px-0">
-              <div className="bg-secondary/10 rounded-[2.5rem] p-6 sm:p-10 space-y-4 icy-glass">
+              <div className="bg-secondary/10 rounded-[2.5rem] p-6 sm:p-10 space-y-4 icy-glass shadow-2xl">
                 <LargePriceDisplay price={latestPrice} />
                 
                 <div className="space-y-6">
-                  <h3 className="text-sm font-medium text-muted-foreground/60">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/40 text-center">
                     Last digit prediction
                   </h3>
                   
-                  <div className="grid grid-cols-5 gap-3 sm:gap-6">
+                  <div className="grid grid-cols-5 gap-3 sm:gap-6 max-w-4xl mx-auto">
                     {distribution.map((d) => (
                       <DigitCard
                         key={d.digit}
@@ -177,6 +278,7 @@ export default function DigitFlowApp() {
             </CardContent>
           </Card>
 
+          {/* Analysis Controls & Distribution */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-2 border-border/50 bg-card/10 overflow-hidden icy-glass">
               <CardHeader className="pb-2">
@@ -237,10 +339,15 @@ export default function DigitFlowApp() {
             </Card>
 
             <Card className="border-border/50 bg-card/10 flex flex-col icy-glass">
-              <CardContent className="pt-6 space-y-8">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  Analysis Window
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-8 pt-6">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-widest">Analysis Window</Label>
+                    <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-widest">Ticks Range</Label>
                     <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">1 - {HISTORY_BUFFER_SIZE}</span>
                   </div>
                   <Slider 
@@ -251,17 +358,56 @@ export default function DigitFlowApp() {
                     step={1}
                     className="py-4"
                   />
-                </div>
-
-                <div className="space-y-6">
-                  <h4 className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest border-b border-white/5 pb-2">Comparisons</h4>
-                  <ComparisonRow label1="Even" label2="Odd" val1={stats.comparisons.even} val2={stats.comparisons.odd} />
-                  <ComparisonRow label1="Over" label2="Under" val1={stats.comparisons.over} val2={stats.comparisons.under} />
-                  <ComparisonRow label1="Rise" label2="Fall" val1={stats.comparisons.rise} val2={stats.comparisons.fall} />
-                  <ComparisonRow label1="Matches" label2="Differs" val1={stats.comparisons.matches} val2={stats.comparisons.differs} />
+                  <div className="text-[10px] text-muted-foreground/60 leading-relaxed italic">
+                    Adjusting the window changes the base for probability calculation across all patterns.
+                  </div>
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Detailed Comparisons Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <DetailedComparison 
+              title="Even / Odd"
+              label1="Even"
+              label2="Odd"
+              val1={stats.comparisons.even}
+              val2={stats.comparisons.odd}
+              count1={stats.counts.even}
+              count2={stats.counts.odd}
+              pattern={stats.patterns.eo}
+            />
+            <DetailedComparison 
+              title="Over / Under"
+              label1="Over"
+              label2="Under"
+              val1={stats.comparisons.over}
+              val2={stats.comparisons.under}
+              count1={stats.counts.over}
+              count2={stats.counts.under}
+              pattern={stats.patterns.ou}
+            />
+            <DetailedComparison 
+              title="Rise / Fall"
+              label1="Rise"
+              label2="Fall"
+              val1={stats.comparisons.rise}
+              val2={stats.comparisons.fall}
+              count1={stats.counts.rise}
+              count2={stats.counts.fall}
+              pattern={stats.patterns.rf}
+            />
+            <DetailedComparison 
+              title="Matches / Differs"
+              label1="Matches"
+              label2="Differs"
+              val1={stats.comparisons.matches}
+              val2={stats.comparisons.differs}
+              count1={stats.counts.matches}
+              count2={stats.counts.differs}
+              pattern={stats.patterns.md}
+            />
           </div>
 
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em] pt-8 pb-4 border-t border-white/5">
