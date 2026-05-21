@@ -43,14 +43,14 @@ export default function DigitFlowApp() {
   const [selectedDigit, setSelectedDigit] = useState<number | null>(null);
 
   const stats = useMemo(() => {
-    const percentages = distribution.map(d => d.percentage);
-    const maxVal = Math.max(...percentages);
-    const minVal = Math.min(...percentages);
+    // Sort to find ranks
+    const sorted = [...distribution].sort((a, b) => b.percentage - a.percentage);
     
-    // Find only the first instance to match Deriv's logic of highlighting a single high/low
     return {
-      high: distribution.findIndex(d => d.percentage === maxVal),
-      low: distribution.findIndex(d => d.percentage === minVal)
+      high: sorted[0]?.digit,
+      secondHigh: sorted[1]?.digit,
+      low: sorted[9]?.digit,
+      secondLow: sorted[8]?.digit
     };
   }, [distribution]);
 
@@ -92,7 +92,9 @@ export default function DigitFlowApp() {
                       digit={d.digit}
                       percentage={d.percentage}
                       isHigh={d.digit === stats.high}
+                      isSecondHigh={d.digit === stats.secondHigh}
                       isLow={d.digit === stats.low}
+                      isSecondLow={d.digit === stats.secondLow}
                       isLatest={d.digit === latestDigit}
                       onClick={() => setSelectedDigit(d.digit === selectedDigit ? null : d.digit)}
                     />
@@ -140,13 +142,22 @@ export default function DigitFlowApp() {
                         formatter={(value: number) => `${value}%`}
                         style={{ fill: 'hsl(var(--foreground))', fontSize: '10px', fontWeight: 'bold', opacity: 0.8 }}
                       />
-                      {chartData.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={index === stats.high ? 'rgb(16, 185, 129)' : index === stats.low ? 'rgb(244, 63, 94)' : 'hsl(var(--primary))'} 
-                          className="transition-all duration-300"
-                        />
-                      ))}
+                      {chartData.map((entry, index) => {
+                        const digit = parseInt(entry.name);
+                        let fill = 'hsl(var(--primary))';
+                        if (digit === stats.high) fill = 'rgb(16, 185, 129)';
+                        else if (digit === stats.secondHigh) fill = 'rgb(56, 189, 248)';
+                        else if (digit === stats.low) fill = 'rgb(244, 63, 94)';
+                        else if (digit === stats.secondLow) fill = 'rgb(245, 158, 11)';
+
+                        return (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={fill}
+                            className="transition-all duration-300"
+                          />
+                        );
+                      })}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -176,15 +187,23 @@ export default function DigitFlowApp() {
                 <div className="grid grid-cols-1 gap-y-2">
                   <div className="flex items-center gap-2 text-xs">
                     <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="font-medium">Highest Percentage</span>
+                    <span className="font-medium">1st Highest</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-2 h-2 rounded-full bg-sky-400" />
+                    <span className="font-medium">2nd Highest</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <div className="w-2 h-2 rounded-full bg-rose-500" />
-                    <span className="font-medium">Lowest Percentage</span>
+                    <span className="font-medium">1st Lowest</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
+                    <div className="w-2 h-2 rounded-full bg-amber-500" />
+                    <span className="font-medium">2nd Lowest</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs mt-1">
                     <div className="w-2 h-2 rounded-full bg-foreground" />
-                    <span className="font-medium">Latest Digit Indicator</span>
+                    <span className="font-medium">Latest Digit</span>
                   </div>
                 </div>
               </div>

@@ -7,7 +7,9 @@ interface DigitCardProps {
   digit: number;
   percentage: number;
   isHigh: boolean;
+  isSecondHigh: boolean;
   isLow: boolean;
+  isSecondLow: boolean;
   isLatest: boolean;
   onClick: () => void;
 }
@@ -16,11 +18,12 @@ export function DigitCard({
   digit,
   percentage,
   isHigh,
+  isSecondHigh,
   isLow,
+  isSecondLow,
   isLatest,
   onClick
 }: DigitCardProps) {
-  // Format percentage: hide .0 if it's a whole number
   const formattedPercentage = percentage % 1 === 0 ? percentage : percentage.toFixed(1);
 
   return (
@@ -49,7 +52,11 @@ export function DigitCard({
       
       <span className={cn(
         "text-xs sm:text-sm font-bold tabular-nums",
-        isHigh ? "text-emerald-500" : isLow ? "text-rose-500" : "text-muted-foreground/80"
+        isHigh ? "text-emerald-500" : 
+        isSecondHigh ? "text-sky-400" :
+        isLow ? "text-rose-500" : 
+        isSecondLow ? "text-orange-400" :
+        "text-muted-foreground/80"
       )}>
         {formattedPercentage}%
       </span>
