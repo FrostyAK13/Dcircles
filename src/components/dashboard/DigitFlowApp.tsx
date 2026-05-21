@@ -12,6 +12,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 
 export default function DigitFlowApp() {
   const { 
     distribution, 
+    latestDigit,
     windowSize, 
     setWindowSize, 
     totalTicks, 
@@ -23,7 +24,6 @@ export default function DigitFlowApp() {
   const [selectedDigit, setSelectedDigit] = useState<number | null>(null);
 
   const stats = useMemo(() => {
-    // distribution always has 10 elements due to robust mapping in the hook
     const percentages = distribution.map(d => d.percentage);
     const maxVal = Math.max(...percentages);
     const minVal = Math.min(...percentages);
@@ -117,18 +117,22 @@ export default function DigitFlowApp() {
               
               <div className="p-4 rounded-xl bg-secondary/30 border border-border/50">
                 <h4 className="text-[10px] font-bold uppercase text-muted-foreground mb-3 tracking-widest">Legend</h4>
-                <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-y-2">
                   <div className="flex items-center gap-2 text-xs">
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                    <span className="font-medium">Highest Percentage</span>
+                    <span className="font-medium">Highest</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                    <span className="font-medium">Lowest Percentage</span>
+                    <span className="font-medium">Lowest</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                    <span className="font-medium">Selected Digit</span>
+                    <span className="font-medium">Selected</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <div className="w-2.5 h-2.5 rounded-full bg-accent" />
+                    <span className="font-medium">Latest (Cursor)</span>
                   </div>
                 </div>
               </div>
@@ -147,6 +151,7 @@ export default function DigitFlowApp() {
               isHigh={d.digit === stats.high}
               isLow={d.digit === stats.low}
               isSelected={d.digit === selectedDigit}
+              isLatest={d.digit === latestDigit}
               onClick={() => setSelectedDigit(d.digit === selectedDigit ? null : d.digit)}
             />
           ))}

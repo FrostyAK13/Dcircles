@@ -7,19 +7,19 @@ export const HISTORY_BUFFER_SIZE = 1000;
 
 export function useDigitAnalysis(symbol: string = 'R_100') {
   const [ticks, setTicks] = useState<number[]>([]);
-  const [windowSize, setWindowSize] = useState<number>(1000); // Default to full buffer
+  const [latestDigit, setLatestDigit] = useState<number | null>(null);
+  const [windowSize, setWindowSize] = useState<number>(1000); 
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
   const [lastTickTime, setLastTickTime] = useState<number | null>(null);
   const [tickSpeed, setTickSpeed] = useState<number>(0);
 
-  // Initialize with 1000 random ticks on mount to ensure analysis is ready immediately
   useEffect(() => {
     const seed = Array.from({ length: 1000 }, () => Math.floor(Math.random() * 10));
     setTicks(seed);
+    setLatestDigit(seed[seed.length - 1]);
   }, []);
 
   const onTick = useCallback((tick: Tick) => {
-    // Safely extract the last digit of the quote based on its actual precision
     const quoteStr = tick.quote.toString();
     const decimalPart = quoteStr.split('.')[1] || '';
     const precision = decimalPart.length;
@@ -27,6 +27,7 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
     
     if (isNaN(digit)) return;
 
+    setLatestDigit(digit);
     setTicks(prev => {
       const next = [...prev, digit];
       if (next.length > HISTORY_BUFFER_SIZE) {
@@ -54,7 +55,6 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
     const windowTicks = ticks.slice(-windowSize);
     const counts = new Array(10).fill(0);
     
-    // Always return a full array of digits 0-9 even if history is empty
     if (windowTicks.length === 0) {
       return Array.from({ length: 10 }, (_, i) => ({
         digit: i,
@@ -72,7 +72,6 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
     const total = windowTicks.length;
     let percentages = counts.map(count => Math.round((count / total) * 1000) / 10);
     
-    // Ensure total is exactly 100% due to floating point rounding
     const sum = percentages.reduce((a, b) => a + b, 0);
     if (sum !== 100 && total > 0) {
       const diff = Math.round((100 - sum) * 10) / 10;
@@ -91,6 +90,7 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
 
   return {
     distribution,
+    latestDigit,
     windowSize,
     setWindowSize,
     totalTicks: ticks.length,
