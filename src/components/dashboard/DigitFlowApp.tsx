@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo } from 'react';
@@ -274,10 +273,7 @@ export default function DigitFlowApp() {
         <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 overflow-y-auto">
           {/* Main Trade Area */}
           <Card className="border-none bg-transparent shadow-none">
-            <CardHeader className="px-0 pt-0 pb-2">
-              <CardTitle className="text-xl font-medium text-foreground/80">Set your trade</CardTitle>
-            </CardHeader>
-            <CardContent className="px-0">
+            <CardContent className="px-0 pt-0">
               <div className="bg-secondary/10 rounded-[2.5rem] p-6 sm:p-10 space-y-4 icy-glass shadow-2xl">
                 <LargePriceDisplay price={latestPrice} />
                 
