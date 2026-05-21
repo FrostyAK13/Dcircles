@@ -2,8 +2,8 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'DigitFlow - Deriv Digit Analysis',
-  description: 'Modern real-time digit distribution analysis for Deriv binary options.',
+  title: 'frostytraders - Advanced Digit Analysis',
+  description: 'Modern real-time digit distribution analysis for binary options trading.',
 };
 
 export default function RootLayout({

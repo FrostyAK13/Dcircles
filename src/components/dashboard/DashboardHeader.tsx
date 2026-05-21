@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Activity, Signal, Zap, Database, Banknote } from "lucide-react";
@@ -29,7 +28,7 @@ export function DashboardHeader({ status, symbol, totalTicks, speed, price }: Da
           <Activity className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <h1 className="text-xl font-bold tracking-tight">DigitFlow</h1>
+          <h1 className="text-xl font-bold tracking-tight">frostytraders</h1>
           <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Analysis Engine</p>
         </div>
       </div>
