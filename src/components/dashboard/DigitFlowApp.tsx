@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from 'react';
@@ -9,7 +10,6 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { Progress } from '@/components/ui/progress';
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -259,28 +259,6 @@ export default function DigitFlowApp() {
                   <ComparisonRow label1="Over" label2="Under" val1={stats.comparisons.over} val2={stats.comparisons.under} />
                   <ComparisonRow label1="Rise" label2="Fall" val1={stats.comparisons.rise} val2={stats.comparisons.fall} />
                   <ComparisonRow label1="Matches" label2="Differs" val1={stats.comparisons.matches} val2={stats.comparisons.differs} />
-                </div>
-                
-                <div className="p-4 rounded-xl bg-secondary/30 border border-white/5">
-                  <h4 className="text-[10px] font-bold uppercase text-muted-foreground mb-3 tracking-widest">Legend</h4>
-                  <div className="grid grid-cols-1 gap-y-2">
-                    <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                      <span className="font-medium text-primary">1st Highest</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 rounded-full bg-accent" />
-                      <span className="font-medium text-accent">2nd Highest</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 rounded-full bg-rose-400" />
-                      <span className="font-medium text-rose-400">1st Lowest</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs">
-                      <div className="w-2 h-2 rounded-full bg-orange-400" />
-                      <span className="font-medium text-orange-400">2nd Lowest</span>
-                    </div>
-                  </div>
                 </div>
               </CardContent>
             </Card>
