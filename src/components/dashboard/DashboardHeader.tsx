@@ -34,7 +34,6 @@ export function DashboardHeader({ status, symbol, totalTicks, price, onSymbolCha
           </div>
           <div>
             <h1 className="text-xl font-bold tracking-tight text-primary">frostytraders</h1>
-            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em]">Icy Golden Engine</p>
           </div>
         </div>
 
