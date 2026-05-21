@@ -8,12 +8,15 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Presentation } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 
 export default function DigitFlowApp() {
   const { 
     distribution, 
     latestDigit,
+    latestPrice,
     windowSize, 
     setWindowSize, 
     totalTicks, 
@@ -49,24 +52,57 @@ export default function DigitFlowApp() {
         symbol={currentSymbol} 
         totalTicks={totalTicks} 
         speed={tickSpeed} 
+        price={latestPrice}
       />
       
-      <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8">
-        {/* Controls Section */}
+      <main className="flex-1 p-4 md:p-8 max-w-6xl mx-auto w-full space-y-8">
+        {/* Set Your Trade Section */}
+        <Card className="border-none bg-card/10 shadow-none">
+          <CardHeader className="px-0 flex flex-row items-center justify-between">
+            <CardTitle className="text-xl font-medium text-foreground/80">Set your trade</CardTitle>
+            <Button variant="outline" className="rounded-full gap-2 px-6">
+              <Presentation className="w-4 h-4" />
+              Guide
+            </Button>
+          </CardHeader>
+          <CardContent className="px-0">
+            <div className="bg-secondary/20 rounded-[2rem] p-6 sm:p-10 space-y-6">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60 mb-6">
+                Last digit prediction
+              </h3>
+              
+              <div className="grid grid-cols-5 gap-3 sm:gap-6">
+                {distribution.map((d) => (
+                  <DigitCard
+                    key={d.digit}
+                    digit={d.digit}
+                    percentage={d.percentage}
+                    isHigh={d.digit === stats.high}
+                    isLow={d.digit === stats.low}
+                    isLatest={d.digit === latestDigit}
+                    onClick={() => setSelectedDigit(d.digit === selectedDigit ? null : d.digit)}
+                  />
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Analytics Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2 border-border/50 bg-card/20 overflow-hidden">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                   Distribution Overview
                 </CardTitle>
                 <div className="text-2xl font-bold text-primary">
-                  {windowSize} <span className="text-xs text-muted-foreground font-normal">Ticks Window</span>
+                  {windowSize} <span className="text-xs text-muted-foreground font-normal">Ticks</span>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="h-[240px] w-full pt-4">
+              <div className="h-[240px] w-full pt-8">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} margin={{ top: 20, right: 10, left: 10, bottom: 10 }}>
                     <XAxis 
@@ -118,30 +154,22 @@ export default function DigitFlowApp() {
                   step={1}
                   className="py-4"
                 />
-                <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
-                  <span>FASTEST</span>
-                  <span>SMOOTHEST</span>
-                </div>
               </div>
               
               <div className="p-4 rounded-xl bg-secondary/30 border border-border/50">
                 <h4 className="text-[10px] font-bold uppercase text-muted-foreground mb-3 tracking-widest">Legend</h4>
-                <div className="grid grid-cols-2 gap-y-2">
+                <div className="grid grid-cols-1 gap-y-2">
                   <div className="flex items-center gap-2 text-xs">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                    <span className="font-medium">Highest</span>
+                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span className="font-medium">Highest Percentage</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
-                    <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                    <span className="font-medium">Lowest</span>
+                    <div className="w-2 h-2 rounded-full bg-rose-500" />
+                    <span className="font-medium">Lowest Percentage</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
-                    <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                    <span className="font-medium">Standard</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="w-2.5 h-2.5 rounded-full bg-accent" />
-                    <span className="font-medium">Latest (Cursor)</span>
+                    <div className="w-2 h-2 rounded-full bg-foreground" />
+                    <span className="font-medium">Latest Digit Indicator</span>
                   </div>
                 </div>
               </div>
@@ -149,34 +177,13 @@ export default function DigitFlowApp() {
           </Card>
         </div>
 
-        {/* Digit Grid Section */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-          {distribution.map((d) => (
-            <DigitCard
-              key={d.digit}
-              digit={d.digit}
-              percentage={d.percentage}
-              count={d.count}
-              isHigh={d.digit === stats.high}
-              isLow={d.digit === stats.low}
-              isSelected={d.digit === selectedDigit}
-              isLatest={d.digit === latestDigit}
-              onClick={() => setSelectedDigit(d.digit === selectedDigit ? null : d.digit)}
-            />
-          ))}
-        </div>
-
-        {/* Footer Info */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em] border-t border-border/30 pt-8 pb-4">
-          <span>&copy; {new Date().getFullYear()} DigitFlow Analysis</span>
+        {/* Footer */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em] pt-8 pb-4 border-t border-border/10">
+          <span>&copy; {new Date().getFullYear()} DigitFlow Pro</span>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              Real-time WebSocket Data
-            </span>
-            <span className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-accent" />
-              Buffer: {HISTORY_BUFFER_SIZE} Ticks
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Live Feed
             </span>
           </div>
         </div>

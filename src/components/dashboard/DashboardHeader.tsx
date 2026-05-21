@@ -1,6 +1,7 @@
+
 "use client"
 
-import { Activity, Signal, Zap, Database } from "lucide-react";
+import { Activity, Signal, Zap, Database, Banknote } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { type ConnectionStatus } from "@/app/lib/deriv-ws";
 import { cn } from "@/lib/utils";
@@ -10,9 +11,10 @@ interface DashboardHeaderProps {
   symbol: string;
   totalTicks: number;
   speed: number;
+  price: number | null;
 }
 
-export function DashboardHeader({ status, symbol, totalTicks, speed }: DashboardHeaderProps) {
+export function DashboardHeader({ status, symbol, totalTicks, speed, price }: DashboardHeaderProps) {
   const statusColors = {
     connected: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
     connecting: "bg-amber-500/10 text-amber-500 border-amber-500/20",
@@ -38,6 +40,13 @@ export function DashboardHeader({ status, symbol, totalTicks, speed }: Dashboard
           {status}
         </Badge>
         
+        {price !== null && (
+          <Badge variant="secondary" className="px-3 py-1 flex items-center gap-2 bg-accent/10 text-accent border-accent/20">
+            <Banknote className="w-3.5 h-3.5" />
+            {price.toFixed(4)}
+          </Badge>
+        )}
+
         <Badge variant="secondary" className="px-3 py-1 flex items-center gap-2 bg-secondary/50 text-foreground border-transparent">
           <Zap className="w-3.5 h-3.5 text-accent" />
           {symbol.replace('_', ' ')}

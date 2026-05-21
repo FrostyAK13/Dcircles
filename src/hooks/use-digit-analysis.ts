@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -8,15 +9,18 @@ export const HISTORY_BUFFER_SIZE = 1000;
 export function useDigitAnalysis(symbol: string = 'R_100') {
   const [ticks, setTicks] = useState<number[]>([]);
   const [latestDigit, setLatestDigit] = useState<number | null>(null);
+  const [latestPrice, setLatestPrice] = useState<number | null>(null);
   const [windowSize, setWindowSize] = useState<number>(1000); 
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
   const [lastTickTime, setLastTickTime] = useState<number | null>(null);
   const [tickSpeed, setTickSpeed] = useState<number>(0);
 
   useEffect(() => {
+    // Seed with 1000 digits to ensure meaningful percentages on load
     const seed = Array.from({ length: 1000 }, () => Math.floor(Math.random() * 10));
     setTicks(seed);
     setLatestDigit(seed[seed.length - 1]);
+    setLatestPrice(100.00); // Placeholder starting price
   }, []);
 
   const onTick = useCallback((tick: Tick) => {
@@ -27,6 +31,7 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
     
     if (isNaN(digit)) return;
 
+    setLatestPrice(tick.quote);
     setLatestDigit(digit);
     setTicks(prev => {
       const next = [...prev, digit];
@@ -72,6 +77,7 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
     const total = windowTicks.length;
     let percentages = counts.map(count => Math.round((count / total) * 1000) / 10);
     
+    // Ensure total is 100% due to rounding
     const sum = percentages.reduce((a, b) => a + b, 0);
     if (sum !== 100 && total > 0) {
       const diff = Math.round((100 - sum) * 10) / 10;
@@ -91,6 +97,7 @@ export function useDigitAnalysis(symbol: string = 'R_100') {
   return {
     distribution,
     latestDigit,
+    latestPrice,
     windowSize,
     setWindowSize,
     totalTicks: ticks.length,
