@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Activity, Signal, Zap, Database, ChevronDown, BarChart2, MessageCircle } from "lucide-react";
@@ -6,6 +7,8 @@ import { type ConnectionStatus } from "@/app/lib/deriv-ws";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CONTINUOUS_INDICES } from "./DigitFlowApp";
+import Image from "next/image";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 interface DashboardHeaderProps {
   status: ConnectionStatus;
@@ -17,6 +20,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ status, symbol, totalTicks, price, onSymbolChange }: DashboardHeaderProps) {
   const currentMarket = CONTINUOUS_INDICES.find(m => m.id === symbol) || CONTINUOUS_INDICES[0];
+  const logo = PlaceHolderImages.find(img => img.id === 'app-logo');
 
   const statusColors = {
     connected: "bg-primary/10 text-primary border-primary/20",
@@ -29,9 +33,22 @@ export function DashboardHeader({ status, symbol, totalTicks, price, onSymbolCha
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b border-white/5 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-primary/20 golden-glow">
-            <Activity className="w-6 h-6 text-primary" />
-          </div>
+          {logo && (
+            <div className="relative w-10 h-10 rounded-xl overflow-hidden border border-white/10 shadow-lg golden-glow">
+              <Image 
+                src={logo.imageUrl} 
+                alt={logo.description} 
+                fill 
+                className="object-cover"
+                data-ai-hint={logo.imageHint}
+              />
+            </div>
+          )}
+          {!logo && (
+            <div className="p-2 rounded-xl bg-primary/20 golden-glow">
+              <Activity className="w-6 h-6 text-primary" />
+            </div>
+          )}
           <div>
             <h1 className="text-xl font-bold tracking-tight text-primary uppercase">FROSTYDBOT</h1>
           </div>
