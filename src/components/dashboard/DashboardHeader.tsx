@@ -28,20 +28,14 @@ export function DashboardHeader({ status, symbol, totalTicks, price, onSymbolCha
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border-b border-white/5 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
       <div className="flex items-center gap-6">
-        <a 
-          href="https://frostytraders.com" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="flex items-center gap-3 group transition-opacity hover:opacity-90"
-        >
+        <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-primary/20 golden-glow">
             <Activity className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-primary">frostytraders</h1>
-            <span className="text-[10px] text-muted-foreground block -mt-1 font-medium group-hover:text-primary transition-colors">frostytraders.com</span>
+            <h1 className="text-xl font-bold tracking-tight text-primary uppercase">FROSTYDBOT</h1>
           </div>
-        </a>
+        </div>
 
         <div className="h-10 w-px bg-white/10 hidden md:block" />
 
