@@ -4,24 +4,24 @@
 
 @layer base {
   :root {
-    --background: 222 47% 4%;
-    --foreground: 0 0% 98%;
-    --card: 222 47% 7%;
-    --card-foreground: 0 0% 98%;
-    --popover: 222 47% 4%;
-    --popover-foreground: 0 0% 98%;
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 98%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
     --primary: 45 92% 52%;
     --primary-foreground: 222 47% 4%;
-    --secondary: 222 47% 12%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 222 47% 15%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 199 89% 68%;
-    --accent-foreground: 222 47% 4%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 222 47% 11%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 222 47% 15%;
-    --input: 222 47% 15%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
     --ring: 45 92% 52%;
     --radius: 0.75rem;
   }
@@ -37,11 +37,11 @@
 }
 
 .icy-glass {
-  @apply bg-card/40 backdrop-blur-md border border-white/5;
+  @apply bg-white/70 backdrop-blur-md border border-black/5;
 }
 
 .golden-glow {
-  box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+  box-shadow: 0 10px 30px rgba(251, 191, 36, 0.15);
 }
 
 .digit-card-gradient {
@@ -49,13 +49,13 @@
 }
 
 .digit-highlight-high {
-  @apply ring-2 ring-primary/50 shadow-[0_0_15px_rgba(251,191,36,0.2)];
+  @apply ring-2 ring-primary/50 shadow-[0_0_15px_rgba(251,191,36,0.1)];
 }
 
 .digit-highlight-low {
-  @apply ring-2 ring-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.2)];
+  @apply ring-2 ring-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.1)];
 }
 
 .digit-highlight-selected {
-  @apply ring-2 ring-primary shadow-[0_0_20px_rgba(251,191,36,0.3)];
+  @apply ring-2 ring-primary shadow-[0_0_20px_rgba(251,191,36,0.2)];
 }
