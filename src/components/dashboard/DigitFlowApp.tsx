@@ -25,6 +25,11 @@ export const CONTINUOUS_INDICES = [
   { id: '1HZ90V', name: 'Volatility 90 (1s) Index', short: '90 (1s)' },
   { id: '1HZ100V', name: 'Volatility 100 (1s) Index', short: '100 (1s)' },
   { id: 'R_100', name: 'Volatility 100 Index', short: '100' },
+  { id: 'JD10', name: 'Jump 10 Index', short: 'J10' },
+  { id: 'JD25', name: 'Jump 25 Index', short: 'J25' },
+  { id: 'JD50', name: 'Jump 50 Index', short: 'J50' },
+  { id: 'JD75', name: 'Jump 75 Index', short: 'J75' },
+  { id: 'JD100', name: 'Jump 100 Index', short: 'J100' },
 ];
 
 function LargePriceDisplay({ price }: { price: number | null }) {
@@ -75,7 +80,7 @@ function DetailedComparison({
         {showDigitSelector && (
           <div className="space-y-2">
             <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold block">Prediction Digit</span>
-            <div className="flex flex-wrap gap-1 justify-center bg-black/20 p-2 rounded-xl">
+            <div className="flex flex-wrap gap-1 justify-center bg-black/5 p-2 rounded-xl">
               {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                 <button
                   key={num}
@@ -84,7 +89,7 @@ function DetailedComparison({
                     "w-6 h-6 rounded-md text-[10px] font-bold transition-all",
                     selectedDigit === num 
                       ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(251,191,36,0.4)]" 
-                      : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                      : "bg-black/5 text-muted-foreground hover:bg-black/10"
                   )}
                 >
                   {num}
@@ -100,7 +105,7 @@ function DetailedComparison({
             <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label1}</span>
             <div className="text-2xl font-bold text-primary">{count1}</div>
           </div>
-          <div className="h-8 w-px bg-white/5" />
+          <div className="h-8 w-px bg-black/5" />
           <div className="space-y-1">
             <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label2}</span>
             <div className="text-2xl font-bold text-accent">{count2}</div>
@@ -110,7 +115,7 @@ function DetailedComparison({
         {/* Pattern Display */}
         <div className="space-y-2">
           <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold block">{title} Pattern</span>
-          <div className="flex flex-wrap gap-1.5 justify-center p-3 bg-black/20 rounded-xl">
+          <div className="flex flex-wrap gap-1.5 justify-center p-3 bg-black/5 rounded-xl">
             {pattern.map((p, i) => (
               <div 
                 key={i} 
@@ -134,7 +139,7 @@ function DetailedComparison({
                 <span className="text-primary">{label1}</span>
                 <span className="text-primary">{val1}%</span>
               </div>
-              <div className="h-6 w-full bg-black/30 rounded-md overflow-hidden p-0.5">
+              <div className="h-6 w-full bg-black/10 rounded-md overflow-hidden p-0.5">
                 <div 
                   className="h-full bg-primary rounded-sm transition-all duration-700 ease-out" 
                   style={{ width: `${val1}%` }} 
@@ -146,7 +151,7 @@ function DetailedComparison({
                 <span className="text-accent">{label2}</span>
                 <span className="text-accent">{val2}%</span>
               </div>
-              <div className="h-6 w-full bg-black/30 rounded-md overflow-hidden p-0.5">
+              <div className="h-6 w-full bg-black/10 rounded-md overflow-hidden p-0.5">
                 <div 
                   className="h-full bg-accent rounded-sm transition-all duration-700 ease-out" 
                   style={{ width: `${val2}%` }} 
@@ -211,7 +216,7 @@ export default function DigitFlowApp() {
       })),
       ou: lastTicks.map(d => ({
         label: d > ouDigit ? 'O' : d < ouDigit ? 'U' : d.toString(),
-        color: d > ouDigit ? 'bg-emerald-500 text-white' : d < ouDigit ? 'bg-rose-500 text-white' : 'bg-muted text-muted-foreground'
+        color: d === ouDigit ? 'bg-muted text-muted-foreground' : (d > ouDigit ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white')
       })),
       rf: lastPrices.slice(1).map((p, i) => ({
         label: p > lastPrices[i] ? 'R' : 'F',
@@ -274,11 +279,11 @@ export default function DigitFlowApp() {
           {/* Main Trade Area */}
           <Card className="border-none bg-transparent shadow-none">
             <CardContent className="px-0 pt-0">
-              <div className="bg-secondary/10 rounded-[2.5rem] p-6 sm:p-10 space-y-4 icy-glass shadow-2xl">
+              <div className="bg-secondary/20 rounded-[2.5rem] p-6 sm:p-10 space-y-4 icy-glass shadow-xl">
                 <LargePriceDisplay price={latestPrice} />
                 
                 <div className="space-y-6">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/40 text-center">
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60 text-center">
                     Last digit prediction
                   </h3>
                   
@@ -332,7 +337,7 @@ export default function DigitFlowApp() {
                         labelStyle={{color: 'hsl(var(--primary))', fontWeight: 'bold'}}
                         formatter={(value: number) => [`${value}%`, 'Percentage']}
                       />
-                      <Bar dataKey="val" radius={[4, 4, 0, 0]} animationDuration={300}>
+                      <Bar dataKey="val" radius={[4, 4, 0, 0]} isAnimationActive={false}>
                         <LabelList 
                           dataKey="val" 
                           position="top" 
@@ -440,7 +445,7 @@ export default function DigitFlowApp() {
             />
           </div>
 
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em] pt-8 pb-4 border-t border-white/5">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em] pt-8 pb-4 border-t border-black/5">
             <span>&copy; {new Date().getFullYear()} FROSTYDBOT</span>
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
