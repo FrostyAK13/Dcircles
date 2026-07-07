@@ -1,4 +1,3 @@
-
 "use client"
 
 import { cn } from "@/lib/utils";
@@ -35,19 +34,27 @@ export function DigitCard({
         className={cn(
           "w-full aspect-[4/3] sm:aspect-video rounded-2xl flex items-center justify-center transition-all duration-300 border-2",
           isLatest 
-            ? "bg-primary text-primary-foreground border-primary scale-105 shadow-lg shadow-primary/20" 
-            : "bg-white text-foreground border-border/50 hover:border-primary/50 shadow-sm"
+            ? "bg-primary border-primary scale-105 shadow-lg shadow-primary/20" 
+            : "bg-white border-border/50 hover:border-primary/50 shadow-sm"
         )}
       >
-        <span className="text-2xl sm:text-3xl font-bold tracking-tighter">
+        <span className={cn(
+          "text-2xl sm:text-3xl font-bold tracking-tighter transition-colors duration-300",
+          isLatest ? "text-primary-foreground" :
+          isHigh ? "text-emerald-500" : 
+          isSecondHigh ? "text-blue-500" :
+          isLow ? "text-rose-500" : 
+          isSecondLow ? "text-orange-500" :
+          "text-foreground"
+        )}>
           {digit}
         </span>
       </div>
       
       <span className={cn(
         "text-xs sm:text-sm font-bold tabular-nums transition-colors duration-300",
-        isHigh ? "text-primary" : 
-        isSecondHigh ? "text-accent" :
+        isHigh ? "text-emerald-500" : 
+        isSecondHigh ? "text-blue-500" :
         isLow ? "text-rose-500" : 
         isSecondLow ? "text-orange-500" :
         "text-muted-foreground/80"

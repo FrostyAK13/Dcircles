@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -361,10 +360,10 @@ export default function DigitFlowApp() {
                         {chartData.map((entry, index) => {
                           const digit = parseInt(entry.name);
                           let fill = 'hsl(var(--secondary))';
-                          if (digit === stats.high) fill = 'hsl(var(--primary))';
-                          else if (digit === stats.secondHigh) fill = 'hsl(var(--accent))';
-                          else if (digit === stats.low) fill = 'rgb(244, 63, 94)';
-                          else if (digit === stats.secondLow) fill = 'rgb(245, 158, 11)';
+                          if (digit === stats.high) fill = 'rgb(16, 185, 129)'; // emerald-500
+                          else if (digit === stats.secondHigh) fill = 'rgb(59, 130, 246)'; // blue-500
+                          else if (digit === stats.low) fill = 'rgb(244, 63, 94)'; // rose-500
+                          else if (digit === stats.secondLow) fill = 'rgb(249, 115, 22)'; // orange-500
 
                           return (
                             <Cell 
