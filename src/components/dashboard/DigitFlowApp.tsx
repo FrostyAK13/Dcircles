@@ -66,26 +66,26 @@ function DetailedComparison({
   showDigitSelector, selectedDigit, onDigitSelect 
 }: DetailedComparisonProps) {
   return (
-    <Card className="border-border/50 bg-white/50 overflow-hidden shadow-sm">
-      <CardHeader className="pb-2 border-b border-black/5">
-        <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
+    <Card className="border-border/50 bg-white shadow-md overflow-hidden transition-all hover:shadow-lg">
+      <CardHeader className="pb-4 border-b border-black/5 bg-secondary/30">
+        <CardTitle className="text-sm font-bold uppercase tracking-widest text-primary">
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-6 space-y-6">
+      <CardContent className="pt-8 space-y-8">
         {showDigitSelector && (
-          <div className="space-y-2">
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold block">Prediction Digit</span>
-            <div className="flex flex-wrap gap-1 justify-center bg-black/5 p-2 rounded-xl">
+          <div className="space-y-3">
+            <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold block">Selection Mode</span>
+            <div className="flex flex-wrap gap-1.5 justify-center bg-secondary/50 p-3 rounded-2xl">
               {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                 <button
                   key={num}
                   onClick={() => onDigitSelect?.(num)}
                   className={cn(
-                    "w-6 h-6 rounded-md text-[10px] font-bold transition-all",
+                    "w-9 h-9 rounded-xl text-sm font-bold transition-all flex items-center justify-center",
                     selectedDigit === num 
-                      ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(251,191,36,0.3)]" 
-                      : "bg-black/5 text-muted-foreground hover:bg-black/10"
+                      ? "bg-primary text-primary-foreground shadow-lg scale-110" 
+                      : "bg-white text-muted-foreground hover:bg-primary/10 border border-border/50"
                   )}
                 >
                   {num}
@@ -95,26 +95,26 @@ function DetailedComparison({
           </div>
         )}
 
-        <div className="flex justify-around items-center text-center">
-          <div className="space-y-1">
-            <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label1}</span>
-            <div className="text-2xl font-bold text-primary">{count1}</div>
+        <div className="flex justify-around items-center text-center py-4">
+          <div className="space-y-2">
+            <span className="text-xs uppercase tracking-tighter text-muted-foreground font-bold">{label1}</span>
+            <div className="text-4xl font-black text-primary tabular-nums">{count1}</div>
           </div>
-          <div className="h-8 w-px bg-black/5" />
-          <div className="space-y-1">
-            <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label2}</span>
-            <div className="text-2xl font-bold text-accent">{count2}</div>
+          <div className="h-16 w-px bg-border" />
+          <div className="space-y-2">
+            <span className="text-xs uppercase tracking-tighter text-muted-foreground font-bold">{label2}</span>
+            <div className="text-4xl font-black text-accent tabular-nums">{count2}</div>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold block">{title} Pattern</span>
-          <div className="flex flex-wrap gap-1.5 justify-center p-3 bg-black/5 rounded-xl">
+        <div className="space-y-4">
+          <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold block">Recent History Pattern</span>
+          <div className="flex flex-wrap gap-2 justify-center p-4 bg-secondary/20 rounded-2xl">
             {pattern.map((p, i) => (
               <div 
                 key={i} 
                 className={cn(
-                  "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm transition-all duration-300",
+                  "w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shadow-sm transition-all duration-300",
                   p.color
                 )}
               >
@@ -124,29 +124,29 @@ function DetailedComparison({
           </div>
         </div>
 
-        <div className="space-y-3">
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold block">Probability Analysis</span>
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest px-1">
+        <div className="space-y-5">
+          <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold block">Statistical Probability</span>
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-bold uppercase tracking-widest px-1">
                 <span className="text-primary">{label1}</span>
                 <span className="text-primary">{val1}%</span>
               </div>
-              <div className="h-6 w-full bg-black/10 rounded-md overflow-hidden p-0.5">
+              <div className="h-8 w-full bg-secondary rounded-full overflow-hidden p-1">
                 <div 
-                  className="h-full bg-primary rounded-sm transition-all duration-500 ease-out" 
+                  className="h-full bg-primary rounded-full transition-all duration-700 ease-out shadow-sm" 
                   style={{ width: `${val1}%` }} 
                 />
               </div>
             </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest px-1">
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs font-bold uppercase tracking-widest px-1">
                 <span className="text-accent">{label2}</span>
                 <span className="text-accent">{val2}%</span>
               </div>
-              <div className="h-6 w-full bg-black/10 rounded-md overflow-hidden p-0.5">
+              <div className="h-8 w-full bg-secondary rounded-full overflow-hidden p-1">
                 <div 
-                  className="h-full bg-accent rounded-sm transition-all duration-500 ease-out" 
+                  className="h-full bg-accent rounded-full transition-all duration-700 ease-out shadow-sm" 
                   style={{ width: `${val2}%` }} 
                 />
               </div>
@@ -269,10 +269,10 @@ export default function DigitFlowApp() {
           onSymbolChange={setSymbol}
         />
         
-        <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 overflow-y-auto">
+        <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-12 overflow-y-auto">
           <Card className="border-none bg-transparent shadow-none">
             <CardContent className="px-0 pt-0">
-              <div className="bg-white/80 rounded-[2.5rem] p-6 sm:p-10 space-y-4 shadow-xl border border-black/5">
+              <div className="bg-white rounded-[2.5rem] p-6 sm:p-10 space-y-4 shadow-xl border border-border/50">
                 <LargePriceDisplay price={latestPrice} />
                 
                 <div className="space-y-6 relative">
@@ -281,7 +281,6 @@ export default function DigitFlowApp() {
                   </h3>
                   
                   <div className="grid grid-cols-5 gap-3 sm:gap-6 max-w-4xl mx-auto relative">
-                    {/* Shared Moving Indicator - The Arrow Cursor */}
                     {mounted && latestDigit !== null && (
                       <div 
                         className="absolute -top-8 z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"
@@ -314,7 +313,7 @@ export default function DigitFlowApp() {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <Card className="lg:col-span-2 border-border/50 bg-white shadow-sm">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
@@ -327,7 +326,7 @@ export default function DigitFlowApp() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="h-[240px] w-full pt-8">
+                <div className="h-[300px] w-full pt-8">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData} margin={{ top: 20, right: 10, left: 10, bottom: 10 }}>
                       <XAxis 
@@ -346,7 +345,7 @@ export default function DigitFlowApp() {
                       />
                       <Bar 
                         dataKey="val" 
-                        radius={[4, 4, 0, 0]} 
+                        radius={[6, 6, 0, 0]} 
                         isAnimationActive={true}
                         animationDuration={500}
                         animationEasing="ease-out"
@@ -355,15 +354,15 @@ export default function DigitFlowApp() {
                           dataKey="val" 
                           position="top" 
                           formatter={(value: number) => `${value}%`}
-                          style={{ fill: 'hsl(var(--foreground))', fontSize: '10px', fontWeight: 'bold', opacity: 0.8 }}
+                          style={{ fill: 'hsl(var(--foreground))', fontSize: '11px', fontWeight: 'bold' }}
                         />
                         {chartData.map((entry, index) => {
                           const digit = parseInt(entry.name);
                           let fill = 'hsl(var(--secondary))';
-                          if (digit === stats.high) fill = 'rgb(16, 185, 129)'; // emerald-500
-                          else if (digit === stats.secondHigh) fill = 'rgb(59, 130, 246)'; // blue-500
-                          else if (digit === stats.low) fill = 'rgb(244, 63, 94)'; // rose-500
-                          else if (digit === stats.secondLow) fill = 'rgb(249, 115, 22)'; // orange-500
+                          if (digit === stats.high) fill = 'rgb(16, 185, 129)'; 
+                          else if (digit === stats.secondHigh) fill = 'rgb(59, 130, 246)'; 
+                          else if (digit === stats.low) fill = 'rgb(244, 63, 94)'; 
+                          else if (digit === stats.secondLow) fill = 'rgb(249, 115, 22)'; 
 
                           return (
                             <Cell 
@@ -408,53 +407,58 @@ export default function DigitFlowApp() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <DetailedComparison 
-              title="Even / Odd"
-              label1="Even"
-              label2="Odd"
-              val1={stats.comparisons.even}
-              val2={stats.comparisons.odd}
-              count1={stats.counts.even}
-              count2={stats.counts.odd}
-              pattern={stats.patterns.eo}
-            />
-            <DetailedComparison 
-              title="Over / Under"
-              label1="Over"
-              label2="Under"
-              val1={stats.comparisons.over}
-              val2={stats.comparisons.under}
-              count1={stats.counts.over}
-              count2={stats.counts.under}
-              pattern={stats.patterns.ou}
-              showDigitSelector
-              selectedDigit={ouDigit}
-              onDigitSelect={setOuDigit}
-            />
-            <DetailedComparison 
-              title="Rise / Fall"
-              label1="Rise"
-              label2="Fall"
-              val1={stats.comparisons.rise}
-              val2={stats.comparisons.fall}
-              count1={stats.counts.rise}
-              count2={stats.counts.fall}
-              pattern={stats.patterns.rf}
-            />
-            <DetailedComparison 
-              title="Matches / Differs"
-              label1="Matches"
-              label2="Differs"
-              val1={stats.comparisons.matches}
-              val2={stats.comparisons.differs}
-              count1={stats.counts.matches}
-              count2={stats.counts.differs}
-              pattern={stats.patterns.md}
-              showDigitSelector
-              selectedDigit={mdDigit}
-              onDigitSelect={setMdDigit}
-            />
+          <div className="space-y-8">
+            <h2 className="text-xl font-black uppercase tracking-[0.2em] text-center text-muted-foreground/40">
+              Advanced Strategy Modules
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <DetailedComparison 
+                title="Over / Under Strategy"
+                label1="Over"
+                label2="Under"
+                val1={stats.comparisons.over}
+                val2={stats.comparisons.under}
+                count1={stats.counts.over}
+                count2={stats.counts.under}
+                pattern={stats.patterns.ou}
+                showDigitSelector
+                selectedDigit={ouDigit}
+                onDigitSelect={setOuDigit}
+              />
+              <DetailedComparison 
+                title="Even / Odd Strategy"
+                label1="Even"
+                label2="Odd"
+                val1={stats.comparisons.even}
+                val2={stats.comparisons.odd}
+                count1={stats.counts.even}
+                count2={stats.counts.odd}
+                pattern={stats.patterns.eo}
+              />
+              <DetailedComparison 
+                title="Matches / Differs Strategy"
+                label1="Matches"
+                label2="Differs"
+                val1={stats.comparisons.matches}
+                val2={stats.comparisons.differs}
+                count1={stats.counts.matches}
+                count2={stats.counts.differs}
+                pattern={stats.patterns.md}
+                showDigitSelector
+                selectedDigit={mdDigit}
+                onDigitSelect={setMdDigit}
+              />
+              <DetailedComparison 
+                title="Rise / Fall Strategy"
+                label1="Rise"
+                label2="Fall"
+                val1={stats.comparisons.rise}
+                val2={stats.comparisons.fall}
+                count1={stats.counts.rise}
+                count2={stats.counts.fall}
+                pattern={stats.patterns.rf}
+              />
+            </div>
           </div>
 
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em] pt-8 pb-4 border-t border-black/5">
