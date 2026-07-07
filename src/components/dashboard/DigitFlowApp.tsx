@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useDigitAnalysis, HISTORY_BUFFER_SIZE } from '@/hooks/use-digit-analysis';
 import { DashboardHeader } from './DashboardHeader';
 import { DigitCard } from './DigitCard';
@@ -169,6 +170,7 @@ export default function DigitFlowApp() {
   const [symbol, setSymbol] = useState('R_100');
   const [ouDigit, setOuDigit] = useState(4);
   const [mdDigit, setMdDigit] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   const { 
     distribution, 
@@ -183,6 +185,10 @@ export default function DigitFlowApp() {
   } = useDigitAnalysis(symbol);
 
   const [selectedDigit, setSelectedDigit] = useState<number | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const stats = useMemo(() => {
     const sorted = [...distribution].sort((a, b) => b.percentage - a.percentage);
@@ -446,7 +452,7 @@ export default function DigitFlowApp() {
           </div>
 
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em] pt-8 pb-4 border-t border-black/5">
-            <span>&copy; {new Date().getFullYear()} FROSTYDBOT</span>
+            <span>&copy; {mounted ? new Date().getFullYear() : '2025'} FROSTYDBOT</span>
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
