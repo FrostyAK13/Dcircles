@@ -30,6 +30,7 @@ export class DerivWS {
   private onStatusCallback: (status: ConnectionStatus) => void;
   private symbol: string;
   private reconnectTimeout: NodeJS.Timeout | null = null;
+  private pingInterval: NodeJS.Timeout | null = null;
 
   constructor(
     symbol: string, 
@@ -44,41 +45,68 @@ export class DerivWS {
   }
 
   connect() {
-    if (this.ws) this.ws.close();
+    this.disconnect();
     
     this.onStatusCallback('connecting');
-    this.ws = new WebSocket(DERIV_WS_URL);
+    try {
+      this.ws = new WebSocket(DERIV_WS_URL);
 
-    this.ws.onopen = () => {
-      this.onStatusCallback('connected');
-      this.subscribeToTicks();
-    };
+      this.ws.onopen = () => {
+        this.onStatusCallback('connected');
+        this.subscribeToTicks();
+        this.startPing();
+      };
 
-    this.ws.onmessage = (event) => {
-      const response: TickResponse = JSON.parse(event.data);
-      
-      if (response.history && this.onHistoryCallback) {
-        this.onHistoryCallback(response.history.prices);
-      }
-      
-      if (response.tick) {
-        this.onTickCallback(response.tick);
-      }
-      
-      if (response.error) {
-        console.error('Deriv API Error:', response.error);
+      this.ws.onmessage = (event) => {
+        const response: TickResponse = JSON.parse(event.data);
+        
+        if (response.msg_type === 'history' && response.history && this.onHistoryCallback) {
+          this.onHistoryCallback(response.history.prices);
+        }
+        
+        if (response.msg_type === 'tick' && response.tick) {
+          this.onTickCallback(response.tick);
+        }
+        
+        if (response.error) {
+          console.error('Deriv API Error:', response.error);
+          if (response.error.code === 'AppIdInvalid') {
+             this.onStatusCallback('error');
+          }
+        }
+      };
+
+      this.ws.onclose = () => {
+        this.onStatusCallback('disconnected');
+        this.stopPing();
+        this.attemptReconnect();
+      };
+
+      this.ws.onerror = (err) => {
+        console.error('WebSocket Error:', err);
         this.onStatusCallback('error');
-      }
-    };
-
-    this.ws.onclose = () => {
-      this.onStatusCallback('disconnected');
-      this.attemptReconnect();
-    };
-
-    this.ws.onerror = () => {
+      };
+    } catch (e) {
+      console.error('Connection attempt failed:', e);
       this.onStatusCallback('error');
-    };
+      this.attemptReconnect();
+    }
+  }
+
+  private startPing() {
+    this.stopPing();
+    this.pingInterval = setInterval(() => {
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        this.ws.send(JSON.stringify({ ping: 1 }));
+      }
+    }, 30000);
+  }
+
+  private stopPing() {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
   }
 
   private subscribeToTicks() {
@@ -104,6 +132,7 @@ export class DerivWS {
   private attemptReconnect() {
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
     this.reconnectTimeout = setTimeout(() => {
+      console.log('Attempting to reconnect...');
       this.connect();
     }, 5000);
   }
@@ -114,12 +143,16 @@ export class DerivWS {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({ forget_all: 'ticks' }));
       this.subscribeToTicks();
+    } else {
+      this.connect();
     }
   }
 
   disconnect() {
+    this.stopPing();
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
     if (this.ws) {
+      this.ws.onclose = null;
       this.ws.close();
       this.ws = null;
     }
