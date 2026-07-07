@@ -1,4 +1,4 @@
-export const APP_ID = '84799';
+export const APP_ID = '33CgtWLy6MV5q6iYjy3Y4';
 export const DERIV_WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`;
 
 export type Tick = {
