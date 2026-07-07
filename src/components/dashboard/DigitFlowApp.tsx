@@ -408,9 +408,6 @@ export default function DigitFlowApp() {
           </div>
 
           <div className="space-y-8">
-            <h2 className="text-xl font-black uppercase tracking-[0.2em] text-center text-muted-foreground/40">
-              Advanced Strategy Modules
-            </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <DetailedComparison 
                 title="Over / Under Strategy"
