@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
+import { ChevronDown } from 'lucide-react';
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -37,16 +38,11 @@ function LargePriceDisplay({ price }: { price: number | null }) {
   if (price === null) return null;
   
   const priceStr = price.toFixed(2);
-  const mainPart = priceStr.slice(0, -1);
-  const lastDigit = priceStr.slice(-1);
 
   return (
     <div className="flex flex-col items-center justify-center py-4 mb-2">
       <div className="text-4xl sm:text-6xl font-bold tracking-tighter flex items-baseline tabular-nums text-primary">
-        <span className="opacity-90">{mainPart}</span>
-        <span className="relative inline-block border-b-4 border-primary ml-1">
-          {lastDigit}
-        </span>
+        <span className="opacity-90">{priceStr}</span>
       </div>
     </div>
   );
@@ -71,9 +67,9 @@ function DetailedComparison({
   showDigitSelector, selectedDigit, onDigitSelect 
 }: DetailedComparisonProps) {
   return (
-    <Card className="border-border/50 bg-card/10 overflow-hidden icy-glass">
-      <CardHeader className="pb-2 border-b border-white/5">
-        <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+    <Card className="border-border/50 bg-white/50 overflow-hidden shadow-sm">
+      <CardHeader className="pb-2 border-b border-black/5">
+        <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">
           {title}
         </CardTitle>
       </CardHeader>
@@ -89,7 +85,7 @@ function DetailedComparison({
                   className={cn(
                     "w-6 h-6 rounded-md text-[10px] font-bold transition-all",
                     selectedDigit === num 
-                      ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(251,191,36,0.4)]" 
+                      ? "bg-primary text-primary-foreground shadow-[0_0_10px_rgba(251,191,36,0.3)]" 
                       : "bg-black/5 text-muted-foreground hover:bg-black/10"
                   )}
                 >
@@ -100,7 +96,6 @@ function DetailedComparison({
           </div>
         )}
 
-        {/* Counts */}
         <div className="flex justify-around items-center text-center">
           <div className="space-y-1">
             <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label1}</span>
@@ -113,7 +108,6 @@ function DetailedComparison({
           </div>
         </div>
 
-        {/* Pattern Display */}
         <div className="space-y-2">
           <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold block">{title} Pattern</span>
           <div className="flex flex-wrap gap-1.5 justify-center p-3 bg-black/5 rounded-xl">
@@ -121,7 +115,7 @@ function DetailedComparison({
               <div 
                 key={i} 
                 className={cn(
-                  "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm transition-transform duration-300 animate-in fade-in zoom-in",
+                  "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shadow-sm transition-all duration-300",
                   p.color
                 )}
               >
@@ -131,7 +125,6 @@ function DetailedComparison({
           </div>
         </div>
 
-        {/* Probability Bars */}
         <div className="space-y-3">
           <span className="text-[10px] uppercase tracking-widest text-muted-foreground/60 font-bold block">Probability Analysis</span>
           <div className="space-y-3">
@@ -142,7 +135,7 @@ function DetailedComparison({
               </div>
               <div className="h-6 w-full bg-black/10 rounded-md overflow-hidden p-0.5">
                 <div 
-                  className="h-full bg-primary rounded-sm transition-all duration-700 ease-out" 
+                  className="h-full bg-primary rounded-sm transition-all duration-500 ease-out" 
                   style={{ width: `${val1}%` }} 
                 />
               </div>
@@ -154,7 +147,7 @@ function DetailedComparison({
               </div>
               <div className="h-6 w-full bg-black/10 rounded-md overflow-hidden p-0.5">
                 <div 
-                  className="h-full bg-accent rounded-sm transition-all duration-700 ease-out" 
+                  className="h-full bg-accent rounded-sm transition-all duration-500 ease-out" 
                   style={{ width: `${val2}%` }} 
                 />
               </div>
@@ -192,8 +185,6 @@ export default function DigitFlowApp() {
 
   const stats = useMemo(() => {
     const sorted = [...distribution].sort((a, b) => b.percentage - a.percentage);
-    
-    // Comparisons
     const windowTicks = ticks.slice(-windowSize);
     const windowPrices = prices.slice(-windowSize);
     
@@ -201,7 +192,6 @@ export default function DigitFlowApp() {
     const overCount = windowTicks.filter(d => d > ouDigit).length;
     const underCount = windowTicks.filter(d => d < ouDigit).length;
     const matchCount = windowTicks.filter(d => d === mdDigit).length;
-    const differCount = windowTicks.filter(d => d !== mdDigit).length;
     
     let riseCount = 0;
     for (let i = 1; i < windowPrices.length; i++) {
@@ -211,7 +201,6 @@ export default function DigitFlowApp() {
     const total = windowTicks.length || 1;
     const totalMovements = Math.max(windowPrices.length - 1, 1);
 
-    // Patterns (Last 20)
     const lastTicks = ticks.slice(-20);
     const lastPrices = prices.slice(-21);
 
@@ -247,7 +236,7 @@ export default function DigitFlowApp() {
         rise: riseCount,
         fall: totalMovements - riseCount,
         matches: matchCount,
-        differs: differCount,
+        differs: total - matchCount,
       },
       comparisons: {
         even: Math.round((evenCount / total) * 100),
@@ -257,7 +246,7 @@ export default function DigitFlowApp() {
         rise: Math.round((riseCount / totalMovements) * 100),
         fall: Math.round(((totalMovements - riseCount) / totalMovements) * 100),
         matches: Math.round((matchCount / total) * 100),
-        differs: Math.round((differCount / total) * 100),
+        differs: Math.round(((total - matchCount) / total) * 100),
       },
       patterns
     };
@@ -282,18 +271,31 @@ export default function DigitFlowApp() {
         />
         
         <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 overflow-y-auto">
-          {/* Main Trade Area */}
           <Card className="border-none bg-transparent shadow-none">
             <CardContent className="px-0 pt-0">
-              <div className="bg-secondary/20 rounded-[2.5rem] p-6 sm:p-10 space-y-4 icy-glass shadow-xl">
+              <div className="bg-white/80 rounded-[2.5rem] p-6 sm:p-10 space-y-4 shadow-xl border border-black/5">
                 <LargePriceDisplay price={latestPrice} />
                 
-                <div className="space-y-6">
+                <div className="space-y-6 relative">
                   <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60 text-center">
                     Last digit prediction
                   </h3>
                   
-                  <div className="grid grid-cols-5 gap-3 sm:gap-6 max-w-4xl mx-auto">
+                  <div className="grid grid-cols-5 gap-3 sm:gap-6 max-w-4xl mx-auto relative">
+                    {/* Shared Moving Indicator */}
+                    {mounted && latestDigit !== null && (
+                      <div 
+                        className="absolute -top-8 z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"
+                        style={{
+                          left: `${(latestDigit % 5) * 20 + 10}%`,
+                          top: latestDigit >= 5 ? '55%' : '-1.5rem',
+                          transform: 'translateX(-50%)'
+                        }}
+                      >
+                        <ChevronDown className="w-6 h-6 fill-primary animate-bounce" />
+                      </div>
+                    )}
+
                     {distribution.map((d) => (
                       <DigitCard
                         key={d.digit}
@@ -313,12 +315,11 @@ export default function DigitFlowApp() {
             </CardContent>
           </Card>
 
-          {/* Analysis Controls & Distribution */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-2 border-border/50 bg-card/10 overflow-hidden icy-glass">
+            <Card className="lg:col-span-2 border-border/50 bg-white shadow-sm">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                  <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">
                     Distribution Overview
                   </CardTitle>
                   <div className="text-2xl font-bold text-primary">
@@ -338,12 +339,19 @@ export default function DigitFlowApp() {
                       />
                       <YAxis hide domain={[0, 'auto']} />
                       <Tooltip 
-                        cursor={{fill: 'hsl(var(--secondary))', opacity: 0.2}}
-                        contentStyle={{backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px'}}
+                        cursor={{fill: 'hsl(var(--secondary))', opacity: 0.1, radius: 4}}
+                        animationDuration={300}
+                        contentStyle={{backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)'}}
                         labelStyle={{color: 'hsl(var(--primary))', fontWeight: 'bold'}}
                         formatter={(value: number) => [`${value}%`, 'Percentage']}
                       />
-                      <Bar dataKey="val" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+                      <Bar 
+                        dataKey="val" 
+                        radius={[4, 4, 0, 0]} 
+                        isAnimationActive={true}
+                        animationDuration={500}
+                        animationEasing="ease-out"
+                      >
                         <LabelList 
                           dataKey="val" 
                           position="top" 
@@ -352,7 +360,7 @@ export default function DigitFlowApp() {
                         />
                         {chartData.map((entry, index) => {
                           const digit = parseInt(entry.name);
-                          let fill = 'hsl(var(--muted))';
+                          let fill = 'hsl(var(--secondary))';
                           if (digit === stats.high) fill = 'hsl(var(--primary))';
                           else if (digit === stats.secondHigh) fill = 'hsl(var(--accent))';
                           else if (digit === stats.low) fill = 'rgb(244, 63, 94)';
@@ -373,9 +381,9 @@ export default function DigitFlowApp() {
               </CardContent>
             </Card>
 
-            <Card className="border-border/50 bg-card/10 flex flex-col icy-glass">
+            <Card className="border-border/50 bg-white flex flex-col shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">
                   Analysis Window
                 </CardTitle>
               </CardHeader>
@@ -393,15 +401,14 @@ export default function DigitFlowApp() {
                     step={1}
                     className="py-4"
                   />
-                  <div className="text-[10px] text-muted-foreground/60 leading-relaxed italic">
-                    Adjusting the window changes the base for probability calculation across all patterns.
+                  <div className="text-[10px] text-muted-foreground/50 leading-relaxed italic">
+                    Adjusting the window changes the probability baseline for all analysis modules.
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Detailed Comparisons Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <DetailedComparison 
               title="Even / Odd"
@@ -456,7 +463,7 @@ export default function DigitFlowApp() {
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                Live Golden Feed
+                Live Feed Active
               </span>
             </div>
           </div>

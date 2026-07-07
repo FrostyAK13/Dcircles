@@ -1,7 +1,7 @@
+
 "use client"
 
 import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
 
 interface DigitCardProps {
   digit: number;
@@ -31,18 +31,12 @@ export function DigitCard({
       onClick={onClick}
       className="flex flex-col items-center gap-2 group cursor-pointer relative"
     >
-      {isLatest && (
-        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-primary animate-bounce z-10">
-          <ChevronDown className="w-6 h-6 fill-primary" />
-        </div>
-      )}
-      
       <div
         className={cn(
-          "w-full aspect-[4/3] sm:aspect-video rounded-2xl flex items-center justify-center transition-all duration-200 border-2",
+          "w-full aspect-[4/3] sm:aspect-video rounded-2xl flex items-center justify-center transition-all duration-300 border-2",
           isLatest 
-            ? "bg-primary text-primary-foreground border-primary scale-105 golden-glow" 
-            : "bg-secondary/40 text-foreground border-border/50 hover:border-primary/50 icy-glass"
+            ? "bg-primary text-primary-foreground border-primary scale-105 shadow-lg shadow-primary/20" 
+            : "bg-white text-foreground border-border/50 hover:border-primary/50 shadow-sm"
         )}
       >
         <span className="text-2xl sm:text-3xl font-bold tracking-tighter">
@@ -51,11 +45,11 @@ export function DigitCard({
       </div>
       
       <span className={cn(
-        "text-xs sm:text-sm font-bold tabular-nums",
+        "text-xs sm:text-sm font-bold tabular-nums transition-colors duration-300",
         isHigh ? "text-primary" : 
         isSecondHigh ? "text-accent" :
-        isLow ? "text-rose-400" : 
-        isSecondLow ? "text-orange-400" :
+        isLow ? "text-rose-500" : 
+        isSecondLow ? "text-orange-500" :
         "text-muted-foreground/80"
       )}>
         {formattedPercentage}%
