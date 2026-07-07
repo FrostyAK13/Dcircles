@@ -281,7 +281,7 @@ export default function DigitFlowApp() {
                   </h3>
                   
                   <div className="grid grid-cols-5 gap-3 sm:gap-6 max-w-4xl mx-auto relative">
-                    {/* Shared Moving Indicator */}
+                    {/* Shared Moving Indicator - The Arrow Cursor */}
                     {mounted && latestDigit !== null && (
                       <div 
                         className="absolute -top-8 z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"

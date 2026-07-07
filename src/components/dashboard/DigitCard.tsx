@@ -33,19 +33,17 @@ export function DigitCard({
       <div
         className={cn(
           "w-full aspect-[4/3] sm:aspect-video rounded-2xl flex items-center justify-center transition-all duration-300 border-2",
-          isLatest 
-            ? "bg-primary border-primary scale-105 shadow-lg shadow-primary/20" 
-            : "bg-white border-border/50 hover:border-primary/50 shadow-sm"
+          isHigh ? "bg-emerald-500 border-emerald-500 shadow-md" : 
+          isSecondHigh ? "bg-blue-500 border-blue-500 shadow-md" :
+          isLow ? "bg-rose-500 border-rose-500 shadow-md" : 
+          isSecondLow ? "bg-orange-500 border-orange-500 shadow-md" :
+          "bg-white border-border/50 hover:border-primary/50 shadow-sm",
+          isLatest && !isHigh && !isSecondHigh && !isLow && !isSecondLow && "ring-2 ring-primary ring-offset-2"
         )}
       >
         <span className={cn(
           "text-2xl sm:text-3xl font-bold tracking-tighter transition-colors duration-300",
-          isLatest ? "text-primary-foreground" :
-          isHigh ? "text-emerald-500" : 
-          isSecondHigh ? "text-blue-500" :
-          isLow ? "text-rose-500" : 
-          isSecondLow ? "text-orange-500" :
-          "text-foreground"
+          (isHigh || isSecondHigh || isLow || isSecondLow) ? "text-white" : "text-foreground"
         )}>
           {digit}
         </span>
