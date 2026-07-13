@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Settings2 } from 'lucide-react';
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -40,7 +40,7 @@ function LargePriceDisplay({ price }: { price: number | null }) {
   const priceStr = price.toFixed(2);
 
   return (
-    <div className="flex flex-col items-center justify-center py-4 mb-2">
+    <div className="flex flex-col items-center justify-center py-2">
       <div className="text-4xl sm:text-6xl font-bold tracking-tighter flex items-baseline tabular-nums text-primary">
         <span className="opacity-90">{priceStr}</span>
       </div>
@@ -278,10 +278,42 @@ export default function DigitFlowApp() {
         <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-12 overflow-y-auto">
           <Card className="border-none bg-transparent shadow-none">
             <CardContent className="px-0 pt-0">
-              <div className="bg-white rounded-[2.5rem] p-6 sm:p-10 space-y-4 shadow-xl border border-border/50">
+              <div className="bg-white rounded-[2.5rem] p-6 sm:p-10 space-y-8 shadow-xl border border-border/50">
                 <LargePriceDisplay price={latestPrice} />
                 
-                <div className="space-y-6 relative">
+                {/* Integrated Analysis Window Controls */}
+                <div className="max-w-xl mx-auto p-6 rounded-3xl bg-secondary/30 border border-border/50 space-y-4">
+                   <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Settings2 className="w-4 h-4 text-primary" />
+                      <Label className="text-xs font-bold uppercase text-muted-foreground tracking-widest">Analysis Range</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input 
+                        type="number"
+                        value={windowSize}
+                        onChange={(e) => handleWindowSizeChange(parseInt(e.target.value))}
+                        min={5}
+                        max={HISTORY_BUFFER_SIZE}
+                        className="w-20 h-8 text-xs font-bold text-primary bg-white border-primary/20 text-center rounded-lg"
+                      />
+                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">Ticks</span>
+                    </div>
+                  </div>
+                  <Slider 
+                    value={[windowSize]} 
+                    onValueChange={(vals) => setWindowSize(vals[0])}
+                    min={5} 
+                    max={HISTORY_BUFFER_SIZE} 
+                    step={1}
+                    className="py-2"
+                  />
+                  <p className="text-[10px] text-muted-foreground/60 text-center italic">
+                    Adjusting range from 5 to {HISTORY_BUFFER_SIZE} ticks for probability calculation.
+                  </p>
+                </div>
+
+                <div className="space-y-6 relative pt-4">
                   <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60 text-center">
                     Last digit prediction
                   </h3>
@@ -289,7 +321,7 @@ export default function DigitFlowApp() {
                   <div className="grid grid-cols-5 gap-3 sm:gap-6 max-w-4xl mx-auto relative">
                     {mounted && latestDigit !== null && (
                       <div 
-                        className="absolute -top-8 z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"
+                        className="absolute z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"
                         style={{
                           left: `${(latestDigit % 5) * 20 + 10}%`,
                           top: latestDigit >= 5 ? '55%' : '-1.5rem',
@@ -319,8 +351,8 @@ export default function DigitFlowApp() {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <Card className="lg:col-span-2 border-border/50 bg-white shadow-sm">
+          <div className="grid grid-cols-1 gap-8">
+            <Card className="border-border/50 bg-white shadow-sm">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">
@@ -381,43 +413,6 @@ export default function DigitFlowApp() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border/50 bg-white flex flex-col shadow-sm">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">
-                  Analysis Window
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-8 pt-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-widest">Ticks Range</Label>
-                    <div className="flex items-center gap-2">
-                      <Input 
-                        type="number"
-                        value={windowSize}
-                        onChange={(e) => handleWindowSizeChange(parseInt(e.target.value))}
-                        min={5}
-                        max={HISTORY_BUFFER_SIZE}
-                        className="w-20 h-8 text-xs font-bold text-primary bg-primary/5 border-primary/20 text-center"
-                      />
-                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">Ticks</span>
-                    </div>
-                  </div>
-                  <Slider 
-                    value={[windowSize]} 
-                    onValueChange={(vals) => setWindowSize(vals[0])}
-                    min={5} 
-                    max={HISTORY_BUFFER_SIZE} 
-                    step={1}
-                    className="py-4"
-                  />
-                  <div className="text-[10px] text-muted-foreground/50 leading-relaxed italic">
-                    Adjusting the window changes the probability baseline for all analysis modules (Max: {HISTORY_BUFFER_SIZE}).
-                  </div>
                 </div>
               </CardContent>
             </Card>
