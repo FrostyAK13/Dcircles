@@ -270,10 +270,17 @@ export default function DigitFlowApp() {
 
   return (
     <SidebarProvider>
-      <div className="flex flex-col min-h-screen w-full bg-background text-foreground">
+      <div className="flex flex-col min-h-screen w-full bg-background text-foreground relative overflow-hidden">
+        {/* Background Watermark */}
+        <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 opacity-[0.03] select-none">
+          <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap">
+            FROSTYTOOLS
+          </span>
+        </div>
+
         <DashboardHeader status={status} />
         
-        <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-12 overflow-y-auto">
+        <main className="relative z-10 flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-12 overflow-y-auto">
           <Card className="border-none bg-transparent shadow-none">
             <CardContent className="px-0 pt-0">
               <div className="bg-card rounded-[2.5rem] p-6 sm:p-10 space-y-8 shadow-xl border border-border/50 relative overflow-hidden">
@@ -387,7 +394,7 @@ export default function DigitFlowApp() {
             </CardContent>
           </Card>
 
-          <div className="space-y-8">
+          <div className="space-y-8 relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <DetailedComparison 
                 title="Over / Under Strategy"
@@ -438,7 +445,7 @@ export default function DigitFlowApp() {
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em] pt-8 pb-4 border-t border-black/5">
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-medium uppercase tracking-[0.2em] pt-8 pb-4 border-t border-black/5">
             <span>&copy; {mounted ? new Date().getFullYear() : '2025'} FROSTYDBOT</span>
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1">
