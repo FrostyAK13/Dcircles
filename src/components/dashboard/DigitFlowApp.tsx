@@ -8,7 +8,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, BarChart2, Zap, Database } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -268,21 +269,74 @@ export default function DigitFlowApp() {
     setWindowSize(safeVal);
   };
 
+  const currentMarket = CONTINUOUS_INDICES.find(m => m.id === symbol) || CONTINUOUS_INDICES[0];
+
   return (
     <SidebarProvider>
       <div className="flex flex-col min-h-screen w-full bg-background text-foreground">
-        <DashboardHeader 
-          status={status} 
-          symbol={symbol} 
-          totalTicks={totalTicks} 
-          price={latestPrice}
-          onSymbolChange={setSymbol}
-        />
+        <DashboardHeader status={status} />
         
         <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-12 overflow-y-auto">
           <Card className="border-none bg-transparent shadow-none">
             <CardContent className="px-0 pt-0">
-              <div className="bg-card rounded-[2.5rem] p-6 sm:p-10 space-y-8 shadow-xl border border-border/50">
+              <div className="bg-card rounded-[2.5rem] p-6 sm:p-10 space-y-8 shadow-xl border border-border/50 relative overflow-hidden">
+                {/* Market Selector - Moved to left side inside card */}
+                {mounted && (
+                  <div className="absolute top-6 left-6 z-30">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div className="flex items-center gap-3 cursor-pointer group hover:bg-white/5 p-2 rounded-lg transition-colors border border-white/5 bg-secondary/20 backdrop-blur-sm shadow-sm">
+                          <div className="relative">
+                            <BarChart2 className="w-5 h-5 text-accent" />
+                            <div className="absolute -top-1.5 -right-1.5 bg-secondary text-[7px] font-bold px-1 rounded border border-white/10">
+                              {currentMarket.short}
+                            </div>
+                          </div>
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-1">
+                              <span className="text-[11px] font-bold text-foreground group-hover:text-primary transition-colors">
+                                {currentMarket.name}
+                              </span>
+                              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-transform group-data-[state=open]:rotate-180" />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                                <Database className="w-2.5 h-2.5" />
+                                {totalTicks} Ticks
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-72 p-0 bg-card border-white/10 shadow-2xl backdrop-blur-2xl" align="start">
+                        <div className="p-2 border-b border-white/5">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2">Continuous Indices</span>
+                        </div>
+                        <div className="max-h-[60vh] overflow-y-auto p-1">
+                          {CONTINUOUS_INDICES.map((market) => (
+                            <button
+                              key={market.id}
+                              onClick={() => setSymbol(market.id)}
+                              className={cn(
+                                "w-full flex items-center justify-between px-3 py-2.5 rounded-md text-left transition-colors",
+                                symbol === market.id ? "bg-primary/20 text-primary" : "hover:bg-white/5 text-foreground"
+                              )}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded bg-secondary flex items-center justify-center font-bold text-[10px]">
+                                  {market.short}
+                                </div>
+                                <span className="text-xs font-semibold">{market.name}</span>
+                              </div>
+                              {symbol === market.id && <Zap className="w-3.5 h-3.5 fill-primary text-primary" />}
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+
                 <LargePriceDisplay price={latestPrice} />
                 
                 <div className="space-y-6 relative pt-4">
