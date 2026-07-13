@@ -6,7 +6,6 @@ import { DashboardHeader } from './DashboardHeader';
 import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -263,13 +262,6 @@ export default function DigitFlowApp() {
     };
   }, [distribution, ticks, prices, windowSize, ouDigit, mdDigit]);
 
-  const chartData = useMemo(() => {
-    return distribution.map(d => ({
-      name: d.digit.toString(),
-      val: d.percentage
-    }));
-  }, [distribution]);
-
   const handleWindowSizeChange = (val: number) => {
     if (isNaN(val)) return;
     const safeVal = Math.min(HISTORY_BUFFER_SIZE, Math.max(5, val));
@@ -344,73 +336,6 @@ export default function DigitFlowApp() {
               </div>
             </CardContent>
           </Card>
-
-          <div className="grid grid-cols-1 gap-8">
-            <Card className="border-border/50 bg-white shadow-sm">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-bold uppercase tracking-widest text-muted-foreground/70">
-                    Distribution Overview
-                  </CardTitle>
-                  <div className="text-2xl font-bold text-primary">
-                    {windowSize} <span className="text-xs text-muted-foreground font-normal">Ticks</span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px] w-full pt-8">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData} margin={{ top: 20, right: 10, left: 10, bottom: 10 }}>
-                      <XAxis 
-                        dataKey="name" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fill: 'hsl(var(--muted-foreground))', fontSize: 12, fontWeight: 600}} 
-                      />
-                      <YAxis hide domain={[0, 'auto']} />
-                      <Tooltip 
-                        cursor={{fill: 'hsl(var(--secondary))', opacity: 0.1, radius: 4}}
-                        animationDuration={300}
-                        contentStyle={{backgroundColor: 'white', border: '1px solid hsl(var(--border))', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)'}}
-                        labelStyle={{color: 'hsl(var(--primary))', fontWeight: 'bold'}}
-                        formatter={(value: number) => [`${value}%`, 'Percentage']}
-                      />
-                      <Bar 
-                        dataKey="val" 
-                        radius={[6, 6, 0, 0]} 
-                        isAnimationActive={true}
-                        animationDuration={500}
-                        animationEasing="ease-out"
-                      >
-                        <LabelList 
-                          dataKey="val" 
-                          position="top" 
-                          formatter={(value: number) => `${value}%`}
-                          style={{ fill: 'hsl(var(--foreground))', fontSize: '11px', fontWeight: 'bold' }}
-                        />
-                        {chartData.map((entry, index) => {
-                          const digit = parseInt(entry.name);
-                          let fill = 'hsl(var(--secondary))';
-                          if (digit === stats.high) fill = 'rgb(16, 185, 129)'; 
-                          else if (digit === stats.secondHigh) fill = 'rgb(59, 130, 246)'; 
-                          else if (digit === stats.low) fill = 'rgb(244, 63, 94)'; 
-                          else if (digit === stats.secondLow) fill = 'rgb(249, 115, 22)'; 
-
-                          return (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={fill}
-                              className="transition-all duration-300"
-                            />
-                          );
-                        })}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
 
           <div className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
