@@ -63,9 +63,14 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
             <Activity className="w-6 h-6 text-primary" />
           </div>
         )}
-        <div>
+        <a 
+          href="https://frostydbot.site" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="transition-all hover:opacity-80 active:scale-95"
+        >
           <h1 className="text-xl font-bold tracking-tight text-primary uppercase">FROSTYDBOT</h1>
-        </div>
+        </a>
       </div>
 
       <div className="flex items-center gap-3">
