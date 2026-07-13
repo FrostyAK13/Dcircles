@@ -14,15 +14,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
   { id: 'R_10', name: 'Volatility 10 Index', short: '10' },
-  { id: '1HZ15V', name: 'Volatility 15 (1s) Index', short: '15 (1s)' },
   { id: '1HZ25V', name: 'Volatility 25 (1s) Index', short: '25 (1s)' },
   { id: 'R_25', name: 'Volatility 25 Index', short: '25' },
-  { id: '1HZ30V', name: 'Volatility 30 (1s) Index', short: '30 (1s)' },
   { id: '1HZ50V', name: 'Volatility 50 (1s) Index', short: '50 (1s)' },
   { id: 'R_50', name: 'Volatility 50 Index', short: '50' },
   { id: '1HZ75V', name: 'Volatility 75 (1s) Index', short: '75 (1s)' },
   { id: 'R_75', name: 'Volatility 75 Index', short: '75' },
-  { id: '1HZ90V', name: 'Volatility 90 (1s) Index', short: '90 (1s)' },
   { id: '1HZ100V', name: 'Volatility 100 (1s) Index', short: '100 (1s)' },
   { id: 'R_100', name: 'Volatility 100 Index', short: '100' },
   { id: 'JD10', name: 'Jump 10 Index', short: 'J10' },
@@ -280,7 +277,7 @@ export default function DigitFlowApp() {
           <Card className="border-none bg-transparent shadow-none">
             <CardContent className="px-0 pt-0">
               <div className="bg-card rounded-[2.5rem] p-6 sm:p-10 space-y-8 shadow-xl border border-border/50 relative overflow-hidden">
-                {/* Market Selector - Moved to left side inside card */}
+                {/* Market Selector */}
                 {mounted && (
                   <div className="absolute top-6 left-6 z-30">
                     <Popover>
