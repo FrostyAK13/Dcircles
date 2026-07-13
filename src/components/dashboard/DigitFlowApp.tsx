@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -6,12 +5,11 @@ import { useDigitAnalysis, HISTORY_BUFFER_SIZE } from '@/hooks/use-digit-analysi
 import { DashboardHeader } from './DashboardHeader';
 import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -66,6 +64,9 @@ function DetailedComparison({
   title, label1, label2, val1, val2, count1, count2, pattern,
   showDigitSelector, selectedDigit, onDigitSelect 
 }: DetailedComparisonProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const displayedPattern = isExpanded ? pattern : pattern.slice(-10);
+
   return (
     <Card className="border-border/50 bg-white shadow-md overflow-hidden transition-all hover:shadow-lg">
       <CardHeader className="pb-4 border-b border-black/5 bg-secondary/30">
@@ -109,13 +110,25 @@ function DetailedComparison({
         </div>
 
         <div className="space-y-4">
-          <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold block">Recent History Pattern</span>
-          <div className="flex flex-wrap gap-2 justify-center p-4 bg-secondary/20 rounded-2xl">
-            {pattern.map((p, i) => (
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold block">Recent History Pattern</span>
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1 hover:opacity-70 transition-opacity"
+            >
+              {isExpanded ? (
+                <>Less <ChevronUp className="w-3 h-3" /></>
+              ) : (
+                <>More <ChevronDown className="w-3 h-3" /></>
+              )}
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2 justify-center p-4 bg-secondary/20 rounded-2xl min-h-[4.5rem] transition-all duration-300">
+            {displayedPattern.map((p, i) => (
               <div 
                 key={i} 
                 className={cn(
-                  "w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shadow-sm transition-all duration-300",
+                  "w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shadow-sm transition-all duration-300 animate-in fade-in zoom-in-95",
                   p.color
                 )}
               >
@@ -177,8 +190,6 @@ export default function DigitFlowApp() {
     status 
   } = useDigitAnalysis(symbol);
 
-  const [selectedDigit, setSelectedDigit] = useState<number | null>(null);
-
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -201,8 +212,8 @@ export default function DigitFlowApp() {
     const total = windowTicks.length || 1;
     const totalMovements = Math.max(windowPrices.length - 1, 1);
 
-    const lastTicks = ticks.slice(-20);
-    const lastPrices = prices.slice(-21);
+    const lastTicks = ticks.slice(-25);
+    const lastPrices = prices.slice(-26);
 
     const patterns = {
       eo: lastTicks.map(d => ({
@@ -325,7 +336,7 @@ export default function DigitFlowApp() {
                         isLow={d.digit === stats.low}
                         isSecondLow={d.digit === stats.secondLow}
                         isLatest={d.digit === latestDigit}
-                        onClick={() => setSelectedDigit(d.digit === selectedDigit ? null : d.digit)}
+                        onClick={() => {}}
                       />
                     ))}
                   </div>
