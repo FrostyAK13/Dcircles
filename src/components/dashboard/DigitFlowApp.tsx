@@ -174,6 +174,7 @@ export default function DigitFlowApp() {
   const [ouDigit, setOuDigit] = useState(4);
   const [mdDigit, setMdDigit] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { 
     distribution, 
@@ -287,7 +288,7 @@ export default function DigitFlowApp() {
                 {/* Market Selector & Dynamic UI */}
                 {mounted && (
                   <div className="absolute top-6 left-6 z-30">
-                    <Popover>
+                    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                       <PopoverTrigger asChild>
                         <div className="flex items-center gap-3 cursor-pointer group hover:bg-white/5 p-2 rounded-lg transition-colors border border-white/5 bg-secondary/20 backdrop-blur-sm shadow-sm">
                           <div className="relative">
@@ -320,7 +321,10 @@ export default function DigitFlowApp() {
                           {CONTINUOUS_INDICES.map((market) => (
                             <button
                               key={market.id}
-                              onClick={() => setSymbol(market.id)}
+                              onClick={() => {
+                                setSymbol(market.id);
+                                setIsPopoverOpen(false);
+                              }}
                               className={cn(
                                 "w-full flex items-center justify-between px-3 py-2.5 rounded-md text-left transition-colors",
                                 symbol === market.id ? "bg-primary/20 text-primary" : "hover:bg-white/5 text-foreground"
