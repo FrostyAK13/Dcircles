@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react";
@@ -80,11 +79,18 @@ export function DashboardHeader({ status, symbol, totalTicks, price, onSymbolCha
                     </span>
                     <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-transform group-data-[state=open]:rotate-180" />
                   </div>
-                  {price !== null && (
-                    <span className="text-xs font-medium text-primary tabular-nums">
-                      {price.toFixed(2)}
+                  <div className="flex items-center gap-2">
+                    {price !== null && (
+                      <span className="text-xs font-medium text-primary tabular-nums">
+                        {price.toFixed(2)}
+                      </span>
+                    )}
+                    <div className="h-3 w-px bg-border" />
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                      <Database className="w-2.5 h-2.5" />
+                      {totalTicks} Ticks
                     </span>
-                  )}
+                  </div>
                 </div>
               </div>
             </PopoverTrigger>
@@ -138,11 +144,6 @@ export function DashboardHeader({ status, symbol, totalTicks, price, onSymbolCha
         <Badge variant="outline" className={cn("px-3 py-1 flex items-center gap-2 font-medium capitalize", statusColors[status])}>
           <Signal className="w-3.5 h-3.5" />
           {status}
-        </Badge>
-        
-        <Badge variant="secondary" className="px-3 py-1 flex items-center gap-2 bg-primary/10 text-primary border-transparent">
-          <Database className="w-3.5 h-3.5 text-primary" />
-          {totalTicks} <span className="opacity-60 ml-1">Ticks</span>
         </Badge>
       </div>
     </div>
