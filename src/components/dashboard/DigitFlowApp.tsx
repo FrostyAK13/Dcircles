@@ -67,7 +67,7 @@ function DetailedComparison({
   const displayedPattern = isExpanded ? pattern : pattern.slice(-10);
 
   return (
-    <Card className="border-border/50 bg-white shadow-md overflow-hidden transition-all hover:shadow-lg">
+    <Card className="border-border/50 bg-card shadow-md overflow-hidden transition-all hover:shadow-lg">
       <CardHeader className="pb-4 border-b border-black/5 bg-secondary/30">
         <CardTitle className="text-sm font-bold uppercase tracking-widest text-primary">
           {title}
@@ -86,7 +86,7 @@ function DetailedComparison({
                     "w-9 h-9 rounded-xl text-sm font-bold transition-all flex items-center justify-center",
                     selectedDigit === num 
                       ? "bg-primary text-primary-foreground shadow-lg scale-110" 
-                      : "bg-white text-muted-foreground hover:bg-primary/10 border border-border/50"
+                      : "bg-background text-muted-foreground hover:bg-primary/10 border border-border/50"
                   )}
                 >
                   {num}
@@ -282,7 +282,7 @@ export default function DigitFlowApp() {
         <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-12 overflow-y-auto">
           <Card className="border-none bg-transparent shadow-none">
             <CardContent className="px-0 pt-0">
-              <div className="bg-white rounded-[2.5rem] p-6 sm:p-10 space-y-8 shadow-xl border border-border/50">
+              <div className="bg-card rounded-[2.5rem] p-6 sm:p-10 space-y-8 shadow-xl border border-border/50">
                 <LargePriceDisplay price={latestPrice} />
                 
                 <div className="space-y-6 relative pt-4">

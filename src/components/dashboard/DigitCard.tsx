@@ -37,7 +37,7 @@ export function DigitCard({
           isSecondHigh ? "bg-blue-500 border-blue-500 shadow-md" :
           isLow ? "bg-rose-500 border-rose-500 shadow-md" : 
           isSecondLow ? "bg-orange-500 border-orange-500 shadow-md" :
-          "bg-white border-border/50 hover:border-primary/50 shadow-sm",
+          "bg-background border-border shadow-sm hover:border-primary/50",
           isLatest && !isHigh && !isSecondHigh && !isLow && !isSecondLow && "ring-2 ring-primary ring-offset-2"
         )}
       >
