@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -5,13 +6,12 @@ import { useDigitAnalysis, HISTORY_BUFFER_SIZE } from '@/hooks/use-digit-analysi
 import { DashboardHeader } from './DashboardHeader';
 import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { ChevronDown, Settings2 } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -260,6 +260,7 @@ export default function DigitFlowApp() {
   }, [distribution]);
 
   const handleWindowSizeChange = (val: number) => {
+    if (isNaN(val)) return;
     const safeVal = Math.min(HISTORY_BUFFER_SIZE, Math.max(5, val));
     setWindowSize(safeVal);
   };
@@ -281,42 +282,24 @@ export default function DigitFlowApp() {
               <div className="bg-white rounded-[2.5rem] p-6 sm:p-10 space-y-8 shadow-xl border border-border/50">
                 <LargePriceDisplay price={latestPrice} />
                 
-                {/* Integrated Analysis Window Controls */}
-                <div className="max-w-xl mx-auto p-6 rounded-3xl bg-secondary/30 border border-border/50 space-y-4">
-                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Settings2 className="w-4 h-4 text-primary" />
-                      <Label className="text-xs font-bold uppercase text-muted-foreground tracking-widest">Analysis Range</Label>
-                    </div>
-                    <div className="flex items-center gap-2">
+                <div className="space-y-6 relative pt-4">
+                  <div className="flex flex-col items-center gap-3 mb-8">
+                    <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60">
+                      Last digit prediction
+                    </h3>
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/50 border border-black/5 shadow-inner">
+                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">Analyze:</span>
                       <Input 
                         type="number"
                         value={windowSize}
                         onChange={(e) => handleWindowSizeChange(parseInt(e.target.value))}
                         min={5}
                         max={HISTORY_BUFFER_SIZE}
-                        className="w-20 h-8 text-xs font-bold text-primary bg-white border-primary/20 text-center rounded-lg"
+                        className="w-16 h-6 p-0 text-[11px] font-black text-primary bg-transparent border-none text-center focus-visible:ring-0 tabular-nums"
                       />
                       <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">Ticks</span>
                     </div>
                   </div>
-                  <Slider 
-                    value={[windowSize]} 
-                    onValueChange={(vals) => setWindowSize(vals[0])}
-                    min={5} 
-                    max={HISTORY_BUFFER_SIZE} 
-                    step={1}
-                    className="py-2"
-                  />
-                  <p className="text-[10px] text-muted-foreground/60 text-center italic">
-                    Adjusting range from 5 to {HISTORY_BUFFER_SIZE} ticks for probability calculation.
-                  </p>
-                </div>
-
-                <div className="space-y-6 relative pt-4">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60 text-center">
-                    Last digit prediction
-                  </h3>
                   
                   <div className="grid grid-cols-5 gap-3 sm:gap-6 max-w-4xl mx-auto relative">
                     {mounted && latestDigit !== null && (
