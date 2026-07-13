@@ -7,6 +7,7 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip, LabelList } from 'recharts';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
@@ -258,6 +259,11 @@ export default function DigitFlowApp() {
     }));
   }, [distribution]);
 
+  const handleWindowSizeChange = (val: number) => {
+    const safeVal = Math.min(HISTORY_BUFFER_SIZE, Math.max(5, val));
+    setWindowSize(safeVal);
+  };
+
   return (
     <SidebarProvider>
       <div className="flex flex-col min-h-screen w-full bg-background text-foreground">
@@ -389,18 +395,28 @@ export default function DigitFlowApp() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-widest">Ticks Range</Label>
-                    <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">1 - {HISTORY_BUFFER_SIZE}</span>
+                    <div className="flex items-center gap-2">
+                      <Input 
+                        type="number"
+                        value={windowSize}
+                        onChange={(e) => handleWindowSizeChange(parseInt(e.target.value))}
+                        min={5}
+                        max={HISTORY_BUFFER_SIZE}
+                        className="w-20 h-8 text-xs font-bold text-primary bg-primary/5 border-primary/20 text-center"
+                      />
+                      <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">Ticks</span>
+                    </div>
                   </div>
                   <Slider 
                     value={[windowSize]} 
                     onValueChange={(vals) => setWindowSize(vals[0])}
-                    min={1} 
+                    min={5} 
                     max={HISTORY_BUFFER_SIZE} 
                     step={1}
                     className="py-4"
                   />
                   <div className="text-[10px] text-muted-foreground/50 leading-relaxed italic">
-                    Adjusting the window changes the probability baseline for all analysis modules.
+                    Adjusting the window changes the probability baseline for all analysis modules (Max: {HISTORY_BUFFER_SIZE}).
                   </div>
                 </div>
               </CardContent>

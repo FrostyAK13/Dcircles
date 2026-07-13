@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { DerivWS, type Tick, type ConnectionStatus } from '@/app/lib/deriv-ws';
 
-export const HISTORY_BUFFER_SIZE = 1000;
+export const HISTORY_BUFFER_SIZE = 5000;
 
 export function useDigitAnalysis(symbol: string = 'R_100') {
   const [ticks, setTicks] = useState<number[]>([]);
