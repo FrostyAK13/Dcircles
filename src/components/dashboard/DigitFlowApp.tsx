@@ -277,7 +277,7 @@ export default function DigitFlowApp() {
           <Card className="border-none bg-transparent shadow-none">
             <CardContent className="px-0 pt-0">
               <div className="bg-card rounded-[2.5rem] p-6 sm:p-10 space-y-8 shadow-xl border border-border/50 relative overflow-hidden">
-                {/* Market Selector */}
+                {/* Market Selector & Dynamic UI */}
                 {mounted && (
                   <div className="absolute top-6 left-6 z-30">
                     <Popover>
@@ -338,9 +338,7 @@ export default function DigitFlowApp() {
                 
                 <div className="space-y-6 relative pt-4">
                   <div className="flex flex-col items-center gap-3 mb-8">
-                    <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60">
-                      Last digit prediction
-                    </h3>
+                    {/* Tick Config Input */}
                     <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/50 border border-black/5 shadow-inner">
                       <span className="text-[10px] font-bold text-muted-foreground/60 uppercase">Analyze:</span>
                       <Input 
@@ -356,6 +354,7 @@ export default function DigitFlowApp() {
                   </div>
                   
                   <div className="grid grid-cols-5 gap-3 sm:gap-6 max-w-4xl mx-auto relative">
+                    {/* Real-time Indicator Arrow */}
                     {mounted && latestDigit !== null && (
                       <div 
                         className="absolute z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"
