@@ -6,8 +6,8 @@
   :root {
     --background: 210 40% 98%;
     --foreground: 222 47% 11%;
-    --card: 222 47% 15%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
     --primary: 199 89% 48%;
@@ -23,19 +23,19 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 199 89% 48%;
-    --radius: 0.5rem;
+    --radius: 1rem;
   }
 
   .dark {
-    --background: 222 47% 6%;
+    --background: 222 47% 4%;
     --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
+    --card: 222 47% 8%;
     --card-foreground: 210 40% 98%;
-    --popover: 222 47% 6%;
+    --popover: 222 47% 8%;
     --popover-foreground: 210 40% 98%;
     --primary: 199 89% 48%;
     --primary-foreground: 222 47% 6%;
-    --secondary: 222 47% 15%;
+    --secondary: 222 47% 12%;
     --secondary-foreground: 210 40% 98%;
     --muted: 222 47% 15%;
     --muted-foreground: 215 20.2% 65.1%;
@@ -43,8 +43,8 @@
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 222 47% 15%;
-    --input: 222 47% 15%;
+    --border: 222 47% 12%;
+    --input: 222 47% 12%;
     --ring: 199 89% 48%;
   }
 }
@@ -67,15 +67,11 @@
 }
 
 .icy-glow {
-  box-shadow: 0 0 20px rgba(0, 174, 239, 0.2);
-}
-
-.card-navy {
-  @apply bg-[#0e1e2c] text-white border-none shadow-xl;
+  @apply shadow-[0_0_20px_rgba(0,174,239,0.15)] dark:shadow-[0_0_30px_rgba(0,174,239,0.25)];
 }
 
 .digit-card-gradient {
-  background: linear-gradient(135deg, hsl(var(--card)) 0%, #1a2a3a 100%);
+  background: linear-gradient(135deg, hsl(var(--card)) 0%, rgba(0, 174, 239, 0.05) 100%);
 }
 
 .digit-highlight-selected {

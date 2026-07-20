@@ -36,8 +36,8 @@ function LargePriceDisplay({ price }: { price: number | null }) {
 
   return (
     <div className="flex flex-col items-center justify-center py-4">
-      <div className="text-5xl sm:text-7xl font-black tracking-tighter flex items-baseline tabular-nums text-white">
-        <span className="drop-shadow-[0_0_15px_rgba(0,174,239,0.5)]">{priceStr}</span>
+      <div className="text-5xl sm:text-7xl font-black tracking-tighter flex items-baseline tabular-nums text-foreground">
+        <span className="drop-shadow-[0_0_15px_rgba(0,174,239,0.3)]">{priceStr}</span>
       </div>
     </div>
   );
@@ -65,9 +65,9 @@ function DetailedComparison({
   const displayedPattern = isExpanded ? pattern : pattern.slice(-10);
 
   return (
-    <Card className="border-none bg-[#0e1e2c] text-white shadow-2xl icy-glow overflow-hidden transition-all hover:scale-[1.01]">
-      <CardHeader className="pb-4 border-b border-white/5 bg-white/5">
-        <CardTitle className="text-xs font-bold uppercase tracking-widest text-primary">
+    <Card className="border border-border/50 bg-card text-card-foreground shadow-xl icy-glow overflow-hidden transition-all hover:scale-[1.01]">
+      <CardHeader className="pb-4 border-b border-border/40 bg-muted/20">
+        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
           {title}
         </CardTitle>
       </CardHeader>
@@ -75,7 +75,7 @@ function DetailedComparison({
         {showDigitSelector && (
           <div className="space-y-3">
             <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold block">Selection Mode</span>
-            <div className="flex flex-wrap gap-1 justify-center bg-black/20 p-2 rounded-xl">
+            <div className="flex flex-wrap gap-1 justify-center bg-muted/40 p-2 rounded-xl">
               {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                 <button
                   key={num}
@@ -84,7 +84,7 @@ function DetailedComparison({
                     "w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center",
                     selectedDigit === num 
                       ? "bg-primary text-white shadow-[0_0_15px_rgba(0,174,239,0.5)] scale-110" 
-                      : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                      : "bg-background text-muted-foreground hover:bg-primary/10"
                   )}
                 >
                   {num}
@@ -99,7 +99,7 @@ function DetailedComparison({
             <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label1}</span>
             <div className="text-3xl font-black text-primary tabular-nums">{count1}</div>
           </div>
-          <div className="h-12 w-px bg-white/10" />
+          <div className="h-12 w-px bg-border/50" />
           <div className="space-y-1">
             <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label2}</span>
             <div className="text-3xl font-black text-rose-500 tabular-nums">{count2}</div>
@@ -120,7 +120,7 @@ function DetailedComparison({
               )}
             </button>
           </div>
-          <div className="flex flex-wrap gap-1.5 justify-center p-3 bg-black/20 rounded-xl min-h-[3.5rem] transition-all duration-300">
+          <div className="flex flex-wrap gap-1.5 justify-center p-3 bg-muted/30 rounded-xl min-h-[3.5rem] transition-all duration-300">
             {displayedPattern.map((p, i) => (
               <div 
                 key={i} 
@@ -143,7 +143,7 @@ function DetailedComparison({
                 <span className="text-primary">{label1}</span>
                 <span className="text-primary">{val1}%</span>
               </div>
-              <div className="h-6 w-full bg-black/30 rounded-full overflow-hidden p-0.5">
+              <div className="h-6 w-full bg-muted/40 rounded-full overflow-hidden p-0.5">
                 <div 
                   className="h-full bg-primary rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(0,174,239,0.3)]" 
                   style={{ width: `${val1}%` }} 
@@ -155,7 +155,7 @@ function DetailedComparison({
                 <span className="text-rose-500">{label2}</span>
                 <span className="text-rose-500">{val2}%</span>
               </div>
-              <div className="h-6 w-full bg-black/30 rounded-full overflow-hidden p-0.5">
+              <div className="h-6 w-full bg-muted/40 rounded-full overflow-hidden p-0.5">
                 <div 
                   className="h-full bg-rose-500 rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(244,63,94,0.3)]" 
                   style={{ width: `${val2}%` }} 
@@ -220,7 +220,7 @@ export default function DigitFlowApp() {
       })),
       ou: lastTicks.map(d => ({
         label: d > ouDigit ? 'O' : d < ouDigit ? 'U' : d.toString(),
-        color: d === ouDigit ? 'bg-white/20 text-white' : (d > ouDigit ? 'bg-primary text-white' : 'bg-rose-500 text-white')
+        color: d === ouDigit ? 'bg-muted/40 text-muted-foreground' : (d > ouDigit ? 'bg-primary text-white' : 'bg-rose-500 text-white')
       })),
       rf: lastPrices.slice(1).map((p, i) => ({
         label: p > lastPrices[i] ? 'R' : 'F',
@@ -282,14 +282,14 @@ export default function DigitFlowApp() {
         <DashboardHeader status={status} />
         
         <main className="relative z-10 flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 overflow-y-auto">
-          <Card className="border-none bg-[#0e1e2c] rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
+          <Card className="border-none bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
             <CardContent className="p-8 sm:p-12 space-y-8">
               {/* Market Selector Integrated */}
               {mounted && (
                 <div className="absolute top-8 left-8 z-30">
                   <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                     <PopoverTrigger asChild>
-                      <div className="flex items-center gap-3 cursor-pointer group hover:bg-white/5 p-2 rounded-xl transition-colors border border-white/5 bg-white/5 backdrop-blur-sm shadow-sm">
+                      <div className="flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
                         <div className="relative">
                           <BarChart2 className="w-5 h-5 text-primary" />
                           <div className="absolute -top-1.5 -right-1.5 bg-primary text-[7px] font-bold px-1 rounded text-white">
@@ -298,7 +298,7 @@ export default function DigitFlowApp() {
                         </div>
                         <div className="flex flex-col">
                           <div className="flex items-center gap-1">
-                            <span className="text-[11px] font-bold text-white group-hover:text-primary transition-colors">
+                            <span className="text-[11px] font-bold text-foreground group-hover:text-primary transition-colors">
                               {currentMarket.name}
                             </span>
                             <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-transform group-data-[state=open]:rotate-180" />
@@ -312,8 +312,8 @@ export default function DigitFlowApp() {
                         </div>
                       </div>
                     </PopoverTrigger>
-                    <PopoverContent className="w-72 p-0 bg-[#0e1e2c] border-white/10 shadow-2xl backdrop-blur-2xl text-white" align="start">
-                      <div className="p-3 border-b border-white/5">
+                    <PopoverContent className="w-72 p-0 bg-card border-border/50 shadow-2xl backdrop-blur-2xl text-card-foreground" align="start">
+                      <div className="p-3 border-b border-border/40">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2">Continuous Indices</span>
                       </div>
                       <div className="max-h-[50vh] overflow-y-auto p-1">
@@ -326,11 +326,11 @@ export default function DigitFlowApp() {
                             }}
                             className={cn(
                               "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors",
-                              symbol === market.id ? "bg-primary/20 text-primary" : "hover:bg-white/5 text-white"
+                              symbol === market.id ? "bg-primary/10 text-primary" : "hover:bg-muted/40 text-foreground"
                             )}
                           >
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center font-bold text-[10px]">
+                              <div className="w-8 h-8 rounded bg-muted/40 flex items-center justify-center font-bold text-[10px]">
                                 {market.short}
                               </div>
                               <span className="text-xs font-semibold">{market.name}</span>
@@ -348,7 +348,7 @@ export default function DigitFlowApp() {
               
               <div className="space-y-8 relative pt-4">
                 <div className="flex flex-col items-center gap-3">
-                  <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/5 shadow-inner">
+                  <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-muted/30 border border-border/40 shadow-inner">
                     <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Analyze Window</span>
                     <Input 
                       type="number"

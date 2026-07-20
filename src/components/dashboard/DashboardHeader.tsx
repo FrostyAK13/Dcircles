@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { Activity, Signal, MessageCircle, Moon, Sun } from "lucide-react";
+import { MessageCircle, Moon, Sun } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { type ConnectionStatus } from "@/app/lib/deriv-ws";
@@ -42,7 +42,7 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
   };
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-white dark:bg-[#0e1e2c] sticky top-0 z-50 transition-colors duration-300">
+    <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
       <div className="flex items-center gap-4">
         {logo && (
           <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-primary/20 icy-glow">
@@ -62,7 +62,7 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
           className="transition-all hover:opacity-80 active:scale-95 group"
         >
           <h1 className="text-xl font-black tracking-tighter text-primary uppercase italic">
-            FROSTY<span className="text-foreground dark:text-white group-hover:text-primary transition-colors">DBOT</span>
+            FROSTY<span className="text-foreground group-hover:text-primary transition-colors">DBOT</span>
           </h1>
         </a>
       </div>

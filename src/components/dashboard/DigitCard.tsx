@@ -37,13 +37,13 @@ export function DigitCard({
           isSecondHigh ? "bg-primary/60 border-primary/60" :
           isLow ? "bg-rose-500 border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.4)]" : 
           isSecondLow ? "bg-rose-500/60 border-rose-500/60" :
-          "bg-white/5 border-white/10 shadow-sm hover:border-primary/50",
-          isLatest && !isHigh && !isSecondHigh && !isLow && !isSecondLow && "ring-2 ring-primary ring-offset-4 ring-offset-[#0e1e2c]"
+          "bg-muted/40 border-border shadow-sm hover:border-primary/50",
+          isLatest && !isHigh && !isSecondHigh && !isLow && !isSecondLow && "ring-2 ring-primary ring-offset-4 ring-offset-card"
         )}
       >
         <span className={cn(
           "text-2xl sm:text-4xl font-black tracking-tighter transition-colors duration-300",
-          (isHigh || isSecondHigh || isLow || isSecondLow) ? "text-white" : "text-white/90"
+          (isHigh || isSecondHigh || isLow || isSecondLow) ? "text-white" : "text-foreground/90"
         )}>
           {digit}
         </span>
