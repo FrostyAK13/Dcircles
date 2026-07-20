@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react";
-import { MessageCircle, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { type ConnectionStatus } from "@/app/lib/deriv-ws";
@@ -68,18 +68,8 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <a 
-          href="https://wa.me/254115335502" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all hover:scale-105 shadow-lg shadow-emerald-500/20"
-        >
-          <MessageCircle className="w-3.5 h-3.5" />
-          WhatsApp
-        </a>
-
         {mounted && (
-          <div className="flex items-center gap-2 border-l border-border pl-4">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
