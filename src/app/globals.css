@@ -4,48 +4,48 @@
 
 @layer base {
   :root {
-    --background: 45 30% 98%;
-    --foreground: 45 60% 10%;
-    --card: 45 25% 95%;
-    --card-foreground: 45 60% 10%;
-    --popover: 45 30% 98%;
-    --popover-foreground: 45 60% 10%;
-    --primary: 45 92% 48%;
-    --primary-foreground: 45 100% 5%;
-    --secondary: 45 20% 90%;
-    --secondary-foreground: 45 60% 15%;
-    --muted: 45 20% 85%;
-    --muted-foreground: 45 20% 40%;
-    --accent: 35 90% 50%;
-    --accent-foreground: 45 100% 5%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 222 47% 15%;
+    --card-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 90%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 45 20% 85%;
-    --input: 45 20% 85%;
-    --ring: 45 92% 48%;
-    --radius: 0.75rem;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 199 89% 48%;
+    --radius: 0.5rem;
   }
 
   .dark {
-    --background: 45 50% 5%;
-    --foreground: 45 30% 98%;
-    --card: 45 40% 8%;
-    --card-foreground: 45 30% 98%;
-    --popover: 45 50% 6%;
-    --popover-foreground: 45 30% 98%;
-    --primary: 45 92% 55%;
-    --primary-foreground: 45 100% 5%;
-    --secondary: 45 30% 12%;
-    --secondary-foreground: 45 30% 90%;
-    --muted: 45 30% 15%;
-    --muted-foreground: 45 20% 60%;
-    --accent: 35 90% 55%;
-    --accent-foreground: 45 100% 5%;
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 6%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 222 47% 6%;
+    --secondary: 222 47% 15%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 47% 15%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 45 30% 18%;
-    --input: 45 30% 18%;
-    --ring: 45 92% 55%;
+    --border: 222 47% 15%;
+    --input: 222 47% 15%;
+    --ring: 199 89% 48%;
   }
 }
 
@@ -55,6 +55,10 @@
   }
   body {
     @apply bg-background text-foreground font-body antialiased selection:bg-primary/30 transition-colors duration-300;
+    background-image: 
+      linear-gradient(to right, rgba(0, 174, 239, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 174, 239, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
   }
 }
 
@@ -62,22 +66,18 @@
   @apply bg-white/70 dark:bg-black/40 backdrop-blur-md border border-black/5 dark:border-white/5;
 }
 
-.golden-glow {
-  box-shadow: 0 10px 30px rgba(217, 163, 4, 0.15);
+.icy-glow {
+  box-shadow: 0 0 20px rgba(0, 174, 239, 0.2);
+}
+
+.card-navy {
+  @apply bg-[#0e1e2c] text-white border-none shadow-xl;
 }
 
 .digit-card-gradient {
-  background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--secondary)) 100%);
-}
-
-.digit-highlight-high {
-  @apply ring-2 ring-primary/50 shadow-[0_0_15px_rgba(217,163,4,0.1)];
-}
-
-.digit-highlight-low {
-  @apply ring-2 ring-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.1)];
+  background: linear-gradient(135deg, hsl(var(--card)) 0%, #1a2a3a 100%);
 }
 
 .digit-highlight-selected {
-  @apply ring-2 ring-primary shadow-[0_0_20px_rgba(217,163,4,0.2)];
+  @apply ring-2 ring-primary shadow-[0_0_20px_rgba(0,174,239,0.4)];
 }
