@@ -59,10 +59,10 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
           href="https://frostydbot.site" 
           target="_blank" 
           rel="noopener noreferrer" 
-          className="transition-all hover:opacity-80 active:scale-95 group"
+          className="transition-all hover:opacity-90 active:scale-95 group"
         >
-          <h1 className="text-xl font-black tracking-tighter text-primary uppercase italic shiny-effect px-2 py-0.5 rounded-lg">
-            FROSTY<span className="text-foreground group-hover:text-primary transition-colors">DBOT</span>
+          <h1 className="text-xl font-black tracking-tighter text-[hsl(var(--brand-blue))] uppercase italic shiny-effect px-2 py-0.5 rounded-lg">
+            FROSTY<span className="text-foreground group-hover:text-[hsl(var(--brand-blue))] transition-colors">DBOT</span>
           </h1>
         </a>
       </div>
