@@ -491,16 +491,6 @@ export default function DigitFlowApp() {
               </Card>
             </TabsContent>
           </Tabs>
-
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-bold uppercase tracking-[0.3em] py-8 border-t border-primary/10">
-            <span className="hover:text-primary transition-colors cursor-default">&copy; {mounted ? new Date().getFullYear() : '2025'} FROSTYDBOT</span>
-            <div className="flex items-center gap-6">
-              <span className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(62,59,155,0.6)]" />
-                Live Network Active
-              </span>
-            </div>
-          </div>
         </main>
       </div>
     </SidebarProvider>
