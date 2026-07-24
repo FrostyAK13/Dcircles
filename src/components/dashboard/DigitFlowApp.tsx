@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -9,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export const CONTINUOUS_INDICES = [
@@ -288,17 +289,24 @@ export default function DigitFlowApp() {
               <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto">
                 <TabsTrigger 
                   value="dashboard" 
-                  className="rounded-xl px-8 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                  className="rounded-xl px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
                 >
                   <BarChart2 className="w-3.5 h-3.5 mr-2" />
                   Analysis
                 </TabsTrigger>
                 <TabsTrigger 
                   value="scanner" 
-                  className="rounded-xl px-8 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                  className="rounded-xl px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
                 >
                   <ExternalLink className="w-3.5 h-3.5 mr-2" />
-                  Market Scanner
+                  Scanner
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="digits" 
+                  className="rounded-xl px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5 mr-2" />
+                  Digits View
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -486,6 +494,30 @@ export default function DigitFlowApp() {
                     src="https://tracktool.netlify.app/signals" 
                     className="absolute inset-0 w-full h-full border-none"
                     title="Market Scanner"
+                  />
+                </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="digits" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
+              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
+                <CardHeader className="border-b border-border/40 bg-muted/20 py-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                      <LayoutGrid className="w-4 h-4" />
+                      Advanced Digits View
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Active Monitoring</span>
+                    </div>
+                  </div>
+                </CardHeader>
+                <div className="flex-1 bg-black/5 dark:bg-white/5 relative">
+                  <iframe 
+                    src="https://tracktool.netlify.app/digitshome" 
+                    className="absolute inset-0 w-full h-full border-none"
+                    title="Digits View"
                   />
                 </div>
               </Card>
