@@ -68,7 +68,7 @@ function DetailedComparison({
   return (
     <Card className="border border-border/50 bg-card text-card-foreground shadow-xl icy-glow overflow-hidden transition-all hover:scale-[1.01]">
       <CardHeader className="pb-4 border-b border-border/40 bg-muted/20">
-        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--brand-blue))]">
           {title}
         </CardTitle>
       </CardHeader>
@@ -275,7 +275,7 @@ export default function DigitFlowApp() {
       <div className="flex flex-col min-h-screen w-full bg-background text-foreground relative overflow-hidden">
         {/* Background Watermark */}
         <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 opacity-[0.03] select-none">
-          <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-primary">
+          <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-[hsl(var(--brand-blue))]">
             FROSTYTOOLS
           </span>
         </div>

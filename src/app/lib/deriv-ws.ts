@@ -1,6 +1,7 @@
 
 export const APP_ID = '84799';
-export const DERIV_WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`;
+// Using the recommended public trading endpoint for better stability
+export const DERIV_WS_URL = `wss://api.derivws.com/trading/v1/options/ws/public?app_id=${APP_ID}`;
 
 export type Tick = {
   quote: number;
@@ -61,12 +62,9 @@ export class DerivWS {
       this.ws.onmessage = (event) => {
         const response: TickResponse = JSON.parse(event.data);
         
-        // Handle substantial errors only
         if (response.error && Object.keys(response.error).length > 0) {
-          // Surface actual errors to console for debugging
           console.error('Deriv API Error:', response.error.message || response.error.code);
           
-          // Update UI status on critical failures
           if (response.error.code === 'AppIdInvalid' || 
               response.error.code === 'PermissionDenied' || 
               response.error.code === 'InvalidSymbol') {
@@ -85,7 +83,6 @@ export class DerivWS {
       };
 
       this.ws.onclose = () => {
-        // Only trigger disconnected if we weren't in an error state
         this.onStatusCallback('disconnected');
         this.stopPing();
         this.attemptReconnect();
@@ -118,19 +115,12 @@ export class DerivWS {
 
   private subscribeToTicks() {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      // Fetch history first
+      // Streamlined request: Fetch history and subscribe in one call as per guidelines
       this.ws.send(JSON.stringify({
         ticks_history: this.symbol,
-        adjust_start_time: 1,
+        style: 'ticks',
         count: 1000,
         end: 'latest',
-        start: 1,
-        style: 'ticks'
-      }));
-
-      // Then subscribe to live updates
-      this.ws.send(JSON.stringify({
-        ticks: this.symbol,
         subscribe: 1
       }));
     }
@@ -139,7 +129,6 @@ export class DerivWS {
   private attemptReconnect() {
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
     this.reconnectTimeout = setTimeout(() => {
-      // Reconnect only if we aren't explicitly disconnected
       if (this.ws === null) return;
       this.connect();
     }, 5000);
