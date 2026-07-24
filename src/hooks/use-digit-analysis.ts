@@ -5,7 +5,7 @@ import { DerivWS, type Tick, type ConnectionStatus } from '@/app/lib/deriv-ws';
 
 export const HISTORY_BUFFER_SIZE = 5000;
 
-export function useDigitAnalysis(symbol: string = '1HZ100V') {
+export function useDigitAnalysis(symbol: string = 'R_10') {
   const [ticks, setTicks] = useState<number[]>([]);
   const [prices, setPrices] = useState<number[]>([]);
   const [latestDigit, setLatestDigit] = useState<number | null>(null);
