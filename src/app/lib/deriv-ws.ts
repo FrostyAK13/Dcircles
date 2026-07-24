@@ -62,11 +62,15 @@ export class DerivWS {
         
         // Handle substantial errors only
         if (response.error && Object.keys(response.error).length > 0) {
-          // If it's a critical error like invalid AppID, update status
-          if (response.error.code === 'AppIdInvalid' || response.error.code === 'PermissionDenied') {
+          // Surface actual errors to console for debugging
+          console.error('Deriv API Error:', response.error.message || response.error.code);
+          
+          // Update UI status on critical failures
+          if (response.error.code === 'AppIdInvalid' || 
+              response.error.code === 'PermissionDenied' || 
+              response.error.code === 'InvalidSymbol') {
              this.onStatusCallback('error');
           }
-          // Do not log empty or non-critical errors to console
           return;
         }
 
@@ -80,6 +84,7 @@ export class DerivWS {
       };
 
       this.ws.onclose = () => {
+        // Only trigger disconnected if we weren't in an error state
         this.onStatusCallback('disconnected');
         this.stopPing();
         this.attemptReconnect();
@@ -133,6 +138,8 @@ export class DerivWS {
   private attemptReconnect() {
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
     this.reconnectTimeout = setTimeout(() => {
+      // Reconnect only if we aren't explicitly disconnected
+      if (this.ws === null) return;
       this.connect();
     }, 5000);
   }
