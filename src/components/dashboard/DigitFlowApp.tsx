@@ -170,7 +170,7 @@ function DetailedComparison({
 }
 
 export default function DigitFlowApp() {
-  const [symbol, setSymbol] = useState('R_100');
+  const [symbol, setSymbol] = useState('1HZ100V');
   const [ouDigit, setOuDigit] = useState(4);
   const [mdDigit, setMdDigit] = useState(0);
   const [mounted, setMounted] = useState(false);
