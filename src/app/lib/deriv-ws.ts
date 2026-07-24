@@ -68,9 +68,9 @@ export class DerivWS {
           this.onTickCallback(response.tick);
         }
         
-        if (response.error) {
-          console.error('Deriv API Error:', response.error);
-          if (response.error.code === 'AppIdInvalid') {
+        // Handle substantial errors only
+        if (response.error && Object.keys(response.error).length > 0) {
+          if (response.error.code === 'AppIdInvalid' || response.error.code === 'PermissionDenied') {
              this.onStatusCallback('error');
           }
         }
@@ -82,12 +82,10 @@ export class DerivWS {
         this.attemptReconnect();
       };
 
-      this.ws.onerror = (err) => {
-        console.error('WebSocket Error:', err);
+      this.ws.onerror = () => {
         this.onStatusCallback('error');
       };
     } catch (e) {
-      console.error('Connection attempt failed:', e);
       this.onStatusCallback('error');
       this.attemptReconnect();
     }
@@ -132,7 +130,6 @@ export class DerivWS {
   private attemptReconnect() {
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
     this.reconnectTimeout = setTimeout(() => {
-      console.log('Attempting to reconnect...');
       this.connect();
     }, 5000);
   }
