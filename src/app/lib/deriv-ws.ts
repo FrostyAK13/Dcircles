@@ -60,19 +60,22 @@ export class DerivWS {
       this.ws.onmessage = (event) => {
         const response: TickResponse = JSON.parse(event.data);
         
+        // Handle substantial errors only
+        if (response.error && Object.keys(response.error).length > 0) {
+          // If it's a critical error like invalid AppID, update status
+          if (response.error.code === 'AppIdInvalid' || response.error.code === 'PermissionDenied') {
+             this.onStatusCallback('error');
+          }
+          // Do not log empty or non-critical errors to console
+          return;
+        }
+
         if (response.msg_type === 'history' && response.history && this.onHistoryCallback) {
           this.onHistoryCallback(response.history.prices);
         }
         
         if (response.msg_type === 'tick' && response.tick) {
           this.onTickCallback(response.tick);
-        }
-        
-        // Handle substantial errors only
-        if (response.error && Object.keys(response.error).length > 0) {
-          if (response.error.code === 'AppIdInvalid' || response.error.code === 'PermissionDenied') {
-             this.onStatusCallback('error');
-          }
         }
       };
 
