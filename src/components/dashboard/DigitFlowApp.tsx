@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -8,8 +7,9 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, BarChart2, Zap, Database } from 'lucide-react';
+import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export const CONTINUOUS_INDICES = [
@@ -38,7 +38,7 @@ function LargePriceDisplay({ price }: { price: number | null }) {
   return (
     <div className="flex flex-col items-center justify-center py-4">
       <div className="text-5xl sm:text-7xl font-black tracking-tighter flex items-baseline tabular-nums text-foreground">
-        <span className="drop-shadow-[0_0_15px_rgba(0,174,239,0.3)]">{priceStr}</span>
+        <span className="drop-shadow-[0_0_15px_rgba(62,59,155,0.3)]">{priceStr}</span>
       </div>
     </div>
   );
@@ -68,7 +68,7 @@ function DetailedComparison({
   return (
     <Card className="border border-border/50 bg-card text-card-foreground shadow-xl icy-glow overflow-hidden transition-all hover:scale-[1.01]">
       <CardHeader className="pb-4 border-b border-border/40 bg-muted/20">
-        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-[hsl(var(--brand-blue))]">
+        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
           {title}
         </CardTitle>
       </CardHeader>
@@ -84,7 +84,7 @@ function DetailedComparison({
                   className={cn(
                     "w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center",
                     selectedDigit === num 
-                      ? "bg-primary text-white shadow-[0_0_15px_rgba(0,174,239,0.5)] scale-110" 
+                      ? "bg-primary text-white shadow-[0_0_15px_rgba(62,59,155,0.5)] scale-110" 
                       : "bg-background text-muted-foreground hover:bg-primary/10"
                   )}
                 >
@@ -146,7 +146,7 @@ function DetailedComparison({
               </div>
               <div className="h-6 w-full bg-muted/40 rounded-full overflow-hidden p-0.5">
                 <div 
-                  className="h-full bg-primary rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(0,174,239,0.3)]" 
+                  className="h-full bg-primary rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(62,59,155,0.3)]" 
                   style={{ width: `${val1}%` }} 
                 />
               </div>
@@ -275,7 +275,7 @@ export default function DigitFlowApp() {
       <div className="flex flex-col min-h-screen w-full bg-background text-foreground relative overflow-hidden">
         {/* Background Watermark */}
         <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 opacity-[0.03] select-none">
-          <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-[hsl(var(--brand-blue))]">
+          <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-primary/30">
             FROSTYTOOLS
           </span>
         </div>
@@ -283,173 +283,220 @@ export default function DigitFlowApp() {
         <DashboardHeader status={status} />
         
         <main className="relative z-10 flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 overflow-y-auto">
-          <Card className="border-none bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
-            <CardContent className="p-8 sm:p-12 space-y-8">
-              {/* Market Selector Integrated */}
-              {mounted && (
-                <div className="absolute top-8 left-8 z-30">
-                  <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <div className="flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
-                        <div className="relative">
-                          <BarChart2 className="w-5 h-5 text-primary" />
-                          <div className="absolute -top-1.5 -right-1.5 bg-primary text-[7px] font-bold px-1 rounded text-white">
-                            {currentMarket.short}
-                          </div>
-                        </div>
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-1">
-                            <span className="text-[11px] font-bold text-foreground group-hover:text-primary transition-colors">
-                              {currentMarket.name}
-                            </span>
-                            <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-transform group-data-[state=open]:rotate-180" />
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                              <Database className="w-2.5 h-2.5" />
-                              {totalTicks} Ticks
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-72 p-0 bg-card border-border/50 shadow-2xl backdrop-blur-2xl text-card-foreground" align="start">
-                      <div className="p-3 border-b border-border/40">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2">Continuous Indices</span>
-                      </div>
-                      <div className="max-h-[50vh] overflow-y-auto p-1">
-                        {CONTINUOUS_INDICES.map((market) => (
-                          <button
-                            key={market.id}
-                            onClick={() => {
-                              setSymbol(market.id);
-                              setIsPopoverOpen(false);
-                            }}
-                            className={cn(
-                              "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors",
-                              symbol === market.id ? "bg-primary/10 text-primary" : "hover:bg-muted/40 text-foreground"
-                            )}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded bg-muted/40 flex items-center justify-center font-bold text-[10px]">
-                                {market.short}
-                              </div>
-                              <span className="text-xs font-semibold">{market.name}</span>
-                            </div>
-                            {symbol === market.id && <Zap className="w-3.5 h-3.5 fill-primary text-primary" />}
-                          </button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              )}
+          <Tabs defaultValue="dashboard" className="w-full">
+            <div className="flex justify-center mb-8">
+              <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto">
+                <TabsTrigger 
+                  value="dashboard" 
+                  className="rounded-xl px-8 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                >
+                  <BarChart2 className="w-3.5 h-3.5 mr-2" />
+                  Analysis
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="scanner" 
+                  className="rounded-xl px-8 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 mr-2" />
+                  Market Scanner
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-              <LargePriceDisplay price={latestPrice} />
-              
-              <div className="space-y-8 relative pt-4">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-muted/30 border border-border/40 shadow-inner">
-                    <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Analyze Window</span>
-                    <Input 
-                      type="number"
-                      value={windowSize}
-                      onChange={(e) => handleWindowSizeChange(parseInt(e.target.value))}
-                      min={5}
-                      max={HISTORY_BUFFER_SIZE}
-                      className="w-20 h-7 p-0 text-sm font-black text-primary bg-transparent border-none text-center focus-visible:ring-0 tabular-nums"
-                    />
-                    <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Ticks</span>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-5 gap-4 sm:gap-8 max-w-4xl mx-auto relative px-4">
-                  {/* Real-time Indicator Arrow */}
-                  {mounted && latestDigit !== null && (
-                    <div 
-                      className="absolute z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"
-                      style={{
-                        left: `${(latestDigit % 5) * 20 + 10}%`,
-                        top: latestDigit >= 5 ? '52%' : '-2rem',
-                        transform: 'translateX(-50%)'
-                      }}
-                    >
-                      <ChevronDown className={cn("w-8 h-8 fill-primary animate-bounce", latestDigit >= 5 && "rotate-180")} />
+            <TabsContent value="dashboard" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
+              <Card className="border-none bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
+                <CardContent className="p-8 sm:p-12 space-y-8">
+                  {/* Market Selector Integrated */}
+                  {mounted && (
+                    <div className="absolute top-8 left-8 z-30">
+                      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                        <PopoverTrigger asChild>
+                          <div className="flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
+                            <div className="relative">
+                              <BarChart2 className="w-5 h-5 text-primary" />
+                              <div className="absolute -top-1.5 -right-1.5 bg-primary text-[7px] font-bold px-1 rounded text-white">
+                                {currentMarket.short}
+                              </div>
+                            </div>
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-1">
+                                <span className="text-[11px] font-bold text-foreground group-hover:text-primary transition-colors">
+                                  {currentMarket.name}
+                                </span>
+                                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-transform group-data-[state=open]:rotate-180" />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                                  <Database className="w-2.5 h-2.5" />
+                                  {totalTicks} Ticks
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-72 p-0 bg-card border-border/50 shadow-2xl backdrop-blur-2xl text-card-foreground" align="start">
+                          <div className="p-3 border-b border-border/40">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2">Continuous Indices</span>
+                          </div>
+                          <div className="max-h-[50vh] overflow-y-auto p-1">
+                            {CONTINUOUS_INDICES.map((market) => (
+                              <button
+                                key={market.id}
+                                onClick={() => {
+                                  setSymbol(market.id);
+                                  setIsPopoverOpen(false);
+                                }}
+                                className={cn(
+                                  "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors",
+                                  symbol === market.id ? "bg-primary/10 text-primary" : "hover:bg-muted/40 text-foreground"
+                                )}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded bg-muted/40 flex items-center justify-center font-bold text-[10px]">
+                                    {market.short}
+                                  </div>
+                                  <span className="text-xs font-semibold">{market.name}</span>
+                                </div>
+                                {symbol === market.id && <Zap className="w-3.5 h-3.5 fill-primary text-primary" />}
+                              </button>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   )}
 
-                  {distribution.map((d) => (
-                    <DigitCard
-                      key={d.digit}
-                      digit={d.digit}
-                      percentage={d.percentage}
-                      isHigh={d.digit === stats.high}
-                      isSecondHigh={d.digit === stats.secondHigh}
-                      isLow={d.digit === stats.low}
-                      isSecondLow={d.digit === stats.secondLow}
-                      isLatest={d.digit === latestDigit}
-                      onClick={() => {}}
-                    />
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                  <LargePriceDisplay price={latestPrice} />
+                  
+                  <div className="space-y-8 relative pt-4">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-muted/30 border border-border/40 shadow-inner">
+                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Analyze Window</span>
+                        <Input 
+                          type="number"
+                          value={windowSize}
+                          onChange={(e) => handleWindowSizeChange(parseInt(e.target.value))}
+                          min={5}
+                          max={HISTORY_BUFFER_SIZE}
+                          className="w-20 h-7 p-0 text-sm font-black text-primary bg-transparent border-none text-center focus-visible:ring-0 tabular-nums"
+                        />
+                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Ticks</span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-5 gap-4 sm:gap-8 max-w-4xl mx-auto relative px-4">
+                      {/* Real-time Indicator Arrow */}
+                      {mounted && latestDigit !== null && (
+                        <div 
+                          className="absolute z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"
+                          style={{
+                            left: `${(latestDigit % 5) * 20 + 10}%`,
+                            top: latestDigit >= 5 ? '52%' : '-2rem',
+                            transform: 'translateX(-50%)'
+                          }}
+                        >
+                          <ChevronDown className={cn("w-8 h-8 fill-primary animate-bounce", latestDigit >= 5 && "rotate-180")} />
+                        </div>
+                      )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
-            <DetailedComparison 
-              title="Over / Under Analysis"
-              label1="Over"
-              label2="Under"
-              val1={stats.comparisons.over}
-              val2={stats.comparisons.under}
-              count1={stats.counts.over}
-              count2={stats.counts.under}
-              pattern={stats.patterns.ou}
-              showDigitSelector
-              selectedDigit={ouDigit}
-              onDigitSelect={setOuDigit}
-            />
-            <DetailedComparison 
-              title="Even / Odd Analysis"
-              label1="Even"
-              label2="Odd"
-              val1={stats.comparisons.even}
-              val2={stats.comparisons.odd}
-              count1={stats.counts.even}
-              count2={stats.counts.odd}
-              pattern={stats.patterns.eo}
-            />
-            <DetailedComparison 
-              title="Matches / Differs"
-              label1="Matches"
-              label2="Differs"
-              val1={stats.comparisons.matches}
-              val2={stats.comparisons.differs}
-              count1={stats.counts.matches}
-              count2={stats.counts.differs}
-              pattern={stats.patterns.md}
-              showDigitSelector
-              selectedDigit={mdDigit}
-              onDigitSelect={setMdDigit}
-            />
-            <DetailedComparison 
-              title="Rise / Fall Trend"
-              label1="Rise"
-              label2="Fall"
-              val1={stats.comparisons.rise}
-              val2={stats.comparisons.fall}
-              count1={stats.counts.rise}
-              count2={stats.counts.fall}
-              pattern={stats.patterns.rf}
-            />
-          </div>
+                      {distribution.map((d) => (
+                        <DigitCard
+                          key={d.digit}
+                          digit={d.digit}
+                          percentage={d.percentage}
+                          isHigh={d.digit === stats.high}
+                          isSecondHigh={d.digit === stats.secondHigh}
+                          isLow={d.digit === stats.low}
+                          isSecondLow={d.digit === stats.secondLow}
+                          isLatest={d.digit === latestDigit}
+                          onClick={() => {}}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <DetailedComparison 
+                  title="Over / Under Analysis"
+                  label1="Over"
+                  label2="Under"
+                  val1={stats.comparisons.over}
+                  val2={stats.comparisons.under}
+                  count1={stats.counts.over}
+                  count2={stats.counts.under}
+                  pattern={stats.patterns.ou}
+                  showDigitSelector
+                  selectedDigit={ouDigit}
+                  onDigitSelect={setOuDigit}
+                />
+                <DetailedComparison 
+                  title="Even / Odd Analysis"
+                  label1="Even"
+                  label2="Odd"
+                  val1={stats.comparisons.even}
+                  val2={stats.comparisons.odd}
+                  count1={stats.counts.even}
+                  count2={stats.counts.odd}
+                  pattern={stats.patterns.eo}
+                />
+                <DetailedComparison 
+                  title="Matches / Differs"
+                  label1="Matches"
+                  label2="Differs"
+                  val1={stats.comparisons.matches}
+                  val2={stats.comparisons.differs}
+                  count1={stats.counts.matches}
+                  count2={stats.counts.differs}
+                  pattern={stats.patterns.md}
+                  showDigitSelector
+                  selectedDigit={mdDigit}
+                  onDigitSelect={setMdDigit}
+                />
+                <DetailedComparison 
+                  title="Rise / Fall Trend"
+                  label1="Rise"
+                  label2="Fall"
+                  val1={stats.comparisons.rise}
+                  val2={stats.comparisons.fall}
+                  count1={stats.counts.rise}
+                  count2={stats.counts.fall}
+                  pattern={stats.patterns.rf}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="scanner" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
+              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
+                <CardHeader className="border-b border-border/40 bg-muted/20 py-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                      <BarChart2 className="w-4 h-4" />
+                      Live Market Scanner
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Real-time Stream</span>
+                    </div>
+                  </div>
+                </CardHeader>
+                <div className="flex-1 bg-black/5 dark:bg-white/5 relative">
+                  <iframe 
+                    src="https://www.tradingview.com/chart/?symbol=DERIV:R_10" 
+                    className="absolute inset-0 w-full h-full border-none grayscale-[0.2] dark:invert dark:hue-rotate-180"
+                    title="Market Scanner"
+                  />
+                </div>
+              </Card>
+            </TabsContent>
+          </Tabs>
 
           <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-bold uppercase tracking-[0.3em] py-8 border-t border-primary/10">
             <span className="hover:text-primary transition-colors cursor-default">&copy; {mounted ? new Date().getFullYear() : '2025'} FROSTYDBOT</span>
             <div className="flex items-center gap-6">
               <span className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(0,174,239,0.6)]" />
+                <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(62,59,155,0.6)]" />
                 Live Network Active
               </span>
             </div>

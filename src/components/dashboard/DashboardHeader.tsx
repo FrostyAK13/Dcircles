@@ -9,9 +9,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
-interface DashboardHeaderProps {
-  status: ConnectionStatus;
-}
+interface DashboardHeaderProps { status: ConnectionStatus; }
 
 export function DashboardHeader({ status }: DashboardHeaderProps) {
   const [mounted, setMounted] = useState(false);
@@ -61,7 +59,7 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
           rel="noopener noreferrer" 
           className="transition-all hover:opacity-90 active:scale-95"
         >
-          <h1 className="text-xl font-black tracking-tighter text-[hsl(var(--brand-blue))] uppercase italic shiny-effect px-2 py-0.5 rounded-lg">
+          <h1 className="text-xl font-black tracking-tighter text-primary uppercase italic shiny-effect px-2 py-0.5 rounded-lg">
             FROSTYDBOT
           </h1>
         </a>
