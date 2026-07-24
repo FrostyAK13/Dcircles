@@ -2,7 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'FROSTYDBOT - Advanced Digit Analysis',
+  title: 'FROSTY TRADERS HUB - Advanced Digit Analysis',
   description: 'Modern real-time digit distribution analysis for binary options trading.',
 };
 

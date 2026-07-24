@@ -60,7 +60,7 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
           className="transition-all hover:opacity-90 active:scale-95"
         >
           <h1 className="text-xl font-black tracking-tighter text-primary uppercase italic shiny-effect px-2 py-0.5 rounded-lg">
-            FROSTYDBOT
+            FROSTY TRADERS HUB
           </h1>
         </a>
       </div>
