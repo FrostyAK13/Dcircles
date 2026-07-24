@@ -47,7 +47,7 @@
     --border: 222 47% 12%;
     --input: 222 47% 12%;
     --ring: 199 89% 48%;
-    --brand-blue: 200 80% 60%;
+    --brand-blue: 248 39% 50%;
   }
 }
 
@@ -96,7 +96,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.7),
     transparent
   );
   transform: skewX(-25deg);
