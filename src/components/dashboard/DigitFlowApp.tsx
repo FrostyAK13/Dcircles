@@ -483,8 +483,8 @@ export default function DigitFlowApp() {
                 </CardHeader>
                 <div className="flex-1 bg-black/5 dark:bg-white/5 relative">
                   <iframe 
-                    src="https://www.tradingview.com/chart/?symbol=DERIV:R_10" 
-                    className="absolute inset-0 w-full h-full border-none grayscale-[0.2] dark:invert dark:hue-rotate-180"
+                    src="https://tracktool.netlify.app/signals" 
+                    className="absolute inset-0 w-full h-full border-none"
                     title="Market Scanner"
                   />
                 </div>
