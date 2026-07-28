@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid } from 'lucide-react';
+import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export const CONTINUOUS_INDICES = [
@@ -286,27 +286,34 @@ export default function DigitFlowApp() {
         <main className="relative z-10 flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 overflow-y-auto">
           <Tabs defaultValue="dashboard" className="w-full">
             <div className="flex justify-center mb-8">
-              <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto">
+              <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-wrap sm:flex-nowrap">
                 <TabsTrigger 
                   value="dashboard" 
-                  className="rounded-xl px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                  className="rounded-xl px-4 sm:px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
                 >
                   <BarChart2 className="w-3.5 h-3.5 mr-2" />
                   Analysis
                 </TabsTrigger>
                 <TabsTrigger 
                   value="scanner" 
-                  className="rounded-xl px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                  className="rounded-xl px-4 sm:px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
                 >
                   <ExternalLink className="w-3.5 h-3.5 mr-2" />
                   Scanner
                 </TabsTrigger>
                 <TabsTrigger 
                   value="digits" 
-                  className="rounded-xl px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                  className="rounded-xl px-4 sm:px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
                 >
                   <LayoutGrid className="w-3.5 h-3.5 mr-2" />
                   Digits View
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="percentage" 
+                  className="rounded-xl px-4 sm:px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                >
+                  <Percent className="w-3.5 h-3.5 mr-2" />
+                  Percentage
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -518,6 +525,30 @@ export default function DigitFlowApp() {
                     src="https://tracktool.netlify.app/digitshome" 
                     className="absolute inset-0 w-full h-full border-none"
                     title="Digits View"
+                  />
+                </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="percentage" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
+              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
+                <CardHeader className="border-b border-border/40 bg-muted/20 py-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                      <Percent className="w-4 h-4" />
+                      Percentage Analysis
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Live Data</span>
+                    </div>
+                  </div>
+                </CardHeader>
+                <div className="flex-1 bg-black/5 dark:bg-white/5 relative">
+                  <iframe 
+                    src="https://api.binarytool.site" 
+                    className="absolute inset-0 w-full h-full border-none"
+                    title="Percentage Tool"
                   />
                 </div>
               </Card>
