@@ -52,14 +52,14 @@ function LargePriceDisplay({
   const isHoveredMatch = hoveredDigit === signalDigit && signalDigit !== '!';
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-center gap-8 py-4">
-      <div className="text-5xl sm:text-7xl font-black tracking-tighter flex items-baseline tabular-nums text-foreground">
+    <div className="flex flex-col items-center justify-center gap-6 py-4">
+      <div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-foreground">
         <span className="drop-shadow-[0_0_15px_rgba(62,59,155,0.3)]">{priceStr}</span>
       </div>
 
       {side !== 'none' && engineResult && (
         <div className={cn(
-          "flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-300 icy-glow animate-in zoom-in-95",
+          "flex flex-col items-center justify-center p-4 sm:p-6 rounded-3xl border transition-all duration-300 icy-glow animate-in zoom-in-95 w-full max-w-[200px]",
           (isMatch || isHoveredMatch) 
             ? "bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.3)]" 
             : "bg-primary/10 border-primary/20"
@@ -71,20 +71,20 @@ function LargePriceDisplay({
               <Activity className={cn("w-4 h-4 animate-pulse", isHoveredMatch ? "text-emerald-500" : "text-primary")} />
             )}
             <span className={cn(
-              "text-[10px] font-black uppercase tracking-widest",
+              "text-[9px] sm:text-[10px] font-black uppercase tracking-widest",
               (isMatch || isHoveredMatch) ? "text-emerald-500" : "text-primary"
             )}>
               {isMatch ? "Digit Appeared!" : "Engine Signal"}
             </span>
           </div>
           <div className={cn(
-            "text-4xl font-black flex items-center gap-3",
+            "text-3xl sm:text-4xl font-black flex items-center gap-3",
             (isMatch || isHoveredMatch) ? "text-emerald-500" : "text-primary"
           )}>
-            <Target className="w-8 h-8" />
+            <Target className="w-6 h-6 sm:w-8 sm:h-8" />
             <span>{signalDigit}</span>
           </div>
-          <div className="mt-2 text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">
+          <div className="mt-1 text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">
             AVG: {side === 'over' ? engineResult.overAvg : engineResult.underAvg}%
           </div>
         </div>
@@ -116,22 +116,22 @@ function DetailedComparison({
 
   return (
     <Card className="border border-border/50 bg-card text-card-foreground shadow-xl icy-glow overflow-hidden transition-all hover:scale-[1.01]">
-      <CardHeader className="pb-4 border-b border-border/40 bg-muted/20">
-        <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+      <CardHeader className="p-3 sm:p-4 border-b border-border/40 bg-muted/20">
+        <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-6 space-y-6">
+      <CardContent className="p-4 sm:p-6 space-y-6">
         {showDigitSelector && (
           <div className="space-y-3">
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold block">Selection Mode</span>
-            <div className="flex flex-wrap gap-1 justify-center bg-muted/40 p-2 rounded-xl">
+            <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted-foreground font-bold block text-center">Selection Mode</span>
+            <div className="flex flex-wrap gap-1 justify-center bg-muted/40 p-1.5 sm:p-2 rounded-xl">
               {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                 <button
                   key={num}
                   onClick={() => onDigitSelect?.(num)}
                   className={cn(
-                    "w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center",
+                    "w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center",
                     selectedDigit === num 
                       ? "bg-primary text-white shadow-[0_0_15px_rgba(62,59,155,0.5)] scale-110" 
                       : "bg-background text-muted-foreground hover:bg-primary/10"
@@ -146,22 +146,22 @@ function DetailedComparison({
 
         <div className="flex justify-around items-center text-center py-2">
           <div className="space-y-1">
-            <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label1}</span>
-            <div className="text-3xl font-black text-primary tabular-nums">{count1}</div>
+            <span className="text-[9px] sm:text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label1}</span>
+            <div className="text-2xl sm:text-3xl font-black text-primary tabular-nums">{count1}</div>
           </div>
-          <div className="h-12 w-px bg-border/50" />
+          <div className="h-10 w-px bg-border/50" />
           <div className="space-y-1">
-            <span className="text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label2}</span>
-            <div className="text-3xl font-black text-rose-500 tabular-nums">{count2}</div>
+            <span className="text-[9px] sm:text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label2}</span>
+            <div className="text-2xl sm:text-3xl font-black text-rose-500 tabular-nums">{count2}</div>
           </div>
         </div>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold block">Recent History</span>
+            <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted-foreground font-bold block">Recent History</span>
             <button 
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1 hover:opacity-70 transition-opacity"
+              className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1 hover:opacity-70 transition-opacity"
             >
               {isExpanded ? (
                 <>Less <ChevronUp className="w-3 h-3" /></>
@@ -170,12 +170,12 @@ function DetailedComparison({
               )}
             </button>
           </div>
-          <div className="flex flex-wrap gap-1.5 justify-center p-3 bg-muted/30 rounded-xl min-h-[3.5rem] transition-all duration-300">
+          <div className="flex flex-wrap gap-1 sm:gap-1.5 justify-center p-2 sm:p-3 bg-muted/30 rounded-xl min-h-[3.5rem] transition-all duration-300">
             {displayedPattern.map((p, i) => (
               <div 
                 key={i} 
                 className={cn(
-                  "w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black shadow-sm transition-all duration-300 animate-in fade-in zoom-in-95",
+                  "w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center text-[9px] sm:text-[10px] font-black shadow-sm transition-all duration-300 animate-in fade-in zoom-in-95",
                   p.color
                 )}
               >
@@ -186,14 +186,14 @@ function DetailedComparison({
         </div>
 
         <div className="space-y-4">
-          <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold block">Probability</span>
+          <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted-foreground font-bold block">Probability</span>
           <div className="space-y-4">
             <div className="space-y-1.5">
-              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest px-1">
+              <div className="flex justify-between text-[9px] sm:text-[10px] font-bold uppercase tracking-widest px-1">
                 <span className="text-primary">{label1}</span>
                 <span className="text-primary">{val1}%</span>
               </div>
-              <div className="h-6 w-full bg-muted/40 rounded-full overflow-hidden p-0.5">
+              <div className="h-4 sm:h-6 w-full bg-muted/40 rounded-full overflow-hidden p-0.5">
                 <div 
                   className="h-full bg-primary rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(62,59,155,0.3)]" 
                   style={{ width: `${val1}%` }} 
@@ -201,11 +201,11 @@ function DetailedComparison({
               </div>
             </div>
             <div className="space-y-1.5">
-              <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest px-1">
+              <div className="flex justify-between text-[9px] sm:text-[10px] font-bold uppercase tracking-widest px-1">
                 <span className="text-rose-500">{label2}</span>
                 <span className="text-rose-500">{val2}%</span>
               </div>
-              <div className="h-6 w-full bg-muted/40 rounded-full overflow-hidden p-0.5">
+              <div className="h-4 sm:h-6 w-full bg-muted/40 rounded-full overflow-hidden p-0.5">
                 <div 
                   className="h-full bg-rose-500 rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(244,63,94,0.3)]" 
                   style={{ width: `${val2}%` }} 
@@ -372,66 +372,66 @@ export default function DigitFlowApp() {
 
         <DashboardHeader status={status} />
         
-        <main className="relative z-10 flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8 overflow-y-auto">
+        <main className="relative z-10 flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6 sm:space-y-8 overflow-y-auto">
           <Tabs defaultValue="dashboard" className="w-full">
-            <div className="flex justify-center mb-8">
-              <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-wrap sm:flex-nowrap">
+            <div className="flex justify-center mb-6 sm:mb-8 sticky top-0 z-40 bg-background/80 backdrop-blur-md py-2 -mx-3 sm:mx-0 px-3">
+              <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start sm:justify-center w-full max-w-fit scrollbar-hide">
                 <TabsTrigger 
                   value="dashboard" 
-                  className="rounded-xl px-4 sm:px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)] shrink-0"
                 >
-                  <BarChart2 className="w-3.5 h-3.5 mr-2" />
+                  <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                   Analysis
                 </TabsTrigger>
                 <TabsTrigger 
                   value="scanner" 
-                  className="rounded-xl px-4 sm:px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)] shrink-0"
                 >
-                  <ExternalLink className="w-3.5 h-3.5 mr-2" />
+                  <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                   Scanner
                 </TabsTrigger>
                 <TabsTrigger 
                   value="digits" 
-                  className="rounded-xl px-4 sm:px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)] shrink-0"
                 >
-                  <LayoutGrid className="w-3.5 h-3.5 mr-2" />
-                  Digits View
+                  <LayoutGrid className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
+                  Digits
                 </TabsTrigger>
                 <TabsTrigger 
                   value="percentage" 
-                  className="rounded-xl px-4 sm:px-6 py-2.5 font-bold uppercase tracking-widest text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)]"
+                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)] shrink-0"
                 >
-                  <Percent className="w-3.5 h-3.5 mr-2" />
-                  Percentage
+                  <Percent className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
+                  %
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            <TabsContent value="dashboard" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
+            <TabsContent value="dashboard" className="space-y-6 sm:space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
               <Card className="border-none bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
-                <CardContent className="p-8 sm:p-12 space-y-8">
-                  {/* Controls Toolbar */}
+                <CardContent className="p-4 sm:p-8 lg:p-12 space-y-6 sm:space-y-8">
+                  {/* Controls Toolbar - Responsive Layout */}
                   {mounted && (
-                    <div className="absolute top-8 left-8 z-30 flex flex-wrap items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-between w-full">
                       {/* Market Selector */}
                       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                         <PopoverTrigger asChild>
-                          <div className="flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
-                            <div className="relative">
+                          <div className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
+                            <div className="relative shrink-0">
                               <BarChart2 className="w-5 h-5 text-primary" />
                               <div className="absolute -top-1.5 -right-1.5 bg-primary text-[7px] font-bold px-1 rounded text-white">
                                 {currentMarket.short}
                               </div>
                             </div>
-                            <div className="flex flex-col">
+                            <div className="flex flex-col min-w-0">
                               <div className="flex items-center gap-1">
-                                <span className="text-[11px] font-bold text-foreground group-hover:text-primary transition-colors">
+                                <span className="text-[10px] sm:text-[11px] font-bold text-foreground group-hover:text-primary transition-colors truncate">
                                   {currentMarket.name}
                                 </span>
-                                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-transform group-data-[state=open]:rotate-180" />
+                                <ChevronDown className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-transform group-data-[state=open]:rotate-180" />
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                                <span className="text-[9px] font-bold text-muted-foreground uppercase flex items-center gap-1">
                                   <Database className="w-2.5 h-2.5" />
                                   {totalTicks} Ticks
                                 </span>
@@ -470,16 +470,16 @@ export default function DigitFlowApp() {
                       </Popover>
 
                       {/* Trade Side Selector */}
-                      <div className="flex items-center gap-3 p-2 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Side:</span>
+                      <div className="w-full sm:w-auto flex items-center gap-3 p-2 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
+                        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Side:</span>
                         <Select value={tradeSide} onValueChange={setTradeSide}>
-                          <SelectTrigger className="w-28 h-8 text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
+                          <SelectTrigger className="flex-1 sm:w-28 h-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
                             <SelectValue placeholder="Trade Side" />
                           </SelectTrigger>
                           <SelectContent className="bg-card border-border/50">
-                            <SelectItem value="none" className="text-[10px] font-black uppercase tracking-widest">None</SelectItem>
-                            <SelectItem value="over" className="text-[10px] font-black uppercase tracking-widest text-primary">Over</SelectItem>
-                            <SelectItem value="under" className="text-[10px] font-black uppercase tracking-widest text-rose-500">Under</SelectItem>
+                            <SelectItem value="none" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">None</SelectItem>
+                            <SelectItem value="over" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary">Over</SelectItem>
+                            <SelectItem value="under" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-rose-500">Under</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -494,34 +494,34 @@ export default function DigitFlowApp() {
                     hoveredDigit={hoveredDigit}
                   />
                   
-                  <div className="space-y-8 relative pt-4">
+                  <div className="space-y-6 sm:space-y-8 relative">
                     <div className="flex flex-col items-center gap-3">
-                      <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-muted/30 border border-border/40 shadow-inner">
-                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Analyze Window</span>
+                      <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-muted/30 border border-border/40 shadow-inner">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Window</span>
                         <Input 
                           type="number"
                           value={windowSize}
                           onChange={(e) => handleWindowSizeChange(parseInt(e.target.value))}
                           min={5}
                           max={HISTORY_BUFFER_SIZE}
-                          className="w-20 h-7 p-0 text-sm font-black text-primary bg-transparent border-none text-center focus-visible:ring-0 tabular-nums"
+                          className="w-16 sm:w-20 h-6 sm:h-7 p-0 text-xs sm:text-sm font-black text-primary bg-transparent border-none text-center focus-visible:ring-0 tabular-nums"
                         />
-                        <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Ticks</span>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Ticks</span>
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-5 gap-4 sm:gap-8 max-w-4xl mx-auto relative px-4">
-                      {/* Real-time Indicator Arrow */}
+                    <div className="grid grid-cols-5 gap-2 sm:gap-8 max-w-4xl mx-auto relative px-1 sm:px-4">
+                      {/* Real-time Indicator Arrow - Responsive Position */}
                       {mounted && latestDigit !== null && (
                         <div 
                           className="absolute z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"
                           style={{
                             left: `${(latestDigit % 5) * 20 + 10}%`,
-                            top: latestDigit >= 5 ? '52%' : '-2rem',
+                            top: latestDigit >= 5 ? '55%' : '-1.5rem',
                             transform: 'translateX(-50%)'
                           }}
                         >
-                          <ChevronDown className={cn("w-8 h-8 fill-primary animate-bounce", latestDigit >= 5 && "rotate-180")} />
+                          <ChevronDown className={cn("w-6 h-6 sm:w-8 sm:h-8 fill-primary animate-bounce", latestDigit >= 5 && "rotate-180")} />
                         </div>
                       )}
 
@@ -545,7 +545,7 @@ export default function DigitFlowApp() {
                 </CardContent>
               </Card>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <DetailedComparison 
                   title="Over / Under Analysis"
                   label1="Over"
@@ -596,16 +596,16 @@ export default function DigitFlowApp() {
             </TabsContent>
 
             <TabsContent value="scanner" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
-                <CardHeader className="border-b border-border/40 bg-muted/20 py-4">
+              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
+                <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                      <BarChart2 className="w-4 h-4" />
+                    <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                      <BarChart2 className="w-3.5 h-3.5 sm:w-4 h-4" />
                       Live Market Scanner
                     </CardTitle>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Real-time Stream</span>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Real-time Stream</span>
                     </div>
                   </div>
                 </CardHeader>
@@ -620,16 +620,16 @@ export default function DigitFlowApp() {
             </TabsContent>
 
             <TabsContent value="digits" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
-                <CardHeader className="border-b border-border/40 bg-muted/20 py-4">
+              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
+                <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                      <LayoutGrid className="w-4 h-4" />
-                      Advanced Digits View
+                    <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                      <LayoutGrid className="w-3.5 h-3.5 sm:w-4 h-4" />
+                      Advanced Digits
                     </CardTitle>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Active Monitoring</span>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary animate-pulse" />
+                      <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Active</span>
                     </div>
                   </div>
                 </CardHeader>
@@ -644,16 +644,16 @@ export default function DigitFlowApp() {
             </TabsContent>
 
             <TabsContent value="percentage" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
-                <CardHeader className="border-b border-border/40 bg-muted/20 py-4">
+              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
+                <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                      <Percent className="w-4 h-4" />
+                    <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                      <Percent className="w-3.5 h-3.5 sm:w-4 h-4" />
                       Percentage Analysis
                     </CardTitle>
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Live Data</span>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-accent animate-pulse" />
+                      <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Live Data</span>
                     </div>
                   </div>
                 </CardHeader>

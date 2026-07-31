@@ -40,10 +40,10 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
   };
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
-      <div className="flex items-center gap-4">
+    <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
+      <div className="flex items-center gap-2 sm:gap-4">
         {logo && (
-          <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-primary/20 icy-glow">
+          <div className="relative w-7 h-7 sm:w-8 h-8 rounded-lg overflow-hidden border border-primary/20 icy-glow shrink-0">
             <Image 
               src={logo.imageUrl} 
               alt={logo.description} 
@@ -59,31 +59,31 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
           rel="noopener noreferrer" 
           className="transition-all hover:opacity-90 active:scale-95"
         >
-          <h1 className="text-xl font-black tracking-tighter text-primary uppercase italic shiny-effect px-2 py-0.5 rounded-lg">
+          <h1 className="text-sm sm:text-xl font-black tracking-tighter text-primary uppercase italic shiny-effect px-1 sm:px-2 py-0.5 rounded-lg whitespace-nowrap">
             FROSTY TRADERS HUB
           </h1>
         </a>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         {mounted && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className="rounded-xl w-9 h-9 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
+              className="rounded-xl w-8 h-8 sm:w-9 sm:h-9 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all"
             >
               {theme === "light" ? (
-                <Moon className="w-5 h-5" />
+                <Moon className="w-4 h-4 sm:w-5 sm:h-5" />
               ) : (
-                <Sun className="w-5 h-5" />
+                <Sun className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
             </Button>
             
-            <Badge variant="outline" className={cn("px-4 py-1.5 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all", statusColors[status])}>
-              <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse", status === 'connected' ? "bg-emerald-500" : "bg-current")} />
-              {status}
+            <Badge variant="outline" className={cn("px-2 sm:px-4 py-1 flex items-center gap-1.5 sm:gap-2 text-[8px] sm:text-[10px] font-black uppercase tracking-widest rounded-xl transition-all", statusColors[status])}>
+              <div className={cn("w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full animate-pulse", status === 'connected' ? "bg-emerald-500" : "bg-current")} />
+              <span className="hidden xs:inline">{status}</span>
             </Badge>
           </div>
         )}
