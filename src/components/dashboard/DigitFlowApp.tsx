@@ -10,8 +10,9 @@ import { Input } from '@/components/ui/input';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent } from 'lucide-react';
+import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -31,16 +32,32 @@ export const CONTINUOUS_INDICES = [
   { id: 'JD100', name: 'Jump 100 Index', short: 'J100' },
 ];
 
-function LargePriceDisplay({ price }: { price: number | null }) {
+function LargePriceDisplay({ price, engineResult, side }: { price: number | null, engineResult: any, side: string }) {
   if (price === null) return null;
   
   const priceStr = price.toFixed(2);
 
   return (
-    <div className="flex flex-col items-center justify-center py-4">
+    <div className="flex flex-col sm:flex-row items-center justify-center gap-8 py-4">
       <div className="text-5xl sm:text-7xl font-black tracking-tighter flex items-baseline tabular-nums text-foreground">
         <span className="drop-shadow-[0_0_15px_rgba(62,59,155,0.3)]">{priceStr}</span>
       </div>
+
+      {side !== 'none' && engineResult && (
+        <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-primary/10 border border-primary/20 icy-glow animate-in zoom-in-95 duration-300">
+          <div className="flex items-center gap-2 mb-2">
+            <Activity className="w-4 h-4 text-primary animate-pulse" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-primary">Engine Signal</span>
+          </div>
+          <div className="text-4xl font-black text-primary flex items-center gap-3">
+            <Target className="w-8 h-8" />
+            <span>{side === 'over' ? engineResult.overSignal : engineResult.underSignal}</span>
+          </div>
+          <div className="mt-2 text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">
+            AVG: {side === 'over' ? engineResult.overAvg : engineResult.underAvg}%
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -173,6 +190,7 @@ function DetailedComparison({
 
 export default function DigitFlowApp() {
   const [symbol, setSymbol] = useState('1HZ10V');
+  const [tradeSide, setTradeSide] = useState('none');
   const [ouDigit, setOuDigit] = useState(4);
   const [mdDigit, setMdDigit] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -193,6 +211,40 @@ export default function DigitFlowApp() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const engineResults = useMemo(() => {
+    if (distribution.length < 10) return null;
+    
+    const p0 = distribution.find(d => d.digit === 0)?.percentage || 0;
+    const p1 = distribution.find(d => d.digit === 1)?.percentage || 0;
+    const p2 = distribution.find(d => d.digit === 2)?.percentage || 0;
+    const p9 = distribution.find(d => d.digit === 9)?.percentage || 0;
+    const p8 = distribution.find(d => d.digit === 8)?.percentage || 0;
+    const p7 = distribution.find(d => d.digit === 7)?.percentage || 0;
+
+    const overAvg = (p0 + p1 + p2) / 3;
+    const underAvg = (p9 + p8 + p7) / 3;
+
+    const findClosest = (avg: number) => {
+      let closestDigit = 0;
+      let minDiff = Infinity;
+      distribution.forEach(d => {
+        const diff = Math.abs(d.percentage - avg);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestDigit = d.digit;
+        }
+      });
+      return closestDigit;
+    };
+
+    return {
+      overAvg: overAvg.toFixed(2),
+      underAvg: underAvg.toFixed(2),
+      overSignal: findClosest(overAvg),
+      underSignal: findClosest(underAvg)
+    };
+  }, [distribution]);
 
   const stats = useMemo(() => {
     const sorted = [...distribution].sort((a, b) => b.percentage - a.percentage);
@@ -321,9 +373,10 @@ export default function DigitFlowApp() {
             <TabsContent value="dashboard" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
               <Card className="border-none bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
                 <CardContent className="p-8 sm:p-12 space-y-8">
-                  {/* Market Selector Integrated */}
+                  {/* Controls Toolbar */}
                   {mounted && (
-                    <div className="absolute top-8 left-8 z-30">
+                    <div className="absolute top-8 left-8 z-30 flex flex-wrap items-center gap-4">
+                      {/* Market Selector */}
                       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                         <PopoverTrigger asChild>
                           <div className="flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
@@ -378,10 +431,25 @@ export default function DigitFlowApp() {
                           </div>
                         </PopoverContent>
                       </Popover>
+
+                      {/* Trade Side Selector */}
+                      <div className="flex items-center gap-3 p-2 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-2">Side:</span>
+                        <Select value={tradeSide} onValueChange={setTradeSide}>
+                          <SelectTrigger className="w-28 h-8 text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
+                            <SelectValue placeholder="Trade Side" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-card border-border/50">
+                            <SelectItem value="none" className="text-[10px] font-black uppercase tracking-widest">None</SelectItem>
+                            <SelectItem value="over" className="text-[10px] font-black uppercase tracking-widest text-primary">Over</SelectItem>
+                            <SelectItem value="under" className="text-[10px] font-black uppercase tracking-widest text-rose-500">Under</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   )}
 
-                  <LargePriceDisplay price={latestPrice} />
+                  <LargePriceDisplay price={latestPrice} engineResult={engineResults} side={tradeSide} />
                   
                   <div className="space-y-8 relative pt-4">
                     <div className="flex flex-col items-center gap-3">
