@@ -11,6 +11,8 @@ interface DigitCardProps {
   isSecondLow: boolean;
   isLatest: boolean;
   onClick: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 export function DigitCard({
@@ -21,13 +23,17 @@ export function DigitCard({
   isLow,
   isSecondLow,
   isLatest,
-  onClick
+  onClick,
+  onMouseEnter,
+  onMouseLeave
 }: DigitCardProps) {
   const formattedPercentage = percentage % 1 === 0 ? percentage : percentage.toFixed(1);
 
   return (
     <div 
       onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       className="flex flex-col items-center gap-3 group cursor-pointer relative"
     >
       <div

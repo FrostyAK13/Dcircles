@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -10,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target } from 'lucide-react';
+import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -32,10 +31,25 @@ export const CONTINUOUS_INDICES = [
   { id: 'JD100', name: 'Jump 100 Index', short: 'J100' },
 ];
 
-function LargePriceDisplay({ price, engineResult, side }: { price: number | null, engineResult: any, side: string }) {
+function LargePriceDisplay({ 
+  price, 
+  engineResult, 
+  side, 
+  latestDigit,
+  hoveredDigit
+}: { 
+  price: number | null, 
+  engineResult: any, 
+  side: string, 
+  latestDigit: number | null,
+  hoveredDigit: number | null
+}) {
   if (price === null) return null;
   
   const priceStr = price.toFixed(2);
+  const signalDigit = side === 'over' ? engineResult?.overSignal : engineResult?.underSignal;
+  const isMatch = latestDigit === signalDigit && signalDigit !== '!';
+  const isHoveredMatch = hoveredDigit === signalDigit && signalDigit !== '!';
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-center gap-8 py-4">
@@ -44,14 +58,31 @@ function LargePriceDisplay({ price, engineResult, side }: { price: number | null
       </div>
 
       {side !== 'none' && engineResult && (
-        <div className="flex flex-col items-center justify-center p-6 rounded-3xl bg-primary/10 border border-primary/20 icy-glow animate-in zoom-in-95 duration-300">
+        <div className={cn(
+          "flex flex-col items-center justify-center p-6 rounded-3xl border transition-all duration-300 icy-glow animate-in zoom-in-95",
+          (isMatch || isHoveredMatch) 
+            ? "bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.3)]" 
+            : "bg-primary/10 border-primary/20"
+        )}>
           <div className="flex items-center gap-2 mb-2">
-            <Activity className="w-4 h-4 text-primary animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-primary">Engine Signal</span>
+            {isMatch ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 animate-bounce" />
+            ) : (
+              <Activity className={cn("w-4 h-4 animate-pulse", isHoveredMatch ? "text-emerald-500" : "text-primary")} />
+            )}
+            <span className={cn(
+              "text-[10px] font-black uppercase tracking-widest",
+              (isMatch || isHoveredMatch) ? "text-emerald-500" : "text-primary"
+            )}>
+              {isMatch ? "Digit Appeared!" : "Engine Signal"}
+            </span>
           </div>
-          <div className="text-4xl font-black text-primary flex items-center gap-3">
+          <div className={cn(
+            "text-4xl font-black flex items-center gap-3",
+            (isMatch || isHoveredMatch) ? "text-emerald-500" : "text-primary"
+          )}>
             <Target className="w-8 h-8" />
-            <span>{side === 'over' ? engineResult.overSignal : engineResult.underSignal}</span>
+            <span>{signalDigit}</span>
           </div>
           <div className="mt-2 text-[9px] font-bold text-muted-foreground uppercase tracking-tighter">
             AVG: {side === 'over' ? engineResult.overAvg : engineResult.underAvg}%
@@ -195,6 +226,7 @@ export default function DigitFlowApp() {
   const [mdDigit, setMdDigit] = useState(0);
   const [mounted, setMounted] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [hoveredDigit, setHoveredDigit] = useState<number | null>(null);
 
   const { 
     distribution, 
@@ -454,7 +486,13 @@ export default function DigitFlowApp() {
                     </div>
                   )}
 
-                  <LargePriceDisplay price={latestPrice} engineResult={engineResults} side={tradeSide} />
+                  <LargePriceDisplay 
+                    price={latestPrice} 
+                    engineResult={engineResults} 
+                    side={tradeSide} 
+                    latestDigit={latestDigit}
+                    hoveredDigit={hoveredDigit}
+                  />
                   
                   <div className="space-y-8 relative pt-4">
                     <div className="flex flex-col items-center gap-3">
@@ -498,6 +536,8 @@ export default function DigitFlowApp() {
                           isSecondLow={d.digit === stats.secondLow}
                           isLatest={d.digit === latestDigit}
                           onClick={() => {}}
+                          onMouseEnter={() => setHoveredDigit(d.digit)}
+                          onMouseLeave={() => setHoveredDigit(null)}
                         />
                       ))}
                     </div>
