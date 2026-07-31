@@ -225,10 +225,15 @@ export default function DigitFlowApp() {
     const overAvg = (p0 + p1 + p2) / 3;
     const underAvg = (p9 + p8 + p7) / 3;
 
-    const findClosest = (avg: number) => {
-      let closestDigit = 0;
+    const findClosest = (avg: number, excluded: number[]) => {
+      let closestDigit: string | number = '!';
       let minDiff = Infinity;
-      distribution.forEach(d => {
+      
+      const candidates = distribution.filter(d => !excluded.includes(d.digit));
+      
+      if (candidates.length === 0) return '!';
+
+      candidates.forEach(d => {
         const diff = Math.abs(d.percentage - avg);
         if (diff < minDiff) {
           minDiff = diff;
@@ -241,8 +246,8 @@ export default function DigitFlowApp() {
     return {
       overAvg: overAvg.toFixed(2),
       underAvg: underAvg.toFixed(2),
-      overSignal: findClosest(overAvg),
-      underSignal: findClosest(underAvg)
+      overSignal: findClosest(overAvg, [0, 1]),
+      underSignal: findClosest(underAvg, [9, 8])
     };
   }, [distribution]);
 
