@@ -70,12 +70,23 @@
   @apply shadow-[0_0_20px_rgba(16,185,129,0.1)] dark:shadow-[0_0_30px_rgba(16,185,129,0.2)];
 }
 
-.digit-card-gradient {
-  background: linear-gradient(135deg, hsl(var(--card)) 0%, rgba(16, 185, 129, 0.05) 100%);
+.brand-glow {
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3);
+  animation: pulse-glow 3s infinite ease-in-out;
 }
 
-.digit-highlight-selected {
-  @apply ring-2 ring-primary shadow-[0_0_20px_rgba(16,185,129,0.4)];
+@keyframes pulse-glow {
+  0%, 100% { text-shadow: 0 0 10px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3); }
+  50% { text-shadow: 0 0 20px rgba(16, 185, 129, 0.8), 0 0 40px rgba(16, 185, 129, 0.5); }
+}
+
+.brand-bounce {
+  animation: cool-bounce 4s infinite ease-in-out;
+}
+
+@keyframes cool-bounce {
+  0%, 10%, 100% { transform: translateY(0); }
+  5% { transform: translateY(-5px) scale(1.05); }
 }
 
 .shiny-effect {
@@ -95,16 +106,16 @@
     90deg,
     transparent,
     rgba(16, 185, 129, 0.2),
-    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.6),
     rgba(16, 185, 129, 0.2),
     transparent
   );
   transform: skewX(-25deg);
-  animation: shine 4s infinite linear;
+  animation: shine 3s infinite linear;
 }
 
 @keyframes shine {
   0% { left: -150%; }
-  15% { left: 150%; }
+  20% { left: 150%; }
   100% { left: 150%; }
 }
