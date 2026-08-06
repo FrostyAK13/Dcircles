@@ -366,7 +366,7 @@ export default function DigitFlowApp() {
         {/* Background Watermark */}
         <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 opacity-[0.03] select-none">
           <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-primary/30">
-            FROSTYTOOLS
+            INDEXNAV
           </span>
         </div>
 

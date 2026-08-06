@@ -60,7 +60,7 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
           className="transition-all hover:opacity-90 active:scale-95"
         >
           <h1 className="text-sm sm:text-xl font-black tracking-tighter text-primary uppercase italic shiny-effect px-1 sm:px-2 py-0.5 rounded-lg whitespace-nowrap">
-            FROSTY TRADERS HUB
+            INDEX NAVIGATOR
           </h1>
         </a>
       </div>
