@@ -22,6 +22,10 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
     if (savedTheme) {
       setTheme(savedTheme);
       document.documentElement.classList.toggle("dark", savedTheme === "dark");
+    } else {
+      // Default to dark for the jungle theme
+      setTheme("dark");
+      document.documentElement.classList.add("dark");
     }
   }, []);
 
@@ -53,16 +57,11 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
             />
           </div>
         )}
-        <a 
-          href="https://frostydbot.site" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="transition-all hover:opacity-90 active:scale-95"
-        >
+        <div className="flex flex-col">
           <h1 className="text-sm sm:text-xl font-black tracking-tighter text-primary uppercase italic shiny-effect px-1 sm:px-2 py-0.5 rounded-lg whitespace-nowrap">
             INDEX NAVIGATOR
           </h1>
-        </a>
+        </div>
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">

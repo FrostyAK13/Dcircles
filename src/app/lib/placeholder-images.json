@@ -2,9 +2,9 @@
   "placeholderImages": [
     {
       "id": "app-logo",
-      "description": "Official INDEX NAVIGATOR branding logo with golden 'I' and data peaks.",
-      "imageUrl": "https://picsum.photos/seed/indexnav-logo/400/400",
-      "imageHint": "trading logo"
+      "description": "Official INDEX NAVIGATOR branding logo with jungle emerald 'I' and data peaks.",
+      "imageUrl": "https://picsum.photos/seed/indexnav-jungle/400/400",
+      "imageHint": "emerald logo"
     }
   ]
 }

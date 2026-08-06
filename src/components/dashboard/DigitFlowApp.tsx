@@ -54,7 +54,7 @@ function LargePriceDisplay({
   return (
     <div className="flex flex-col items-center justify-center gap-6 py-4">
       <div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-foreground">
-        <span className="drop-shadow-[0_0_15px_rgba(62,59,155,0.3)]">{priceStr}</span>
+        <span className="drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">{priceStr}</span>
       </div>
 
       {side !== 'none' && engineResult && (
@@ -133,7 +133,7 @@ function DetailedComparison({
                   className={cn(
                     "w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center",
                     selectedDigit === num 
-                      ? "bg-primary text-white shadow-[0_0_15px_rgba(62,59,155,0.5)] scale-110" 
+                      ? "bg-primary text-white shadow-[0_0_15px_rgba(16,185,129,0.5)] scale-110" 
                       : "bg-background text-muted-foreground hover:bg-primary/10"
                   )}
                 >
@@ -195,7 +195,7 @@ function DetailedComparison({
               </div>
               <div className="h-4 sm:h-6 w-full bg-muted/40 rounded-full overflow-hidden p-0.5">
                 <div 
-                  className="h-full bg-primary rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(62,59,155,0.3)]" 
+                  className="h-full bg-primary rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(16,185,129,0.3)]" 
                   style={{ width: `${val1}%` }} 
                 />
               </div>
@@ -307,19 +307,19 @@ export default function DigitFlowApp() {
     const patterns = {
       eo: lastTicks.map(d => ({
         label: d % 2 === 0 ? 'E' : 'O',
-        color: d % 2 === 0 ? 'bg-primary text-white' : 'bg-rose-500 text-white'
+        color: d % 2 === 0 ? 'bg-primary text-primary-foreground' : 'bg-rose-500 text-white'
       })),
       ou: lastTicks.map(d => ({
         label: d > ouDigit ? 'O' : d < ouDigit ? 'U' : d.toString(),
-        color: d === ouDigit ? 'bg-muted/40 text-muted-foreground' : (d > ouDigit ? 'bg-primary text-white' : 'bg-rose-500 text-white')
+        color: d === ouDigit ? 'bg-muted/40 text-muted-foreground' : (d > ouDigit ? 'bg-primary text-primary-foreground' : 'bg-rose-500 text-white')
       })),
       rf: lastPrices.slice(1).map((p, i) => ({
         label: p > lastPrices[i] ? 'R' : 'F',
-        color: p > lastPrices[i] ? 'bg-primary text-white' : 'bg-rose-500 text-white'
+        color: p > lastPrices[i] ? 'bg-primary text-primary-foreground' : 'bg-rose-500 text-white'
       })),
       md: lastTicks.map(d => ({
         label: d === mdDigit ? 'M' : 'D',
-        color: d === mdDigit ? 'bg-primary text-white' : 'bg-rose-500 text-white'
+        color: d === mdDigit ? 'bg-primary text-primary-foreground' : 'bg-rose-500 text-white'
       }))
     };
 
@@ -364,7 +364,7 @@ export default function DigitFlowApp() {
     <SidebarProvider>
       <div className="flex flex-col min-h-screen w-full bg-background text-foreground relative overflow-hidden">
         {/* Background Watermark */}
-        <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 opacity-[0.03] select-none">
+        <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 opacity-[0.05] select-none">
           <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-primary/30">
             INDEXNAV
           </span>
@@ -378,28 +378,28 @@ export default function DigitFlowApp() {
               <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start sm:justify-center w-full max-w-fit scrollbar-hide">
                 <TabsTrigger 
                   value="dashboard" 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)] shrink-0"
+                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(16,185,129,0.4)] shrink-0"
                 >
                   <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                   Analysis
                 </TabsTrigger>
                 <TabsTrigger 
                   value="scanner" 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)] shrink-0"
+                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(16,185,129,0.4)] shrink-0"
                 >
                   <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                   Scanner
                 </TabsTrigger>
                 <TabsTrigger 
                   value="digits" 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)] shrink-0"
+                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(16,185,129,0.4)] shrink-0"
                 >
                   <LayoutGrid className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                   Digits
                 </TabsTrigger>
                 <TabsTrigger 
                   value="percentage" 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(62,59,155,0.4)] shrink-0"
+                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(16,185,129,0.4)] shrink-0"
                 >
                   <Percent className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                   %
@@ -419,7 +419,7 @@ export default function DigitFlowApp() {
                           <div className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
                             <div className="relative shrink-0">
                               <BarChart2 className="w-5 h-5 text-primary" />
-                              <div className="absolute -top-1.5 -right-1.5 bg-primary text-[7px] font-bold px-1 rounded text-white">
+                              <div className="absolute -top-1.5 -right-1.5 bg-primary text-[7px] font-bold px-1 rounded text-primary-foreground">
                                 {currentMarket.short}
                               </div>
                             </div>
@@ -521,7 +521,7 @@ export default function DigitFlowApp() {
                             transform: 'translateX(-50%)'
                           }}
                         >
-                          <ChevronDown className={cn("w-6 h-6 sm:w-8 sm:h-8 fill-primary animate-bounce", latestDigit >= 5 && "rotate-180")} />
+                          <ChevronDown className={cn("w-6 h-6 sm:w-8 h-8 fill-primary animate-bounce", latestDigit >= 5 && "rotate-180")} />
                         </div>
                       )}
 
