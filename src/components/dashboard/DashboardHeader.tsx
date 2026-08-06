@@ -58,9 +58,16 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
           </div>
         )}
         <div className="flex flex-col">
-          <h1 className="text-sm sm:text-xl font-black tracking-tighter text-primary uppercase italic shiny-effect px-1 sm:px-2 py-0.5 rounded-lg whitespace-nowrap">
-            INDEX NAVIGATOR
-          </h1>
+          <a 
+            href="https://indexnavigator.site" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="block hover:opacity-80 transition-opacity cursor-pointer no-underline"
+          >
+            <h1 className="text-sm sm:text-xl font-black tracking-tighter text-primary uppercase italic shiny-effect px-1 sm:px-2 py-0.5 rounded-lg whitespace-nowrap">
+              INDEX NAVIGATOR
+            </h1>
+          </a>
         </div>
       </div>
 
