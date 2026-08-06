@@ -64,7 +64,7 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
             rel="noopener noreferrer"
             className="block hover:opacity-90 transition-all cursor-pointer no-underline group"
           >
-            <h1 className="text-sm sm:text-2xl font-black tracking-[0.1em] text-primary uppercase italic shiny-effect brand-glow brand-bounce px-2 sm:px-4 py-1 rounded-xl whitespace-nowrap bg-primary/10 border-2 border-primary/20 transition-all group-hover:bg-primary/20 group-hover:scale-105">
+            <h1 className="text-sm sm:text-2xl font-black tracking-[0.1em] text-primary uppercase italic shiny-effect brand-glow brand-vibrate px-2 sm:px-4 py-1 rounded-xl whitespace-nowrap bg-primary/10 border-2 border-primary/20 transition-all group-hover:bg-primary/20 group-hover:scale-105">
               INDEX NAVIGATOR
             </h1>
           </a>

@@ -80,17 +80,16 @@
   50% { text-shadow: 0 0 20px rgba(16, 185, 129, 0.9), 0 0 40px rgba(16, 185, 129, 0.6); opacity: 1; }
 }
 
-.brand-bounce {
+.brand-vibrate {
   display: inline-block;
-  animation: vibration 0.15s infinite linear;
+  animation: smooth-vibration 0.4s infinite ease-in-out;
 }
 
-@keyframes vibration {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(0.5px, 0.5px); }
-  50% { transform: translate(-0.5px, 0.5px); }
-  75% { transform: translate(0.5px, -0.5px); }
-  100% { transform: translate(0, 0); }
+@keyframes smooth-vibration {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(-0.2px, 0.2px, 0); }
+  50% { transform: translate3d(0.2px, -0.1px, 0); }
+  75% { transform: translate3d(-0.1px, -0.2px, 0); }
 }
 
 .shiny-effect {
