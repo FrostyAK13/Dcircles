@@ -4,48 +4,48 @@
 
 @layer base {
   :root {
-    --background: 160 40% 98%;
-    --foreground: 160 50% 5%;
+    --background: 289 64% 98%;
+    --foreground: 289 50% 5%;
     --card: 0 0% 100%;
-    --card-foreground: 160 50% 5%;
+    --card-foreground: 289 50% 5%;
     --popover: 0 0% 100%;
-    --popover-foreground: 160 50% 5%;
-    --primary: 158 82% 30%;
-    --primary-foreground: 160 40% 98%;
-    --secondary: 160 30% 96%;
-    --secondary-foreground: 160 50% 10%;
-    --muted: 160 20% 90%;
-    --muted-foreground: 160 10% 40%;
-    --accent: 158 82% 30%;
-    --accent-foreground: 160 40% 98%;
+    --popover-foreground: 289 50% 5%;
+    --primary: 263 96% 61%;
+    --primary-foreground: 289 40% 98%;
+    --secondary: 289 30% 96%;
+    --secondary-foreground: 289 50% 10%;
+    --muted: 289 20% 90%;
+    --muted-foreground: 289 10% 40%;
+    --accent: 263 96% 61%;
+    --accent-foreground: 289 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 160 20% 90%;
-    --input: 160 20% 90%;
-    --ring: 158 82% 30%;
+    --border: 289 20% 90%;
+    --input: 289 20% 90%;
+    --ring: 263 96% 61%;
     --radius: 1rem;
   }
 
   .dark {
-    --background: 160 50% 3%;
-    --foreground: 160 20% 98%;
-    --card: 160 50% 6%;
-    --card-foreground: 160 20% 98%;
-    --popover: 160 50% 6%;
-    --popover-foreground: 160 20% 98%;
-    --primary: 158 82% 38%;
-    --primary-foreground: 160 10% 4%;
-    --secondary: 160 40% 10%;
-    --secondary-foreground: 160 20% 98%;
-    --muted: 160 40% 12%;
-    --muted-foreground: 160 20% 65%;
-    --accent: 158 82% 38%;
-    --accent-foreground: 160 20% 98%;
+    --background: 289 64% 5%;
+    --foreground: 289 20% 98%;
+    --card: 289 64% 8%;
+    --card-foreground: 289 20% 98%;
+    --popover: 289 64% 8%;
+    --popover-foreground: 289 20% 98%;
+    --primary: 263 96% 61%;
+    --primary-foreground: 289 10% 4%;
+    --secondary: 290 69% 15%;
+    --secondary-foreground: 289 20% 98%;
+    --muted: 290 69% 12%;
+    --muted-foreground: 289 20% 65%;
+    --accent: 263 96% 61%;
+    --accent-foreground: 289 20% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 160 40% 12%;
-    --input: 160 40% 12%;
-    --ring: 158 82% 38%;
+    --border: 290 69% 18%;
+    --input: 290 69% 18%;
+    --ring: 263 96% 61%;
   }
 }
 
@@ -56,8 +56,8 @@
   body {
     @apply bg-background text-foreground font-body antialiased selection:bg-primary/30 transition-colors duration-300;
     background-image: 
-      linear-gradient(to right, rgba(16, 185, 129, 0.03) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(16, 185, 129, 0.03) 1px, transparent 1px);
+      linear-gradient(to right, rgba(133, 59, 251, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(133, 59, 251, 0.03) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 }
@@ -67,17 +67,17 @@
 }
 
 .icy-glow {
-  @apply shadow-[0_0_20px_rgba(16,185,129,0.1)] dark:shadow-[0_0_30px_rgba(16,185,129,0.2)];
+  @apply shadow-[0_0_20px_rgba(133,59,251,0.1)] dark:shadow-[0_0_30px_rgba(133,59,251,0.2)];
 }
 
 .brand-glow {
-  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3);
+  text-shadow: 0 0 10px rgba(133, 59, 251, 0.5), 0 0 20px rgba(133, 59, 251, 0.3);
   animation: pulse-glow 2s infinite ease-in-out;
 }
 
 @keyframes pulse-glow {
-  0%, 100% { text-shadow: 0 0 10px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3); opacity: 0.9; }
-  50% { text-shadow: 0 0 20px rgba(16, 185, 129, 0.9), 0 0 40px rgba(16, 185, 129, 0.6); opacity: 1; }
+  0%, 100% { text-shadow: 0 0 10px rgba(133, 59, 251, 0.5), 0 0 20px rgba(133, 59, 251, 0.3); opacity: 0.9; }
+  50% { text-shadow: 0 0 20px rgba(133, 59, 251, 0.9), 0 0 40px rgba(133, 59, 251, 0.6); opacity: 1; }
 }
 
 .brand-vibrate {
@@ -108,9 +108,9 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(16, 185, 129, 0.2),
+    rgba(133, 59, 251, 0.2),
     rgba(255, 255, 255, 0.7),
-    rgba(16, 185, 129, 0.2),
+    rgba(133, 59, 251, 0.2),
     transparent
   );
   transform: skewX(-25deg);

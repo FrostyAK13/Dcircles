@@ -23,7 +23,6 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
       setTheme(savedTheme);
       document.documentElement.classList.toggle("dark", savedTheme === "dark");
     } else {
-      // Default to dark for the jungle theme
       setTheme("dark");
       document.documentElement.classList.add("dark");
     }
@@ -37,8 +36,8 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
   };
 
   const statusColors = {
-    connected: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.2)]",
-    connecting: "bg-primary/10 text-primary border-primary/20",
+    connected: "bg-primary/10 text-primary border-primary/20 shadow-[0_0_10px_rgba(133,59,251,0.2)]",
+    connecting: "bg-secondary text-secondary-foreground border-border",
     disconnected: "bg-rose-500/10 text-rose-500 border-rose-500/20",
     error: "bg-rose-500/10 text-rose-500 border-rose-500/20"
   };
@@ -88,7 +87,7 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
             </Button>
             
             <Badge variant="outline" className={cn("px-2 sm:px-5 py-1.5 flex items-center gap-1.5 sm:gap-2 text-[8px] sm:text-[11px] font-black uppercase tracking-[0.2em] rounded-xl transition-all border-2", statusColors[status])}>
-              <div className={cn("w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-ping", status === 'connected' ? "bg-emerald-500" : "bg-current")} />
+              <div className={cn("w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-ping", status === 'connected' ? "bg-primary" : "bg-current")} />
               <span className="hidden xs:inline">{status}</span>
             </Badge>
           </div>
