@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -17,12 +16,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
   { id: 'R_10', name: 'Volatility 10 Index', short: '10' },
+  { id: '1HZ15V', name: 'Volatility 15 (1s) Index', short: '15 (1s)' },
   { id: '1HZ25V', name: 'Volatility 25 (1s) Index', short: '25 (1s)' },
   { id: 'R_25', name: 'Volatility 25 Index', short: '25' },
+  { id: '1HZ30V', name: 'Volatility 30 (1s) Index', short: '30 (1s)' },
   { id: '1HZ50V', name: 'Volatility 50 (1s) Index', short: '50 (1s)' },
   { id: 'R_50', name: 'Volatility 50 Index', short: '50' },
   { id: '1HZ75V', name: 'Volatility 75 (1s) Index', short: '75 (1s)' },
   { id: 'R_75', name: 'Volatility 75 Index', short: '75' },
+  { id: '1HZ90V', name: 'Volatility 90 (1s) Index', short: '90 (1s)' },
   { id: '1HZ100V', name: 'Volatility 100 (1s) Index', short: '100 (1s)' },
   { id: 'R_100', name: 'Volatility 100 Index', short: '100' },
   { id: 'JD10', name: 'Jump 10 Index', short: 'J10' },
@@ -429,7 +431,7 @@ export default function DigitFlowApp() {
                                 {currentMarket.short}
                               </div>
                             </div>
-                            <div className="flex flex-col min-w-0">
+                            <div className="flex flex-col min-0">
                               <div className="flex items-center gap-1">
                                 <span className="text-[10px] sm:text-[11px] font-bold text-foreground group-hover:text-primary transition-colors truncate">
                                   {currentMarket.name}
