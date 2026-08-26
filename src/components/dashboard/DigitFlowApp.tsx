@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -9,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2, Loader2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -373,45 +374,50 @@ export default function DigitFlowApp() {
         <DashboardHeader status={status} />
         
         <main className="relative z-10 flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6 sm:space-y-8 overflow-y-auto">
-          <Tabs defaultValue="dashboard" className="w-full">
-            <div className="flex justify-center mb-6 sm:mb-8 sticky top-0 z-40 bg-background/80 backdrop-blur-md py-2 -mx-3 sm:mx-0 px-3">
-              <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start sm:justify-center w-full max-w-fit scrollbar-hide">
-                <TabsTrigger 
-                  value="dashboard" 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
-                >
-                  <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
-                  Analysis
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="scanner" 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
-                >
-                  <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
-                  Scanner
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="digits" 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
-                >
-                  <LayoutGrid className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
-                  Digits
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="percentage" 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
-                >
-                  <Percent className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
-                  %
-                </TabsTrigger>
-              </TabsList>
+          {!mounted ? (
+            <div className="w-full h-96 flex flex-col items-center justify-center gap-4">
+              <Loader2 className="w-12 h-12 text-primary animate-spin" />
+              <p className="text-sm font-black uppercase tracking-[0.3em] text-primary animate-pulse">Initializing Navigator...</p>
             </div>
+          ) : (
+            <Tabs defaultValue="dashboard" className="w-full">
+              <div className="flex justify-center mb-6 sm:mb-8 sticky top-0 z-40 bg-background/80 backdrop-blur-md py-2 -mx-3 sm:mx-0 px-3">
+                <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start sm:justify-center w-full max-w-fit scrollbar-hide">
+                  <TabsTrigger 
+                    value="dashboard" 
+                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
+                  >
+                    <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
+                    Analysis
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="scanner" 
+                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
+                  >
+                    <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
+                    Scanner
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="digits" 
+                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
+                  >
+                    <LayoutGrid className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
+                    Digits
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="percentage" 
+                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
+                  >
+                    <Percent className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
+                    %
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-            <TabsContent value="dashboard" className="space-y-6 sm:space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-              <Card className="border-none bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
-                <CardContent className="p-4 sm:p-8 lg:p-12 space-y-6 sm:space-y-8">
-                  {/* Controls Toolbar - Responsive Layout */}
-                  {mounted && (
+              <TabsContent value="dashboard" className="space-y-6 sm:space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
+                <Card className="border-none bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
+                  <CardContent className="p-4 sm:p-8 lg:p-12 space-y-6 sm:space-y-8">
+                    {/* Controls Toolbar */}
                     <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-between w-full">
                       {/* Market Selector */}
                       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
@@ -484,189 +490,189 @@ export default function DigitFlowApp() {
                         </Select>
                       </div>
                     </div>
-                  )}
 
-                  <LargePriceDisplay 
-                    price={latestPrice} 
-                    engineResult={engineResults} 
-                    side={tradeSide} 
-                    latestDigit={latestDigit}
-                    hoveredDigit={hoveredDigit}
-                  />
-                  
-                  <div className="space-y-6 sm:space-y-8 relative">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-muted/30 border border-border/40 shadow-inner">
-                        <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Window</span>
-                        <Input 
-                          type="number"
-                          value={windowSize}
-                          onChange={(e) => handleWindowSizeChange(parseInt(e.target.value))}
-                          min={5}
-                          max={HISTORY_BUFFER_SIZE}
-                          className="w-16 sm:w-20 h-6 sm:h-7 p-0 text-xs sm:text-sm font-black text-primary bg-transparent border-none text-center focus-visible:ring-0 tabular-nums"
-                        />
-                        <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Ticks</span>
+                    <LargePriceDisplay 
+                      price={latestPrice} 
+                      engineResult={engineResults} 
+                      side={tradeSide} 
+                      latestDigit={latestDigit}
+                      hoveredDigit={hoveredDigit}
+                    />
+                    
+                    <div className="space-y-6 sm:space-y-8 relative">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-muted/30 border border-border/40 shadow-inner">
+                          <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Window</span>
+                          <Input 
+                            type="number"
+                            value={windowSize}
+                            onChange={(e) => handleWindowSizeChange(parseInt(e.target.value))}
+                            min={5}
+                            max={HISTORY_BUFFER_SIZE}
+                            className="w-16 sm:w-20 h-6 sm:h-7 p-0 text-xs sm:text-sm font-black text-primary bg-transparent border-none text-center focus-visible:ring-0 tabular-nums"
+                          />
+                          <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Ticks</span>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-5 gap-2 sm:gap-8 max-w-4xl mx-auto relative px-1 sm:px-4">
+                        {/* Real-time Indicator Arrow */}
+                        {latestDigit !== null && (
+                          <div 
+                            className="absolute z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"
+                            style={{
+                              left: `${(latestDigit % 5) * 20 + 10}%`,
+                              top: latestDigit >= 5 ? '55%' : '-1.5rem',
+                              transform: 'translateX(-50%)'
+                            }}
+                          >
+                            <ChevronDown className={cn("w-6 h-6 sm:w-8 h-8 fill-primary animate-bounce", latestDigit >= 5 && "rotate-180")} />
+                          </div>
+                        )}
+
+                        {distribution.map((d) => (
+                          <DigitCard
+                            key={d.digit}
+                            digit={d.digit}
+                            percentage={d.percentage}
+                            isHigh={d.digit === stats.high}
+                            isSecondHigh={d.digit === stats.secondHigh}
+                            isLow={d.digit === stats.low}
+                            isSecondLow={d.digit === stats.secondLow}
+                            isLatest={d.digit === latestDigit}
+                            onClick={() => {}}
+                            onMouseEnter={() => setHoveredDigit(d.digit)}
+                            onMouseLeave={() => setHoveredDigit(null)}
+                          />
+                        ))}
                       </div>
                     </div>
-                    
-                    <div className="grid grid-cols-5 gap-2 sm:gap-8 max-w-4xl mx-auto relative px-1 sm:px-4">
-                      {/* Real-time Indicator Arrow - Responsive Position */}
-                      {mounted && latestDigit !== null && (
-                        <div 
-                          className="absolute z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"
-                          style={{
-                            left: `${(latestDigit % 5) * 20 + 10}%`,
-                            top: latestDigit >= 5 ? '55%' : '-1.5rem',
-                            transform: 'translateX(-50%)'
-                          }}
-                        >
-                          <ChevronDown className={cn("w-6 h-6 sm:w-8 h-8 fill-primary animate-bounce", latestDigit >= 5 && "rotate-180")} />
-                        </div>
-                      )}
+                  </CardContent>
+                </Card>
 
-                      {distribution.map((d) => (
-                        <DigitCard
-                          key={d.digit}
-                          digit={d.digit}
-                          percentage={d.percentage}
-                          isHigh={d.digit === stats.high}
-                          isSecondHigh={d.digit === stats.secondHigh}
-                          isLow={d.digit === stats.low}
-                          isSecondLow={d.digit === stats.secondLow}
-                          isLatest={d.digit === latestDigit}
-                          onClick={() => {}}
-                          onMouseEnter={() => setHoveredDigit(d.digit)}
-                          onMouseLeave={() => setHoveredDigit(null)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                <DetailedComparison 
-                  title="Over / Under Analysis"
-                  label1="Over"
-                  label2="Under"
-                  val1={stats.comparisons.over}
-                  val2={stats.comparisons.under}
-                  count1={stats.counts.over}
-                  count2={stats.counts.under}
-                  pattern={stats.patterns.ou}
-                  showDigitSelector
-                  selectedDigit={ouDigit}
-                  onDigitSelect={setOuDigit}
-                />
-                <DetailedComparison 
-                  title="Even / Odd Analysis"
-                  label1="Even"
-                  label2="Odd"
-                  val1={stats.comparisons.even}
-                  val2={stats.comparisons.odd}
-                  count1={stats.counts.even}
-                  count2={stats.counts.odd}
-                  pattern={stats.patterns.eo}
-                />
-                <DetailedComparison 
-                  title="Matches / Differs"
-                  label1="Matches"
-                  label2="Differs"
-                  val1={stats.comparisons.matches}
-                  val2={stats.comparisons.differs}
-                  count1={stats.counts.matches}
-                  count2={stats.counts.differs}
-                  pattern={stats.patterns.md}
-                  showDigitSelector
-                  selectedDigit={mdDigit}
-                  onDigitSelect={setMdDigit}
-                />
-                <DetailedComparison 
-                  title="Rise / Fall Trend"
-                  label1="Rise"
-                  label2="Fall"
-                  val1={stats.comparisons.rise}
-                  val2={stats.comparisons.fall}
-                  count1={stats.counts.rise}
-                  count2={stats.counts.fall}
-                  pattern={stats.patterns.rf}
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="scanner" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
-                <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                      <BarChart2 className="w-3.5 h-3.5 sm:w-4 h-4" />
-                      Live Market Scanner
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary animate-pulse" />
-                      <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Real-time Stream</span>
-                    </div>
-                  </div>
-                </CardHeader>
-                <div className="flex-1 bg-black/5 dark:bg-white/5 relative">
-                  <iframe 
-                    src="https://tracktool.netlify.app/signals" 
-                    className="absolute inset-0 w-full h-full border-none"
-                    title="Market Scanner"
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                  <DetailedComparison 
+                    title="Over / Under Analysis"
+                    label1="Over"
+                    label2="Under"
+                    val1={stats.comparisons.over}
+                    val2={stats.comparisons.under}
+                    count1={stats.counts.over}
+                    count2={stats.counts.under}
+                    pattern={stats.patterns.ou}
+                    showDigitSelector
+                    selectedDigit={ouDigit}
+                    onDigitSelect={setOuDigit}
+                  />
+                  <DetailedComparison 
+                    title="Even / Odd Analysis"
+                    label1="Even"
+                    label2="Odd"
+                    val1={stats.comparisons.even}
+                    val2={stats.comparisons.odd}
+                    count1={stats.counts.even}
+                    count2={stats.counts.odd}
+                    pattern={stats.patterns.eo}
+                  />
+                  <DetailedComparison 
+                    title="Matches / Differs"
+                    label1="Matches"
+                    label2="Differs"
+                    val1={stats.comparisons.matches}
+                    val2={stats.comparisons.differs}
+                    count1={stats.counts.matches}
+                    count2={stats.counts.differs}
+                    pattern={stats.patterns.md}
+                    showDigitSelector
+                    selectedDigit={mdDigit}
+                    onDigitSelect={setMdDigit}
+                  />
+                  <DetailedComparison 
+                    title="Rise / Fall Trend"
+                    label1="Rise"
+                    label2="Fall"
+                    val1={stats.comparisons.rise}
+                    val2={stats.comparisons.fall}
+                    count1={stats.counts.rise}
+                    count2={stats.counts.fall}
+                    pattern={stats.patterns.rf}
                   />
                 </div>
-              </Card>
-            </TabsContent>
+              </TabsContent>
 
-            <TabsContent value="digits" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
-                <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                      <LayoutGrid className="w-3.5 h-3.5 sm:w-4 h-4" />
-                      Advanced Digits
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary animate-pulse" />
-                      <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Active</span>
+              <TabsContent value="scanner" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
+                <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
+                  <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                        <BarChart2 className="w-3.5 h-3.5 sm:w-4 h-4" />
+                        Live Market Scanner
+                      </CardTitle>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary animate-pulse" />
+                        <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Real-time Stream</span>
+                      </div>
                     </div>
+                  </CardHeader>
+                  <div className="flex-1 bg-black/5 dark:bg-white/5 relative">
+                    <iframe 
+                      src="https://tracktool.netlify.app/signals" 
+                      className="absolute inset-0 w-full h-full border-none"
+                      title="Market Scanner"
+                    />
                   </div>
-                </CardHeader>
-                <div className="flex-1 bg-black/5 dark:bg-white/5 relative">
-                  <iframe 
-                    src="https://tracktool.netlify.app/digitshome" 
-                    className="absolute inset-0 w-full h-full border-none"
-                    title="Digits View"
-                  />
-                </div>
-              </Card>
-            </TabsContent>
+                </Card>
+              </TabsContent>
 
-            <TabsContent value="percentage" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
-                <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
-                      <Percent className="w-3.5 h-3.5 sm:w-4 h-4" />
-                      Percentage Analysis
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary animate-pulse" />
-                      <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Live Data</span>
+              <TabsContent value="digits" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
+                <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
+                  <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                        <LayoutGrid className="w-3.5 h-3.5 sm:w-4 h-4" />
+                        Advanced Digits
+                      </CardTitle>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary animate-pulse" />
+                        <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Active</span>
+                      </div>
                     </div>
+                  </CardHeader>
+                  <div className="flex-1 bg-black/5 dark:bg-white/5 relative">
+                    <iframe 
+                      src="https://tracktool.netlify.app/digitshome" 
+                      className="absolute inset-0 w-full h-full border-none"
+                      title="Digits View"
+                    />
                   </div>
-                </CardHeader>
-                <div className="flex-1 bg-black/5 dark:bg-white/5 relative">
-                  <iframe 
-                    src="https://api.binarytool.site" 
-                    className="absolute inset-0 w-full h-full border-none"
-                    title="Percentage Tool"
-                  />
-                </div>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="percentage" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
+                <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
+                  <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                        <Percent className="w-3.5 h-3.5 sm:w-4 h-4" />
+                        Percentage Analysis
+                      </CardTitle>
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary animate-pulse" />
+                        <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Live Data</span>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <div className="flex-1 bg-black/5 dark:bg-white/5 relative">
+                    <iframe 
+                      src="https://api.binarytool.site" 
+                      className="absolute inset-0 w-full h-full border-none"
+                      title="Percentage Tool"
+                    />
+                  </div>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          )}
         </main>
       </div>
     </SidebarProvider>
