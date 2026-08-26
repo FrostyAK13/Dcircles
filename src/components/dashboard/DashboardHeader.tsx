@@ -36,7 +36,7 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
   };
 
   const statusColors = {
-    connected: "bg-primary/10 text-primary border-primary/20 shadow-[0_0_10px_rgba(133,59,251,0.2)]",
+    connected: "bg-primary/10 text-primary border-primary/20 shadow-[0_0_10px_rgba(0,166,166,0.2)]",
     connecting: "bg-secondary text-secondary-foreground border-border",
     disconnected: "bg-rose-500/10 text-rose-500 border-rose-500/20",
     error: "bg-rose-500/10 text-rose-500 border-rose-500/20"

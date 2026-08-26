@@ -54,14 +54,14 @@ function LargePriceDisplay({
   return (
     <div className="flex flex-col items-center justify-center gap-6 py-4">
       <div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-foreground">
-        <span className="drop-shadow-[0_0_15px_rgba(133,59,251,0.3)]">{priceStr}</span>
+        <span className="drop-shadow-[0_0_15px_rgba(0,166,166,0.3)]">{priceStr}</span>
       </div>
 
       {side !== 'none' && engineResult && (
         <div className={cn(
           "flex flex-col items-center justify-center p-4 sm:p-6 rounded-3xl border transition-all duration-300 icy-glow animate-in zoom-in-95 w-full max-w-[200px]",
           (isMatch || isHoveredMatch) 
-            ? "bg-primary/20 border-primary/50 shadow-[0_0_20px_rgba(133,59,251,0.4)]" 
+            ? "bg-primary/20 border-primary/50 shadow-[0_0_20px_rgba(0,166,166,0.4)]" 
             : "bg-primary/10 border-primary/20"
         )}>
           <div className="flex items-center gap-2 mb-2">
@@ -133,7 +133,7 @@ function DetailedComparison({
                   className={cn(
                     "w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center",
                     selectedDigit === num 
-                      ? "bg-primary text-white shadow-[0_0_15px_rgba(133,59,251,0.5)] scale-110" 
+                      ? "bg-primary text-white shadow-[0_0_15px_rgba(0,166,166,0.5)] scale-110" 
                       : "bg-background text-muted-foreground hover:bg-primary/10"
                   )}
                 >
@@ -195,7 +195,7 @@ function DetailedComparison({
               </div>
               <div className="h-4 sm:h-6 w-full bg-muted/40 rounded-full overflow-hidden p-0.5">
                 <div 
-                  className="h-full bg-primary rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(133,59,251,0.3)]" 
+                  className="h-full bg-primary rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(0,166,166,0.3)]" 
                   style={{ width: `${val1}%` }} 
                 />
               </div>
@@ -378,28 +378,28 @@ export default function DigitFlowApp() {
               <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start sm:justify-center w-full max-w-fit scrollbar-hide">
                 <TabsTrigger 
                   value="dashboard" 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(133,59,251,0.4)] shrink-0"
+                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
                 >
                   <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                   Analysis
                 </TabsTrigger>
                 <TabsTrigger 
                   value="scanner" 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(133,59,251,0.4)] shrink-0"
+                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
                 >
                   <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                   Scanner
                 </TabsTrigger>
                 <TabsTrigger 
                   value="digits" 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(133,59,251,0.4)] shrink-0"
+                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
                 >
                   <LayoutGrid className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                   Digits
                 </TabsTrigger>
                 <TabsTrigger 
                   value="percentage" 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(133,59,251,0.4)] shrink-0"
+                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
                 >
                   <Percent className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                   %
