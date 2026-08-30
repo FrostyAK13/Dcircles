@@ -163,22 +163,49 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
     if (ema20 && ema50 && rsi && atr) {
       if (ema20 > ema50 && current > ema20 && rsi >= 55 && rsi <= 70 && current > Math.max(...last3)) {
         const barrier = current - (atr * 0.2);
-        return { signal: `HIGHER`, direction: 'HIGHER', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: rsi, barrier: barrier.toFixed(3) };
+        return { signal: `HIGHER | Barrier: ${barrier.toFixed(3)}`, direction: 'HIGHER', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: rsi, barrier: barrier.toFixed(3) };
       }
       if (ema20 < ema50 && current < ema20 && rsi >= 30 && rsi <= 45 && current < Math.min(...last3)) {
         const barrier = current + (atr * 0.2);
-        return { signal: `LOWER`, direction: 'LOWER', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: 100 - rsi, barrier: barrier.toFixed(3) };
+        return { signal: `LOWER | Barrier: ${barrier.toFixed(3)}`, direction: 'LOWER', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: 100 - rsi, barrier: barrier.toFixed(3) };
       }
     }
   }
 
   if (strategy === 'ONLY_UPS_DOWNS') {
-    if (prices.length >= 5) {
-      const last5 = prices.slice(-5);
-      const isUp = last5.every((p, i) => i === 0 || p > last5[i - 1]);
-      const isDown = last5.every((p, i) => i === 0 || p < last5[i - 1]);
-      if (isUp) return { signal: 'ONLY UPS', direction: 'ONLY UPS', color: 'text-emerald-400 font-black', led: 'bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,1)]', flash: true, timing: 'VELOCITY UP', isHit: true, score: 95, barrier: null };
-      if (isDown) return { signal: 'ONLY DOWNS', direction: 'ONLY DOWNS', color: 'text-rose-400 font-black', led: 'bg-rose-400 shadow-[0_0_20px_rgba(251,113,133,1)]', flash: true, timing: 'VELOCITY DOWN', isHit: true, score: 95, barrier: null };
+    if (prices.length < 71) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
+    if (lastSignalTime && Date.now() - lastSignalTime < 20000) return { ...defaultState, signal: 'COOLDOWN', timing: 'WAITING', color: 'text-muted-foreground/40' };
+
+    const ema8 = calculateEMA(prices, 8);
+    const ema21 = calculateEMA(prices, 21);
+    
+    if (ema8 !== null && ema21 !== null) {
+      const latest5 = prices.slice(-5);
+      const prior20 = prices.slice(-25, -5);
+      const prior50 = prices.slice(-55, -5);
+      const last10 = prices.slice(-10);
+
+      const isStrictlyRising = latest5.every((p, i) => i === 0 || p > latest5[i - 1]);
+      const isStrictlyFalling = latest5.every((p, i) => i === 0 || p < latest5[i - 1]);
+
+      const highestPrior20 = Math.max(...prior20);
+      const lowestPrior20 = Math.min(...prior20);
+      const currentPrice = prices[prices.length - 1];
+      
+      const noEqualTicks = last10.every((p, i) => i === 0 || p !== last10[i - 1]);
+
+      const avgMoveLatest5 = latest5.reduce((sum, p, i) => i === 0 ? 0 : sum + Math.abs(p - latest5[i-1]), 0) / 4;
+      const avgMovePrior50 = prior50.reduce((sum, p, i) => i === 0 ? 0 : sum + Math.abs(p - prior50[i-1]), 0) / 49;
+
+      const velocityConfirmed = avgMoveLatest5 >= (1.25 * avgMovePrior50);
+
+      if (ema8 > ema21 && isStrictlyRising && currentPrice > highestPrior20 && velocityConfirmed && noEqualTicks) {
+        return { signal: 'ONLY UPS | Duration: 2 ticks', direction: 'ONLY UPS', color: 'text-emerald-400 font-black', led: 'bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,1)]', flash: true, timing: 'DURATION: 2T', isHit: true, score: 98, barrier: null };
+      }
+
+      if (ema8 < ema21 && isStrictlyFalling && currentPrice < lowestPrior20 && velocityConfirmed && noEqualTicks) {
+        return { signal: 'ONLY DOWNS | Duration: 2 ticks', direction: 'ONLY DOWNS', color: 'text-rose-400 font-black', led: 'bg-rose-400 shadow-[0_0_20px_rgba(251,113,133,1)]', flash: true, timing: 'DURATION: 2T', isHit: true, score: 98, barrier: null };
+      }
     }
   }
 
@@ -271,7 +298,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
             isGolden ? "bg-amber-400 text-black border-amber-500" : isFlashy ? "bg-primary text-white border-primary shadow-[0_0_15px_rgba(0,166,166,0.5)]" : "bg-black/20 text-muted-foreground/50 border-transparent"
           )}>
             <Clock className="w-2.5 h-2.5" />
-            {isFlashy ? (countdown > 0 ? `${strategy === 'MATCHES' ? 'RUN BOT' : 'ENTRY NOW'} (${countdown}s)` : "ACTIVE SIGNAL") : analysis.timing}
+            {isFlashy ? (countdown > 0 ? `${strategy === 'MATCHES' ? 'RUN BOT' : (strategy === 'ONLY_UPS_DOWNS' ? '2T DURATION' : 'ENTRY NOW')} (${countdown}s)` : "ACTIVE SIGNAL") : analysis.timing}
           </div>
           {expiryTimestamp && (
             <div className={cn(
@@ -286,12 +313,17 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
       </div>
       
       <div className="flex flex-col items-center gap-1.5 w-full z-10">
-        <span className={cn(
-          "text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-center px-1 truncate w-full",
-          isGolden ? "text-amber-500" : isSelected || isFlashy ? "text-primary" : "text-muted-foreground/40"
-        )}>
-          {market.name.replace('Index', '').trim()}
-        </span>
+        <div className="flex flex-col items-center">
+           <span className={cn(
+            "text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-center px-1 truncate w-full",
+            isGolden ? "text-amber-500" : isSelected || isFlashy ? "text-primary" : "text-muted-foreground/40"
+          )}>
+            {market.name.replace('Index', '').trim()}
+          </span>
+          {strategy === 'RISE_FALL' && (
+            <span className="text-[6px] font-bold text-muted-foreground/40 uppercase tracking-[0.1em] mt-0.5">100T | 5T Target</span>
+          )}
+        </div>
         
         <div className={cn(
           "flex items-center gap-2 px-3 py-1.5 rounded-xl border mt-1 w-full justify-center transition-all duration-500",
@@ -343,8 +375,8 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
       case 'EVEN_ODD': return '100 Ticks Density / 20 Ticks Momentum';
       case 'MATCHES': return '200 Ticks Density / 50 Ticks Momentum';
       case 'RISE_FALL': return '100 Ticks Analysis / 5 Ticks Duration';
-      case 'HIGHER_LOWER': return '50 Ticks EMA & ATR Analysis';
-      case 'ONLY_UPS_DOWNS': return '5 Ticks Consecutive Velocity';
+      case 'HIGHER_LOWER': return '50 Ticks SMA & ATR Analysis';
+      case 'ONLY_UPS_DOWNS': return 'EMA & Velocity & Breakout Analysis';
       default: return 'Real-time Statistical Engine';
     }
   }, [strategy]);
