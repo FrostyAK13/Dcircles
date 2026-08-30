@@ -239,7 +239,7 @@ function MarketCardGrid({
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-16 p-4 max-w-7xl mx-auto">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 p-4 max-w-7xl mx-auto">
       {CONTINUOUS_INDICES.map((market) => {
         const isActive = currentSymbol === market.id;
         const trend = isActive ? activeTrend : getPseudoTrend(market.id);
@@ -249,38 +249,38 @@ function MarketCardGrid({
             key={market.id}
             onClick={() => onSelect(market.id)}
             className={cn(
-              "group relative flex flex-col items-center justify-center p-12 sm:p-20 rounded-[4rem] border-4 transition-all duration-500",
+              "group relative flex flex-col items-center justify-center p-6 sm:p-8 rounded-[2rem] border-2 transition-all duration-300",
               isActive 
-                ? "bg-primary/20 border-primary shadow-[0_0_60px_rgba(0,166,166,0.6)] scale-[1.1] z-20" 
-                : "bg-muted/20 border-border/30 hover:border-primary/40 hover:bg-muted/40 hover:scale-[1.05]"
+                ? "bg-primary/20 border-primary shadow-[0_0_30px_rgba(0,166,166,0.4)] scale-[1.05] z-20" 
+                : "bg-muted/20 border-border/30 hover:border-primary/40 hover:bg-muted/40 hover:scale-[1.02]"
             )}
           >
             <div className={cn(
-              "w-28 h-28 sm:w-40 sm:h-40 rounded-[2.5rem] flex items-center justify-center mb-6 sm:mb-10 transition-all duration-500 shadow-2xl relative overflow-hidden",
+              "w-12 h-12 sm:w-16 sm:h-16 rounded-[1rem] flex items-center justify-center mb-4 transition-all duration-300 shadow-lg relative overflow-hidden",
               isActive 
-                ? "bg-primary text-white scale-110 shadow-primary/30" 
+                ? "bg-primary text-white scale-110 shadow-primary/20" 
                 : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
             )}>
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50" />
               {trend === 'up' ? (
-                <TrendingUp className={cn("w-16 h-16 sm:w-24 sm:h-24 relative z-10", isActive && "animate-bounce")} />
+                <TrendingUp className={cn("w-7 h-7 sm:w-9 sm:h-9 relative z-10", isActive && "animate-bounce")} />
               ) : trend === 'down' ? (
-                <TrendingDown className={cn("w-16 h-16 sm:w-24 sm:h-24 relative z-10", isActive && "animate-bounce")} />
+                <TrendingDown className={cn("w-7 h-7 sm:w-9 sm:h-9 relative z-10", isActive && "animate-bounce")} />
               ) : (
-                <Activity className={cn("w-16 h-16 sm:w-24 sm:h-24 relative z-10", isActive && "animate-pulse")} />
+                <Activity className={cn("w-7 h-7 sm:w-9 sm:h-9 relative z-10", isActive && "animate-pulse")} />
               )}
             </div>
             
-            <div className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-1.5">
               <span className={cn(
-                "text-sm sm:text-2xl font-black uppercase tracking-[0.3em] text-center line-clamp-2 px-4 transition-colors duration-500",
+                "text-[10px] sm:text-sm font-black uppercase tracking-[0.2em] text-center line-clamp-2 px-2 transition-colors duration-300",
                 isActive ? "text-primary" : "text-muted-foreground/80"
               )}>
                 {market.name.replace(' Index', '')}
               </span>
               
               <div className={cn(
-                "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all duration-500",
+                "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border transition-all duration-300",
                 isActive 
                   ? (trend === 'up' ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-500" : trend === 'down' ? "bg-rose-500/20 border-rose-500/30 text-rose-500" : "bg-primary/20 border-primary/30 text-primary")
                   : "bg-muted/50 border-border/50 text-muted-foreground opacity-50"
@@ -290,9 +290,9 @@ function MarketCardGrid({
             </div>
 
             {isActive && (
-              <div className="absolute -top-6 -right-6">
-                <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-2xl animate-pulse ring-8 ring-background">
-                  <CheckCircle2 className="w-8 h-8 text-white" />
+              <div className="absolute -top-3 -right-3">
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-xl animate-pulse ring-4 ring-background">
+                  <CheckCircle2 className="w-5 h-5 text-white" />
                 </div>
               </div>
             )}
@@ -731,10 +731,10 @@ export default function DigitFlowApp() {
                         <TabsContent key={tabId} value={tabId} className="mt-0 outline-none">
                           <div className="p-4 sm:p-8 space-y-8">
                             <div className="flex flex-col gap-8">
-                              <div className="flex items-center justify-between px-6 border-l-8 border-primary bg-primary/5 py-6 rounded-r-3xl">
-                                <h3 className="text-lg sm:text-2xl font-black uppercase tracking-[0.3em] text-primary">Strategic Markets for {tabId.replace('_', ' ')}</h3>
-                                <div className="text-[10px] sm:text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-                                  <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
+                              <div className="flex items-center justify-between px-6 border-l-8 border-primary bg-primary/5 py-4 rounded-r-2xl">
+                                <h3 className="text-sm sm:text-xl font-black uppercase tracking-[0.2em] text-primary">Strategic Markets for {tabId.replace('_', ' ')}</h3>
+                                <div className="text-[8px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
                                   Live Network
                                 </div>
                               </div>
