@@ -44,6 +44,7 @@ interface MarketEngineCardProps {
 }
 
 function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: MarketEngineCardProps) {
+  const [countdown, setCountdown] = useState(5);
   const ticks = data?.ticks || [];
   const prices = data?.prices || [];
   
@@ -96,6 +97,18 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
     return { signal: 'MONITORING', color: 'text-muted-foreground/40', led: 'bg-muted-foreground/20', flash: false, timing: 'STANDBY' };
   }, [ticks, strategy]);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (analysis.timing === 'ENTRY NOW') {
+      if (countdown > 0) {
+        timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
+      }
+    } else {
+      setCountdown(5);
+    }
+    return () => clearTimeout(timer);
+  }, [analysis.timing, countdown]);
+
   const trend = useMemo(() => {
     if (prices.length < 10) return 'neutral';
     const last = prices[prices.length - 1];
@@ -138,7 +151,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
           analysis.timing === 'ENTRY NOW' ? "bg-primary text-white border-primary shadow-[0_0_10px_rgba(0,166,166,0.5)] animate-pulse" : "bg-black/20 text-muted-foreground/50 border-transparent"
         )}>
           <Clock className="w-2.5 h-2.5" />
-          {analysis.timing}
+          {analysis.timing === 'ENTRY NOW' ? `${analysis.timing} (${countdown}s)` : analysis.timing}
         </div>
       </div>
       
