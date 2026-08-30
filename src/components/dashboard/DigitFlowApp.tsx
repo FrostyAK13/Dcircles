@@ -49,8 +49,8 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const window10 = ticks.slice(-10);
 
   if (strategy === 'OVER_UNDER') {
-    const overCount = window150.filter(d => d > 3).length;
-    const underCount = window150.filter(d => d < 6).length;
+    const overCount = window150.filter(d => d > 3).length; // Over 3 (4,5,6,7,8,9)
+    const underCount = window150.filter(d => d < 6).length; // Under 6 (0,1,2,3,4,5)
     const last10Over = window10.filter(d => d > 3).length;
     const last10Under = window10.filter(d => d < 6).length;
 
@@ -192,6 +192,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
     }
   }, [strategy]);
 
+  // Flash logic: Remain flashy if signal is safe (isHit is true)
   const isFlashy = isHit;
 
   return (
@@ -351,7 +352,15 @@ export default function DigitFlowApp() {
   const [activeMainTab, setActiveMainTab] = useState('dashboard');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
-  const [signalRegistry, setSignalRegistry] = useState<Record<string, number>>({});
+  // Isolated signal registries for each strategy
+  const [multiSignalRegistry, setMultiSignalRegistry] = useState<Record<string, Record<string, number>>>({
+    'OVER_UNDER': {},
+    'EVEN_ODD': {},
+    'MATCHES': {},
+    'RISE_FALL': {},
+    'HIGHER_LOWER': {},
+    'ONLY_UPS_DOWNS': {},
+  });
 
   const marketIds = useMemo(() => CONTINUOUS_INDICES.map(m => m.id), []);
   const { marketData, status } = useMultiMarketAnalysis(marketIds);
@@ -363,39 +372,45 @@ export default function DigitFlowApp() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    setSignalRegistry({});
-  }, [activeStrategy]);
-
+  // Registry Update Loop
   useEffect(() => {
     const now = Date.now();
-    setSignalRegistry(prev => {
+    setMultiSignalRegistry(prev => {
       const next = { ...prev };
+      const currentRegistry = { ...next[activeStrategy] };
       let changed = false;
 
+      // Update active hits
       Object.entries(marketData).forEach(([id, data]) => {
         const analysis = getMarketAnalysis(data, activeStrategy);
         if (analysis.isHit) {
-          if (!next[id]) {
-            next[id] = now;
-            changed = true;
-          }
-        }
-      });
-
-      Object.entries(next).forEach(([id, timestamp]) => {
-        if (now - timestamp > 30000) {
-          delete next[id];
+          // While hit is active, we keep updating the timestamp to "now"
+          // This keeps the life timer at 30s as long as it's safe
+          currentRegistry[id] = now;
           changed = true;
         }
       });
 
-      return changed ? next : prev;
+      // Cleanup expired (Life <= 0)
+      Object.entries(currentRegistry).forEach(([id, timestamp]) => {
+        if (now - timestamp > 30000) {
+          delete currentRegistry[id];
+          changed = true;
+        }
+      });
+
+      if (changed) {
+        next[activeStrategy] = currentRegistry;
+        return next;
+      }
+      return prev;
     });
   }, [marketData, activeStrategy]);
 
-  const persistentSignalIds = useMemo(() => Object.keys(signalRegistry), [signalRegistry]);
+  const currentStrategyRegistry = multiSignalRegistry[activeStrategy] || {};
+  const persistentSignalIds = useMemo(() => Object.keys(currentStrategyRegistry), [currentStrategyRegistry]);
 
+  // Golden Signal Logic (Top 4 Highest Probabilities)
   const goldenMarketIds = useMemo(() => {
     if (persistentSignalIds.length === 0) return [];
     
@@ -562,7 +577,7 @@ export default function DigitFlowApp() {
                 strategy={activeStrategy} 
                 signals={persistentSignalIds} 
                 goldenIds={goldenMarketIds}
-                signalRegistry={signalRegistry}
+                signalRegistry={currentStrategyRegistry}
               />
               
               <Card className="border border-border/50 bg-card rounded-[3rem] shadow-2xl icy-glow overflow-hidden min-h-[50vh] flex flex-col">
@@ -579,7 +594,7 @@ export default function DigitFlowApp() {
                             isSelected={strategySelections[tabId] === market.id}
                             onSelect={(id) => handleMarketSelect(id)}
                             isGolden={goldenMarketIds.includes(market.id)}
-                            expiryTimestamp={signalRegistry[market.id]}
+                            expiryTimestamp={currentStrategyRegistry[market.id]}
                           />
                         ))}
                       </div>
