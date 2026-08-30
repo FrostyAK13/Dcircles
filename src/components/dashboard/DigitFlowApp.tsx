@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -10,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { ChevronDown, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2, Loader2, TrendingUp, TrendingDown, Hash, ArrowUpDown, Layers, ShieldAlert, ZapOff } from 'lucide-react';
+import { ChevronDown, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2, Loader2, TrendingUp, TrendingDown, Hash, ArrowUpDown, Layers, ShieldAlert, ZapOff, Circle } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -47,49 +46,58 @@ function StrategySignal({
 }) {
   if (!isActive || distribution.length === 0) {
     return (
-      <div className="flex items-center gap-1 text-[7px] font-bold text-muted-foreground/50 uppercase">
-        <ZapOff className="w-2 h-2" /> Standby
+      <div className="flex items-center gap-1 mt-1 text-[7px] font-bold text-muted-foreground/30 uppercase tracking-widest">
+        <Circle className="w-1.5 h-1.5 fill-muted-foreground/20 text-transparent" />
+        Standby
       </div>
     );
   }
 
-  let signal = "Analyzing";
-  let color = "text-muted-foreground";
+  let signal = "Wait";
+  let color = "text-muted-foreground/60";
+  let ledColor = "bg-muted-foreground/40";
 
   switch (strategy) {
     case 'OVER_UNDER':
       const over5 = distribution.filter(d => d.digit > 5).reduce((acc, d) => acc + d.percentage, 0);
       const under4 = distribution.filter(d => d.digit < 4).reduce((acc, d) => acc + d.percentage, 0);
-      if (over5 > under4 + 5) {
-        signal = "Over 5 Signal";
-        color = "text-[#00a6a6]";
-      } else if (under4 > over5 + 5) {
-        signal = "Under 4 Signal";
-        color = "text-rose-500";
-      } else {
-        signal = "Neutral 5/4";
+      if (over5 > under4 + 3) {
+        signal = "OVER";
+        color = "text-primary font-black";
+        ledColor = "bg-primary animate-pulse shadow-[0_0_8px_rgba(0,166,166,0.6)]";
+      } else if (under4 > over5 + 3) {
+        signal = "UNDER";
+        color = "text-rose-500 font-black";
+        ledColor = "bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.6)]";
       }
       break;
     case 'EVEN_ODD':
       const evens = distribution.filter(d => d.digit % 2 === 0).reduce((acc, d) => acc + d.percentage, 0);
       const odds = 100 - evens;
-      signal = evens > odds ? "Even Bias" : "Odd Bias";
-      color = evens > odds ? "text-[#00a6a6]" : "text-rose-500";
+      if (Math.abs(evens - odds) > 4) {
+        signal = evens > odds ? "EVEN" : "ODD";
+        color = evens > odds ? "text-primary font-black" : "text-rose-500 font-black";
+        ledColor = evens > odds ? "bg-primary animate-pulse" : "bg-rose-500 animate-pulse";
+      }
       break;
     case 'MATCHES':
       const sorted = [...distribution].sort((a, b) => b.percentage - a.percentage);
-      signal = `Hot: ${sorted[0].digit}`;
-      color = "text-[#d6b36a]";
+      if (sorted[0].percentage > 12) {
+        signal = `HOT ${sorted[0].digit}`;
+        color = "text-[#d6b36a] font-black";
+        ledColor = "bg-[#d6b36a] animate-pulse shadow-[0_0_8px_rgba(214,179,106,0.6)]";
+      }
       break;
     default:
-      signal = "Active Engine";
-      color = "text-[#00a6a6]";
+      signal = "ACTIVE";
+      color = "text-primary font-black";
+      ledColor = "bg-primary animate-pulse";
   }
 
   return (
-    <div className={cn("flex items-center gap-1 text-[7px] font-black uppercase tracking-tighter", color)}>
-      <ShieldAlert className="w-2 h-2 animate-pulse" />
-      {signal}
+    <div className={cn("flex items-center gap-2 mt-2 px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-border/20", color)}>
+      <div className={cn("w-2 h-2 rounded-full", ledColor)} />
+      <span className="text-[9px] uppercase tracking-[0.2em]">{signal}</span>
     </div>
   );
 }
@@ -122,60 +130,61 @@ function MarketCardGrid({
   const StrategyIcon = getStrategyIcon(strategy);
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 p-4 max-w-7xl mx-auto">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 max-w-7xl mx-auto">
       {CONTINUOUS_INDICES.map((market) => {
         const isActive = currentSymbol === market.id;
         
         return (
-          <button
+          <div
             key={market.id}
             onClick={() => onSelect(market.id)}
             className={cn(
-              "group relative flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all duration-300 min-h-[100px]",
+              "group relative flex flex-col items-center justify-center p-6 rounded-[2rem] border-2 transition-all duration-500 min-h-[160px] cursor-default",
               isActive 
-                ? "bg-[#00a6a6]/20 border-[#00a6a6] shadow-[0_0_20px_rgba(0,166,166,0.3)] scale-[1.02] z-20" 
-                : "bg-muted/10 border-border/20 hover:border-[#00a6a6]/40 hover:bg-muted/20 hover:scale-[1.01]"
+                ? "bg-card border-primary shadow-[0_0_40px_rgba(0,166,166,0.15)] scale-[1.02] z-20" 
+                : "bg-muted/5 border-border/20 hover:border-border/40 hover:bg-muted/10"
             )}
           >
             <div className={cn(
-              "w-8 h-8 rounded-xl flex items-center justify-center mb-2 transition-all duration-300 shadow-md relative overflow-hidden",
+              "w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-all duration-500 shadow-inner relative overflow-hidden",
               isActive 
-                ? "bg-[#00a6a6] text-white" 
-                : "bg-muted text-muted-foreground group-hover:bg-[#00a6a6]/10 group-hover:text-[#00a6a6]"
+                ? "bg-primary text-white" 
+                : "bg-muted/50 text-muted-foreground/40"
             )}>
-              <StrategyIcon className={cn("w-4 h-4 relative z-10", isActive && "animate-pulse")} />
+              <StrategyIcon className={cn("w-6 h-6 relative z-10", isActive && "animate-pulse")} />
             </div>
             
-            <div className="flex flex-col items-center gap-0.5">
+            <div className="flex flex-col items-center gap-1">
               <span className={cn(
-                "text-[9px] font-black uppercase tracking-widest text-center truncate px-2",
-                isActive ? "text-[#00a6a6]" : "text-muted-foreground"
+                "text-[10px] font-black uppercase tracking-[0.2em] text-center px-4",
+                isActive ? "text-primary" : "text-muted-foreground/40"
               )}>
-                {market.short}
+                {market.name}
               </span>
               
-              <div className="flex flex-col items-center gap-1 mt-1">
-                <div className={cn(
-                  "px-2 py-0.5 rounded-full text-[6px] font-black uppercase tracking-widest border flex items-center gap-0.5",
-                  isActive 
-                    ? (activeTrend === 'up' ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-500" : activeTrend === 'down' ? "bg-rose-500/20 border-rose-500/30 text-rose-500" : "bg-[#00a6a6]/20 border-[#00a6a6]/30 text-[#00a6a6]")
-                    : "bg-muted/50 border-border/50 text-muted-foreground opacity-30"
-                )}>
-                  {isActive ? (activeTrend === 'up' ? 'Bullish' : activeTrend === 'down' ? 'Bearish' : 'Neutral') : 'Idle'}
-                </div>
+              <div className="flex flex-col items-center gap-1 mt-2">
+                {isActive && (
+                  <div className={cn(
+                    "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border flex items-center gap-2 mb-1",
+                    activeTrend === 'up' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : activeTrend === 'down' ? "bg-rose-500/10 border-rose-500/20 text-rose-500" : "bg-primary/10 border-primary/20 text-primary"
+                  )}>
+                    {activeTrend === 'up' ? 'Bullish Trend' : activeTrend === 'down' ? 'Bearish Trend' : 'Market Stable'}
+                  </div>
+                )}
 
                 <StrategySignal strategy={strategy} distribution={distribution} isActive={isActive} />
               </div>
             </div>
 
             {isActive && (
-              <div className="absolute -top-1.5 -right-1.5">
-                <div className="w-5 h-5 rounded-full bg-[#d6b36a] flex items-center justify-center shadow-lg animate-bounce ring-2 ring-background">
-                  <CheckCircle2 className="w-3 h-3 text-white" />
+              <div className="absolute top-4 right-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
+                  <span className="text-[7px] font-black uppercase tracking-widest text-primary/60">Live Engine</span>
                 </div>
               </div>
             )}
-          </button>
+          </div>
         );
       })}
     </div>
@@ -257,7 +266,7 @@ export default function DigitFlowApp() {
       patterns: {
         eo: lastTicks.map(d => ({
           label: d % 2 === 0 ? 'E' : 'O',
-          color: d % 2 === 0 ? 'bg-[#00a6a6] text-white' : 'bg-rose-500 text-white'
+          color: d % 2 === 0 ? 'bg-primary text-white' : 'bg-rose-500 text-white'
         }))
       }
     };
@@ -278,7 +287,7 @@ export default function DigitFlowApp() {
     <SidebarProvider>
       <div className="flex flex-col min-h-screen w-full bg-background text-foreground relative overflow-hidden">
         <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 opacity-[0.03] select-none">
-          <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-[#00a6a6]/30">
+          <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-primary/30">
             INDEXNAV
           </span>
         </div>
@@ -299,7 +308,7 @@ export default function DigitFlowApp() {
                   <TabsTrigger 
                     key={tab.value}
                     value={tab.value} 
-                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-[#00a6a6] data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
+                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
                   >
                     <tab.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                     {tab.label}
@@ -315,9 +324,9 @@ export default function DigitFlowApp() {
                     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                       <PopoverTrigger asChild>
                         <div className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
-                          <BarChart2 className="w-5 h-5 text-[#00a6a6]" />
+                          <BarChart2 className="w-5 h-5 text-primary" />
                           <div className="flex flex-col">
-                            <span className="text-[10px] sm:text-[11px] font-bold text-foreground group-hover:text-[#00a6a6] transition-colors truncate">
+                            <span className="text-[10px] sm:text-[11px] font-bold text-foreground group-hover:text-primary transition-colors truncate">
                               {currentMarket.name}
                             </span>
                             <span className="text-[9px] font-bold text-muted-foreground uppercase flex items-center gap-1">
@@ -341,7 +350,7 @@ export default function DigitFlowApp() {
                               }}
                               className={cn(
                                 "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors",
-                                currentSymbol === market.id ? "bg-[#00a6a6]/10 text-[#00a6a6]" : "hover:bg-muted/40 text-foreground"
+                                currentSymbol === market.id ? "bg-primary/10 text-primary" : "hover:bg-muted/40 text-foreground"
                               )}
                             >
                               <span className="text-xs font-semibold">{market.name}</span>
@@ -359,7 +368,7 @@ export default function DigitFlowApp() {
                         </SelectTrigger>
                         <SelectContent className="bg-card border-border/50">
                           <SelectItem value="none" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">General</SelectItem>
-                          <SelectItem value="over" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#00a6a6]">Bullish Focus</SelectItem>
+                          <SelectItem value="over" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary">Bullish Focus</SelectItem>
                           <SelectItem value="under" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-rose-500">Bearish Focus</SelectItem>
                         </SelectContent>
                       </Select>
@@ -367,7 +376,7 @@ export default function DigitFlowApp() {
                   </div>
 
                   <div className="flex flex-col items-center justify-center gap-6 py-4">
-                    <div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-[#00a6a6]">
+                    <div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-primary">
                       {latestPrice?.toFixed(2) || "---"}
                     </div>
                   </div>
@@ -394,7 +403,7 @@ export default function DigitFlowApp() {
             </TabsContent>
 
             <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-              <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
+              <Card className="border border-border/50 bg-card rounded-[2.5rem] shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
                 <Tabs value={activeStrategy} onValueChange={setActiveStrategy} className="w-full h-full flex flex-col">
                   <CardHeader className="border-b border-border/40 bg-muted/20 p-2 sm:p-4 shrink-0">
                     <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1">
@@ -409,7 +418,7 @@ export default function DigitFlowApp() {
                         <TabsTrigger 
                           key={tab.id}
                           value={tab.id} 
-                          className="rounded-xl px-2 sm:px-4 py-1.5 font-bold uppercase tracking-widest text-[7px] sm:text-[9px] data-[state=active]:bg-[#00a6a6] data-[state=active]:text-white shrink-0 flex items-center gap-1.5"
+                          className="rounded-xl px-2 sm:px-4 py-1.5 font-bold uppercase tracking-widest text-[7px] sm:text-[9px] data-[state=active]:bg-primary data-[state=active]:text-white shrink-0 flex items-center gap-1.5"
                         >
                           <tab.icon className="w-3 h-3" />
                           {tab.label}
@@ -418,7 +427,7 @@ export default function DigitFlowApp() {
                     </TabsList>
                   </CardHeader>
                   
-                  <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                  <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-muted/5">
                     {['OVER_UNDER', 'EVEN_ODD', 'MATCHES', 'RISE_FALL', 'HIGHER_LOWER', 'ONLY_UPS_DOWNS'].map((tabId) => (
                       <TabsContent key={tabId} value={tabId} className="mt-0 outline-none">
                         <MarketCardGrid 
