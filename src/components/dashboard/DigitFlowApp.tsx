@@ -9,11 +9,11 @@ import { Input } from '@/components/ui/input';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2, Loader2, Sparkles, Brain, ShieldCheck } from 'lucide-react';
+import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2, Loader2, Sparkles, Brain, ShieldCheck, TrendingUp, Hash, Layers } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
-import { getNavigatorAIInsight, type NavigatorAIOutput } from '@/ai/flows/navigator-ai-flow';
+import { getNavigatorAIInsight, type NavigatorAIOutput, type NavigatorAIInput } from '@/ai/flows/navigator-ai-flow';
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -234,6 +234,7 @@ export default function DigitFlowApp() {
   const [hoveredDigit, setHoveredDigit] = useState<number | null>(null);
   const [aiInsight, setAiInsight] = useState<NavigatorAIOutput | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiTradeType, setAiTradeType] = useState<NavigatorAIInput['tradeType']>('OVER_UNDER');
 
   const { 
     distribution, 
@@ -367,12 +368,14 @@ export default function DigitFlowApp() {
 
   const handleFetchAiInsight = async () => {
     setIsAiLoading(true);
+    setAiInsight(null);
     try {
       const insight = await getNavigatorAIInsight({
         symbol,
         latestPrice,
         distribution,
-        windowSize
+        windowSize,
+        tradeType: aiTradeType
       });
       setAiInsight(insight);
     } catch (error) {
@@ -632,7 +635,7 @@ export default function DigitFlowApp() {
 
               <TabsContent value="ai" className="space-y-6 sm:space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
                 <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden min-h-[60vh] flex flex-col">
-                  <CardHeader className="border-b border-border/40 bg-muted/20 py-4 px-6 flex flex-row items-center justify-between">
+                  <CardHeader className="border-b border-border/40 bg-muted/20 py-4 px-6 flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-xl bg-primary/10 border border-primary/20">
                         <Sparkles className="w-5 h-5 text-primary animate-pulse" />
@@ -641,10 +644,26 @@ export default function DigitFlowApp() {
                         NAVIGATOR AI Agent
                       </CardTitle>
                     </div>
+                    
+                    <Tabs 
+                      value={aiTradeType} 
+                      onValueChange={(val) => setAiTradeType(val as NavigatorAIInput['tradeType'])} 
+                      className="w-full md:w-auto"
+                    >
+                      <TabsList className="bg-background/50 border border-border/40 p-1 h-auto flex-wrap justify-center md:justify-start">
+                        <TabsTrigger value="OVER_UNDER" className="text-[8px] font-bold py-1 px-3">O/U</TabsTrigger>
+                        <TabsTrigger value="EVEN_ODD" className="text-[8px] font-bold py-1 px-3">E/O</TabsTrigger>
+                        <TabsTrigger value="MATCHES" className="text-[8px] font-bold py-1 px-3">MATCH</TabsTrigger>
+                        <TabsTrigger value="RISE_FALL" className="text-[8px] font-bold py-1 px-3">R/F</TabsTrigger>
+                        <TabsTrigger value="HIGHER_LOWER" className="text-[8px] font-bold py-1 px-3">H/L</TabsTrigger>
+                        <TabsTrigger value="ONLY_UPS_DOWNS" className="text-[8px] font-bold py-1 px-3">U/D</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+
                     <Button 
                       onClick={handleFetchAiInsight} 
                       disabled={isAiLoading}
-                      className="rounded-xl font-bold uppercase tracking-widest text-[10px] px-6 shadow-[0_0_15px_rgba(0,166,166,0.3)] hover:scale-105 transition-all"
+                      className="w-full md:w-auto rounded-xl font-bold uppercase tracking-widest text-[10px] px-6 shadow-[0_0_15px_rgba(0,166,166,0.3)] hover:scale-105 transition-all"
                     >
                       {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Brain className="w-4 h-4 mr-2" />}
                       Generate AI Insight
@@ -656,8 +675,8 @@ export default function DigitFlowApp() {
                         <div className="w-20 h-20 bg-muted/30 rounded-full flex items-center justify-center mx-auto border border-border/50">
                           <Target className="w-10 h-10 text-muted-foreground/40" />
                         </div>
-                        <h3 className="text-lg font-black uppercase tracking-widest text-foreground">Ready for Analysis</h3>
-                        <p className="text-sm text-muted-foreground font-medium">Click the button above to start the NAVIGATOR AI engine and receive advanced trading recommendations based on current digit volatility.</p>
+                        <h3 className="text-lg font-black uppercase tracking-widest text-foreground">Ready for {aiTradeType.replace('_', ' ')} Analysis</h3>
+                        <p className="text-sm text-muted-foreground font-medium">Click the button above to start the NAVIGATOR AI engine focusing on {aiTradeType.replace('_', '/')} strategy.</p>
                       </div>
                     )}
 
@@ -668,8 +687,8 @@ export default function DigitFlowApp() {
                           <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-primary animate-pulse" />
                         </div>
                         <div className="space-y-2">
-                          <p className="text-xs font-black uppercase tracking-[0.3em] text-primary animate-pulse">Scanning Distribution Patterns...</p>
-                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Aggregating {windowSize} ticks from {currentMarket.short}</p>
+                          <p className="text-xs font-black uppercase tracking-[0.3em] text-primary animate-pulse">Running {aiTradeType.replace('_', ' ')} Analysis...</p>
+                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Aggregating {windowSize} ticks for strategic momentum</p>
                         </div>
                       </div>
                     )}
@@ -692,6 +711,7 @@ export default function DigitFlowApp() {
                             <div className="text-3xl sm:text-4xl font-black uppercase tracking-tighter text-foreground">
                               {aiInsight.recommendation}
                             </div>
+                            <div className="text-[9px] font-bold text-primary/60 uppercase tracking-widest">Strategy: {aiTradeType.replace('_', ' ')}</div>
                           </Card>
                         </div>
 
