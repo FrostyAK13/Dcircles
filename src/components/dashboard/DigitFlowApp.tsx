@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -10,16 +9,16 @@ import { Input } from '@/components/ui/input';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2, Loader2, Sparkles, Brain, ShieldCheck, TrendingUp, Hash, Layers } from 'lucide-react';
+import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2, Loader2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
-import { getNavigatorAIInsight, type NavigatorAIOutput, type NavigatorAIInput } from '@/ai/flows/navigator-ai-flow';
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
   { id: 'R_10', name: 'Volatility 10 Index', short: '10' },
   { id: '1HZ15V', name: 'Volatility 15 (1s) Index', short: '15 (1s)' },
+  { id: 'R_15', name: 'Volatility 15 Index', short: '15' },
   { id: '1HZ25V', name: 'Volatility 25 (1s) Index', short: '25 (1s)' },
   { id: 'R_25', name: 'Volatility 25 Index', short: '25' },
   { id: '1HZ30V', name: 'Volatility 30 (1s) Index', short: '30 (1s)' },
@@ -233,9 +232,6 @@ export default function DigitFlowApp() {
   const [mounted, setMounted] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [hoveredDigit, setHoveredDigit] = useState<number | null>(null);
-  const [aiInsight, setAiInsight] = useState<NavigatorAIOutput | null>(null);
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiTradeType, setAiTradeType] = useState<NavigatorAIInput['tradeType']>('OVER_UNDER');
   const [activeMainTab, setActiveMainTab] = useState('dashboard');
 
   const { 
@@ -253,31 +249,6 @@ export default function DigitFlowApp() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const handleFetchAiInsight = async () => {
-    if (isAiLoading) return;
-    setIsAiLoading(true);
-    try {
-      const insight = await getNavigatorAIInsight({
-        symbol,
-        latestPrice,
-        distribution,
-        windowSize,
-        tradeType: aiTradeType
-      });
-      setAiInsight(insight);
-    } catch (error) {
-      console.error("AI Insight Error:", error);
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (mounted && activeMainTab === 'ai') {
-      handleFetchAiInsight();
-    }
-  }, [aiTradeType, symbol, activeMainTab, mounted]);
 
   const engineResults = useMemo(() => {
     if (distribution.length < 10) return null;
@@ -426,13 +397,6 @@ export default function DigitFlowApp() {
                   >
                     <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                     Analysis
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="ai" 
-                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
-                  >
-                    <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2 text-gold animate-pulse" />
-                    Navigator AI
                   </TabsTrigger>
                   <TabsTrigger 
                     value="scanner" 
@@ -638,126 +602,6 @@ export default function DigitFlowApp() {
                     pattern={stats.patterns.rf}
                   />
                 </div>
-              </TabsContent>
-
-              <TabsContent value="ai" className="space-y-6 sm:space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none h-full">
-                <Card className="border-none bg-transparent shadow-none min-h-[70vh] flex flex-col items-center">
-                  <div className="w-full max-w-5xl pt-4 pb-8 sticky top-0 z-40 bg-background/80 backdrop-blur-md space-y-6">
-                    <Tabs 
-                      value={aiTradeType} 
-                      onValueChange={(val) => setAiTradeType(val as NavigatorAIInput['tradeType'])} 
-                      className="w-full"
-                    >
-                      <TabsList className="bg-muted/30 border border-border/20 p-1.5 h-auto flex-wrap justify-center rounded-2xl w-full">
-                        <TabsTrigger value="OVER_UNDER" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">Over/Under</TabsTrigger>
-                        <TabsTrigger value="EVEN_ODD" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">Even/Odd</TabsTrigger>
-                        <TabsTrigger value="MATCHES" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">Matches</TabsTrigger>
-                        <TabsTrigger value="RISE_FALL" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">Rise/Fall</TabsTrigger>
-                        <TabsTrigger value="HIGHER_LOWER" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">H/L</TabsTrigger>
-                        <TabsTrigger value="ONLY_UPS_DOWNS" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">Ups/Downs</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-
-                    <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-6 md:grid-cols-9 gap-2 px-2">
-                      {CONTINUOUS_INDICES.map((market) => (
-                        <button
-                          key={market.id}
-                          onClick={() => setSymbol(market.id)}
-                          className={cn(
-                            "flex flex-col items-center justify-center p-2 rounded-xl border transition-all duration-300 relative group",
-                            symbol === market.id 
-                              ? "bg-primary/20 border-primary shadow-[0_0_10px_rgba(0,166,166,0.3)] scale-105 z-10" 
-                              : "bg-muted/20 border-border/40 hover:border-primary/50 hover:bg-muted/30"
-                          )}
-                        >
-                          <span className={cn(
-                            "text-[10px] font-black tracking-tighter",
-                            symbol === market.id ? "text-primary" : "text-foreground/80"
-                          )}>
-                            {market.short}
-                          </span>
-                          <span className="text-[6px] font-bold uppercase text-muted-foreground/60 truncate w-full text-center">
-                            {market.name.split(' ')[0]}
-                          </span>
-                          {symbol === market.id && (
-                            <div className="absolute -top-1 -right-1">
-                              <CheckCircle2 className="w-2.5 h-2.5 text-primary fill-background" />
-                            </div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <CardContent className="p-0 w-full flex-1 flex flex-col items-center justify-center text-center space-y-8">
-                    {isAiLoading ? (
-                      <div className="flex flex-col items-center gap-8 py-20">
-                        <div className="relative">
-                          <div className="w-32 h-32 border-8 border-primary/10 border-t-primary rounded-full animate-spin" />
-                          <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 text-primary animate-pulse" />
-                        </div>
-                        <div className="space-y-4">
-                          <h3 className="text-xl font-black uppercase tracking-[0.4em] text-primary animate-pulse">Analyzing {aiTradeType.replace('_', ' ')}</h3>
-                          <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest">Processing {windowSize} ticks of live distribution data...</p>
-                        </div>
-                      </div>
-                    ) : aiInsight ? (
-                      <div className="w-full max-w-5xl space-y-10 animate-in fade-in zoom-in-95 duration-700 text-left px-4 pb-20">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                          <Card className="bg-card border-border/50 p-8 rounded-[2rem] text-center space-y-4 icy-glow shadow-2xl">
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Analysis Confidence</span>
-                            <div className="text-6xl font-black text-primary tabular-nums drop-shadow-[0_0_15px_rgba(0,166,166,0.3)]">{aiInsight.confidence}%</div>
-                            <div className="h-3 w-full bg-muted/40 rounded-full overflow-hidden p-0.5">
-                              <div className="h-full bg-primary rounded-full transition-all duration-1000 ease-out" style={{ width: `${aiInsight.confidence}%` }} />
-                            </div>
-                            <div className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest">Real-time Statistical Validation</div>
-                          </Card>
-                          
-                          <Card className="lg:col-span-2 bg-primary/10 border-primary/30 p-8 rounded-[2rem] space-y-4 flex flex-col justify-center border-l-8 shadow-2xl relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                              <Brain className="w-24 h-24 text-primary" />
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <ShieldCheck className="w-6 h-6 text-primary" />
-                              <span className="text-[11px] font-black uppercase tracking-[0.3em] text-primary">Priority Recommendation</span>
-                            </div>
-                            <div className="text-4xl sm:text-6xl font-black uppercase tracking-tighter text-foreground brand-glow">
-                              {aiInsight.recommendation}
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <Badge variant="outline" className="border-primary/40 text-primary font-black uppercase tracking-widest py-1 px-3">
-                                {aiTradeType.replace('_', ' ')}
-                              </Badge>
-                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-                                <Activity className="w-3.5 h-3.5" />
-                                Momentum Optimal
-                              </span>
-                            </div>
-                          </Card>
-                        </div>
-
-                        <Card className="bg-card border-border/50 p-10 rounded-[2.5rem] shadow-2xl icy-glow relative overflow-hidden">
-                           <div className="absolute top-0 left-0 w-2 h-full bg-primary/40" />
-                          <div className="flex items-center gap-3 mb-6">
-                            <Layers className="w-5 h-5 text-primary" />
-                            <span className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground">Technical Market Breakdown</span>
-                          </div>
-                          <p className="text-base sm:text-lg leading-relaxed font-medium text-foreground/90 first-letter:text-4xl first-letter:font-black first-letter:text-primary first-letter:mr-1 first-letter:float-left">
-                            {aiInsight.analysis}
-                          </p>
-                        </Card>
-                      </div>
-                    ) : (
-                      <div className="py-20 max-w-md space-y-6">
-                        <div className="w-24 h-24 bg-muted/20 rounded-[2rem] flex items-center justify-center mx-auto border border-border/20 icy-glow">
-                          <Brain className="w-12 h-12 text-primary/40" />
-                        </div>
-                        <h3 className="text-xl font-black uppercase tracking-[0.2em] text-foreground">Initializing AI Engine</h3>
-                        <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">Awaiting strategic parameters for {aiTradeType.replace('_', ' ')} verification...</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
               </TabsContent>
 
               <TabsContent value="scanner" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
