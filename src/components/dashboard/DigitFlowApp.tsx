@@ -37,7 +37,7 @@ export const CONTINUOUS_INDICES = [
 ];
 
 /**
- * Shared logic for market analysis based on specific strategies
+ * Strategy-Specific Tactical Engine
  */
 function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const ticks = data?.ticks || [];
@@ -49,6 +49,7 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
 
   if (strategy === 'OVER_UNDER') {
     // Strategy: OVER 3 (digits 4-9) and UNDER 6 (digits 0-5)
+    // Criteria: Density >= 90 (Macro), Momentum >= 6 (Micro)
     const overCount = window150.filter(d => d >= 4).length;
     const underCount = window150.filter(d => d <= 5).length;
 
@@ -86,10 +87,45 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
     const last10OddCount = window10.filter(d => d % 2 !== 0).length;
 
     if (evenCount >= 90 && last10EvenCount >= 6) {
-      return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary', flash: true, timing: 'ENTRY NOW', isHit: true, score: evenCount };
+      return { 
+        signal: 'EVEN', 
+        color: 'text-primary font-black', 
+        led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', 
+        flash: true, 
+        timing: 'ENTRY NOW', 
+        isHit: true, 
+        score: evenCount 
+      };
     }
     if (oddCount >= 90 && last10OddCount >= 6) {
-      return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount };
+      return { 
+        signal: 'ODD', 
+        color: 'text-rose-500 font-black', 
+        led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', 
+        flash: true, 
+        timing: 'ENTRY NOW', 
+        isHit: true, 
+        score: oddCount 
+      };
+    }
+  }
+
+  // Placeholder for other strategies to keep them separate
+  if (strategy === 'MATCHES') {
+    const digitCounts = new Array(10).fill(0);
+    window150.forEach(d => digitCounts[d]++);
+    const maxDigit = Math.max(...digitCounts);
+    const digit = digitCounts.indexOf(maxDigit);
+    if (maxDigit >= 30) { // High frequency single digit
+      return { 
+        signal: `MATCH ${digit}`, 
+        color: 'text-amber-500 font-black', 
+        led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', 
+        flash: true, 
+        timing: 'POSSIBLE MATCH', 
+        isHit: true, 
+        score: maxDigit 
+      };
     }
   }
 
@@ -340,6 +376,11 @@ export default function DigitFlowApp() {
     setMounted(true);
   }, []);
 
+  // CRITICAL: Clear signals when switching strategies to ensure isolation
+  useEffect(() => {
+    setSignalRegistry({});
+  }, [activeStrategy]);
+
   useEffect(() => {
     const now = Date.now();
     setSignalRegistry(prev => {
@@ -429,7 +470,7 @@ export default function DigitFlowApp() {
                   value={tab.value} 
                   className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white shrink-0"
                 >
-                  <tab.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
+                  <tab.icon className="w-3.5 h-3.5 mr-2" />
                   {tab.label}
                 </TabsTrigger>
               ))}
