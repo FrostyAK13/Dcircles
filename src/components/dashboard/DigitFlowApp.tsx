@@ -48,18 +48,18 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const window10 = ticks.slice(-10);
 
   if (strategy === 'OVER_UNDER') {
-    // Strategy: Over 4 / Under 5
-    // Over 4 = Digits 5-9
-    // Under 5 = Digits 0-4
-    const over4Count = window150.filter(d => d >= 5).length;
-    const under5Count = window150.filter(d => d <= 4).length;
+    // Strategy: Over 3 (digits 4-9) / Under 6 (digits 0-5)
+    // Over 3 = Digits 4-9
+    // Under 6 = Digits 0-5
+    const over3Count = window150.filter(d => d >= 4).length;
+    const under6Count = window150.filter(d => d <= 5).length;
 
-    const last10OverCount = window10.filter(d => d >= 5).length;
-    const last10UnderCount = window10.filter(d => d <= 4).length;
+    const last10OverCount = window10.filter(d => d >= 4).length;
+    const last10UnderCount = window10.filter(d => d <= 5).length;
 
-    if (over4Count >= 90 && last10OverCount >= 6) {
+    if (over3Count >= 90 && last10OverCount >= 6) {
       return { 
-        signal: 'OVER 4', 
+        signal: 'OVER 3', 
         color: 'text-primary font-black', 
         led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', 
         flash: true,
@@ -67,9 +67,9 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
         isHit: true
       };
     }
-    if (under5Count >= 90 && last10UnderCount >= 6) {
+    if (under6Count >= 90 && last10UnderCount >= 6) {
       return { 
-        signal: 'UNDER 5', 
+        signal: 'UNDER 6', 
         color: 'text-rose-500 font-black', 
         led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', 
         flash: true,
@@ -447,7 +447,7 @@ export default function DigitFlowApp() {
                 <CardHeader className="border-b border-border/40 bg-muted/20 p-2 sm:p-4 shrink-0">
                   <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1">
                     {[
-                      { id: 'OVER_UNDER', label: 'Over 4 / Under 5', icon: ArrowUpDown },
+                      { id: 'OVER_UNDER', label: 'Over 3 / Under 6', icon: ArrowUpDown },
                       { id: 'EVEN_ODD', label: 'Even / Odd', icon: Hash },
                       { id: 'MATCHES', label: 'Matches', icon: Target },
                       { id: 'RISE_FALL', label: 'Rise / Fall', icon: TrendingUp },
