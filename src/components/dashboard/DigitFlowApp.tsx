@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useDigitAnalysis } from '@/hooks/use-digit-analysis';
 import { useMultiMarketAnalysis, type MarketData } from '@/hooks/use-multi-market-analysis';
 import { DashboardHeader } from './DashboardHeader';
@@ -129,37 +129,41 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
     }
   }, [strategy]);
 
+  const isEntryActive = analysis.timing === 'ENTRY NOW';
+
   return (
     <div
       onClick={() => onSelect(market.id)}
       className={cn(
         "group relative flex flex-col items-center justify-between p-4 sm:p-5 rounded-[1.5rem] border-2 transition-all duration-500 min-h-[160px] sm:min-h-[180px] cursor-default overflow-hidden",
-        isSelected 
-          ? "bg-card border-primary shadow-[0_0_30px_rgba(0,166,166,0.1)] z-10 scale-[1.02]" 
-          : "bg-muted/5 border-border/10 hover:border-border/30 hover:bg-muted/10 scale-100"
+        isEntryActive 
+          ? "bg-card border-primary shadow-[0_0_30px_rgba(0,166,166,0.3)] z-10 scale-[1.02] dark:bg-primary/5" 
+          : isSelected
+            ? "bg-card border-primary/40 shadow-[0_0_20px_rgba(0,166,166,0.05)] z-10 scale-[1.01]"
+            : "bg-muted/5 border-border/10 hover:border-border/30 hover:bg-muted/10 scale-100"
       )}
     >
       <div className="w-full flex justify-between items-start mb-2">
         <div className={cn(
           "w-10 h-10 rounded-[0.75rem] flex items-center justify-center transition-all duration-500",
-          isSelected ? "bg-primary text-white" : "bg-muted/50 text-muted-foreground/30"
+          isSelected || isEntryActive ? "bg-primary text-white" : "bg-muted/50 text-muted-foreground/30"
         )}>
           <StrategyIcon className={cn("w-5 h-5", analysis.flash && "animate-pulse")} />
         </div>
         
         <div className={cn(
-          "px-2.5 py-1 rounded-lg text-[7px] font-black uppercase tracking-[0.2em] border flex items-center gap-1.5",
-          analysis.timing === 'ENTRY NOW' ? "bg-primary text-white border-primary shadow-[0_0_10px_rgba(0,166,166,0.5)] animate-pulse" : "bg-black/20 text-muted-foreground/50 border-transparent"
+          "px-2.5 py-1 rounded-lg text-[7px] font-black uppercase tracking-[0.2em] border flex items-center gap-1.5 transition-all duration-300",
+          isEntryActive ? "bg-primary text-white border-primary shadow-[0_0_10px_rgba(0,166,166,0.5)] animate-pulse" : "bg-black/20 text-muted-foreground/50 border-transparent"
         )}>
           <Clock className="w-2.5 h-2.5" />
-          {analysis.timing === 'ENTRY NOW' ? `${analysis.timing} (${countdown}s)` : analysis.timing}
+          {isEntryActive ? `${analysis.timing} (${countdown}s)` : analysis.timing}
         </div>
       </div>
       
       <div className="flex flex-col items-center gap-1.5 w-full">
         <span className={cn(
           "text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-center px-1 truncate w-full",
-          isSelected ? "text-primary" : "text-muted-foreground/40"
+          isSelected || isEntryActive ? "text-primary" : "text-muted-foreground/40"
         )}>
           {market.name.replace('Index', '').trim()}
         </span>
@@ -191,6 +195,8 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
 }
 
 function SignalScanner({ marketData, strategy }: { marketData: Record<string, MarketData>, strategy: string }) {
+  const [signalTimers, setSignalTimers] = useState<Record<string, number>>({});
+  
   const activeSignals = useMemo(() => {
     return Object.entries(marketData).map(([id, data]) => {
       const ticks = data.ticks;
@@ -236,6 +242,46 @@ function SignalScanner({ marketData, strategy }: { marketData: Record<string, Ma
     }).filter(Boolean);
   }, [marketData, strategy]);
 
+  useEffect(() => {
+    const newTimers = { ...signalTimers };
+    let changed = false;
+
+    // Add new signals
+    activeSignals.forEach((sig: any) => {
+      if (newTimers[sig.id] === undefined) {
+        newTimers[sig.id] = 5;
+        changed = true;
+      }
+    });
+
+    // Remove expired signals or those no longer detected
+    Object.keys(newTimers).forEach(id => {
+      if (!activeSignals.find((s: any) => s.id === id)) {
+        delete newTimers[id];
+        changed = true;
+      }
+    });
+
+    if (changed) setSignalTimers(newTimers);
+  }, [activeSignals]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSignalTimers(prev => {
+        const next = { ...prev };
+        let updated = false;
+        Object.keys(next).forEach(id => {
+          if (next[id] > 0) {
+            next[id] -= 1;
+            updated = true;
+          }
+        });
+        return updated ? next : prev;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Card className="mb-6 bg-card border-primary/20 shadow-2xl icy-glow overflow-hidden rounded-[2rem]">
       <CardHeader className="py-4 px-6 border-b border-border/40 flex flex-row items-center justify-between bg-muted/20">
@@ -244,22 +290,29 @@ function SignalScanner({ marketData, strategy }: { marketData: Record<string, Ma
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Live Signal Scanner</h3>
         </div>
         <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.2em] bg-primary/10 text-primary border-primary/20">
-          {activeSignals.length} Active
+          {activeSignals.length} Detected
         </Badge>
       </CardHeader>
-      <CardContent className="p-4 min-h-[80px] flex items-center justify-center">
+      <CardContent className="p-4 min-h-[100px] flex items-center justify-center">
         {activeSignals.length > 0 ? (
-          <div className="flex flex-wrap gap-3 w-full">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 w-full">
             {activeSignals.map((sig: any) => (
               <div 
                 key={`${sig.id}-${sig.signal}`} 
-                className="flex items-center gap-3 px-4 py-2 rounded-xl bg-muted/40 border border-primary/20 animate-in fade-in zoom-in duration-300"
+                className="flex flex-col gap-2 p-3 rounded-2xl bg-muted/40 border border-primary/30 animate-in fade-in zoom-in duration-300 relative overflow-hidden group shadow-[0_0_15px_rgba(0,166,166,0.1)]"
               >
-                <div className="flex flex-col">
-                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">{sig.name}</span>
-                  <span className={cn("text-xs font-black uppercase tracking-widest", sig.color)}>{sig.signal}</span>
+                <div className="flex justify-between items-start">
+                  <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">{sig.name}</span>
+                  <div className={cn("px-1.5 py-0.5 rounded text-[7px] font-black flex items-center gap-1 bg-black/20 text-white")}>
+                    <Clock className="w-2.5 h-2.5" />
+                    {signalTimers[sig.id] || 0}s
+                  </div>
                 </div>
-                <div className={cn("w-2 h-2 rounded-full animate-ping", sig.color.replace('text-', 'bg-'))} />
+                <div className="flex items-center gap-2">
+                  <div className={cn("w-2 h-2 rounded-full animate-ping", sig.color.replace('text-', 'bg-'))} />
+                  <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] leading-none", sig.color)}>{sig.signal}</span>
+                </div>
+                <div className="absolute bottom-0 left-0 h-[2px] bg-primary/50 transition-all duration-1000" style={{ width: `${(signalTimers[sig.id] / 5) * 100}%` }} />
               </div>
             ))}
           </div>
