@@ -686,31 +686,6 @@ export default function DigitFlowApp() {
                               <h3 className="text-[10px] sm:text-[12px] font-black uppercase tracking-[0.2em] text-primary px-2">Select Market for {tabId.replace('_', ' ')}</h3>
                               <MarketCardGrid currentSymbol={symbol} onSelect={setSymbol} />
                             </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <Card className="bg-muted/20 border-border/40 rounded-2xl p-4">
-                                <h4 className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Market Stats</h4>
-                                <div className="space-y-4">
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-bold text-foreground">Active Market</span>
-                                    <span className="text-[10px] font-black text-primary">{currentMarket.name}</span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-bold text-foreground">Current Strategy</span>
-                                    <span className="text-[10px] font-black text-primary">{tabId.replace('_', ' ')}</span>
-                                  </div>
-                                  <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-bold text-foreground">Live Digit</span>
-                                    <span className="text-xl font-black text-primary">{latestDigit}</span>
-                                  </div>
-                                </div>
-                              </Card>
-                              <Card className="bg-muted/20 border-border/40 rounded-2xl p-4 flex flex-col justify-center items-center text-center">
-                                <Activity className="w-8 h-8 text-primary/40 mb-3 animate-pulse" />
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Strategy Activated</p>
-                                <p className="text-[9px] text-muted-foreground/60 mt-1 italic">Navigator is monitoring {currentMarket.short} for strategic opportunities.</p>
-                              </Card>
-                            </div>
                           </div>
                         </TabsContent>
                       ))}
