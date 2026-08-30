@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -37,67 +38,103 @@ export const CONTINUOUS_INDICES = [
 
 function StrategySignal({ 
   strategy, 
-  distribution, 
+  ticks, 
   isActive 
 }: { 
   strategy: string, 
-  distribution: any[], 
+  ticks: number[], 
   isActive: boolean 
 }) {
-  if (!isActive || distribution.length === 0) {
+  if (!isActive) {
     return (
-      <div className="flex items-center gap-1 mt-1 text-[7px] font-bold text-muted-foreground/30 uppercase tracking-widest">
-        <Circle className="w-1.5 h-1.5 fill-muted-foreground/20 text-transparent" />
-        Standby
+      <div className="flex flex-col items-center gap-2 mt-4">
+        <div className="flex items-center gap-1 text-[8px] font-bold text-muted-foreground/30 uppercase tracking-[0.2em]">
+          <Circle className="w-1.5 h-1.5 fill-muted-foreground/10 text-transparent" />
+          Standby
+        </div>
       </div>
     );
   }
 
-  let signal = "Wait";
-  let color = "text-muted-foreground/60";
-  let ledColor = "bg-muted-foreground/40";
+  if (ticks.length < 150) {
+    return (
+      <div className="flex flex-col items-center gap-2 mt-4">
+        <div className="flex items-center gap-2 text-[8px] font-black text-primary/40 uppercase tracking-[0.3em] animate-pulse">
+          <Loader2 className="w-3 h-3 animate-spin" />
+          Calibrating Engine
+        </div>
+        <div className="text-[7px] font-bold text-muted-foreground/40">{ticks.length}/150 Ticks</div>
+      </div>
+    );
+  }
 
-  switch (strategy) {
-    case 'OVER_UNDER':
-      const over5 = distribution.filter(d => d.digit > 5).reduce((acc, d) => acc + d.percentage, 0);
-      const under4 = distribution.filter(d => d.digit < 4).reduce((acc, d) => acc + d.percentage, 0);
-      if (over5 > under4 + 3) {
-        signal = "OVER";
-        color = "text-primary font-black";
-        ledColor = "bg-primary animate-pulse shadow-[0_0_8px_rgba(0,166,166,0.6)]";
-      } else if (under4 > over5 + 3) {
-        signal = "UNDER";
-        color = "text-rose-500 font-black";
-        ledColor = "bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.6)]";
+  let signal = "NO SIGNAL";
+  let color = "text-muted-foreground/40";
+  let ledColor = "bg-muted-foreground/20";
+  let isFlashing = false;
+
+  const window150 = ticks.slice(-150);
+  const window10 = ticks.slice(-10);
+
+  if (strategy === 'OVER_UNDER') {
+    // Strategy: OVER 4 (5-9) vs UNDER 5 (0-4)
+    const count59_150 = window150.filter(d => d >= 5).length;
+    const count04_150 = window150.filter(d => d <= 4).length;
+    
+    if (count59_150 >= 90) {
+      const count59_10 = window10.filter(d => d >= 5).length;
+      if (count59_10 >= 6) {
+        signal = "OVER 4";
+        color = "text-primary font-black scale-110 drop-shadow-[0_0_10px_rgba(0,166,166,0.5)]";
+        ledColor = "bg-primary shadow-[0_0_15px_rgba(0,166,166,0.8)]";
+        isFlashing = true;
       }
-      break;
-    case 'EVEN_ODD':
-      const evens = distribution.filter(d => d.digit % 2 === 0).reduce((acc, d) => acc + d.percentage, 0);
-      const odds = 100 - evens;
-      if (Math.abs(evens - odds) > 4) {
-        signal = evens > odds ? "EVEN" : "ODD";
-        color = evens > odds ? "text-primary font-black" : "text-rose-500 font-black";
-        ledColor = evens > odds ? "bg-primary animate-pulse" : "bg-rose-500 animate-pulse";
+    } else if (count04_150 >= 90) {
+      const count04_10 = window10.filter(d => d <= 4).length;
+      if (count04_10 >= 6) {
+        signal = "UNDER 5";
+        color = "text-rose-500 font-black scale-110 drop-shadow-[0_0_10px_rgba(244,63,94,0.5)]";
+        ledColor = "bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.8)]";
+        isFlashing = true;
       }
-      break;
-    case 'MATCHES':
-      const sorted = [...distribution].sort((a, b) => b.percentage - a.percentage);
-      if (sorted[0].percentage > 12) {
-        signal = `HOT ${sorted[0].digit}`;
-        color = "text-[#d6b36a] font-black";
-        ledColor = "bg-[#d6b36a] animate-pulse shadow-[0_0_8px_rgba(214,179,106,0.6)]";
-      }
-      break;
-    default:
-      signal = "ACTIVE";
-      color = "text-primary font-black";
-      ledColor = "bg-primary animate-pulse";
+    }
+  } else if (strategy === 'EVEN_ODD') {
+    const evens150 = window150.filter(d => d % 2 === 0).length;
+    if (evens150 >= 85) {
+      signal = "EVEN";
+      color = "text-primary";
+      ledColor = "bg-primary";
+      isFlashing = true;
+    } else if (evens150 <= 65) {
+      signal = "ODD";
+      color = "text-rose-500";
+      ledColor = "bg-rose-500";
+      isFlashing = true;
+    }
   }
 
   return (
-    <div className={cn("flex items-center gap-2 mt-2 px-3 py-1 rounded-full bg-black/5 dark:bg-white/5 border border-border/20", color)}>
-      <div className={cn("w-2 h-2 rounded-full", ledColor)} />
-      <span className="text-[9px] uppercase tracking-[0.2em]">{signal}</span>
+    <div className="flex flex-col items-center gap-4 mt-6 w-full">
+      <div className={cn(
+        "flex items-center gap-3 px-6 py-2 rounded-2xl bg-black/10 dark:bg-white/5 border border-border/20 transition-all duration-300",
+        isFlashing && "border-primary/30 ring-1 ring-primary/20"
+      )}>
+        <div className={cn(
+          "w-2.5 h-2.5 rounded-full transition-all duration-300",
+          ledColor,
+          isFlashing && "animate-pulse"
+        )} />
+        <span className={cn("text-[10px] uppercase tracking-[0.4em] transition-all duration-300", color)}>
+          {signal}
+        </span>
+      </div>
+      
+      {isFlashing && (
+        <div className="flex items-center gap-1.5">
+          <div className="w-1 h-1 rounded-full bg-primary/40 animate-ping" />
+          <span className="text-[7px] font-black text-primary/50 uppercase tracking-widest">Signal Locked</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -107,13 +144,13 @@ function MarketCardGrid({
   onSelect, 
   activeTrend,
   strategy,
-  distribution
+  ticks
 }: { 
   currentSymbol: string, 
   onSelect: (id: string) => void,
   activeTrend: 'up' | 'down' | 'neutral',
   strategy: string,
-  distribution: any[]
+  ticks: number[]
 }) {
   const getStrategyIcon = (type: string) => {
     switch(type) {
@@ -130,7 +167,7 @@ function MarketCardGrid({
   const StrategyIcon = getStrategyIcon(strategy);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 max-w-7xl mx-auto">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6 max-w-7xl mx-auto">
       {CONTINUOUS_INDICES.map((market) => {
         const isActive = currentSymbol === market.id;
         
@@ -139,49 +176,47 @@ function MarketCardGrid({
             key={market.id}
             onClick={() => onSelect(market.id)}
             className={cn(
-              "group relative flex flex-col items-center justify-center p-6 rounded-[2rem] border-2 transition-all duration-500 min-h-[160px] cursor-default",
+              "group relative flex flex-col items-center justify-start p-8 rounded-[2.5rem] border-2 transition-all duration-700 min-h-[220px]",
               isActive 
-                ? "bg-card border-primary shadow-[0_0_40px_rgba(0,166,166,0.15)] scale-[1.02] z-20" 
-                : "bg-muted/5 border-border/20 hover:border-border/40 hover:bg-muted/10"
+                ? "bg-card border-primary shadow-[0_0_50px_rgba(0,166,166,0.15)] z-20 cursor-default" 
+                : "bg-muted/5 border-border/10 hover:border-border/30 hover:bg-muted/10 cursor-pointer scale-[0.98] hover:scale-100"
             )}
           >
             <div className={cn(
-              "w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-all duration-500 shadow-inner relative overflow-hidden",
+              "w-14 h-14 rounded-[1.25rem] flex items-center justify-center mb-4 transition-all duration-700 shadow-inner relative overflow-hidden",
               isActive 
                 ? "bg-primary text-white" 
-                : "bg-muted/50 text-muted-foreground/40"
+                : "bg-muted/50 text-muted-foreground/30"
             )}>
-              <StrategyIcon className={cn("w-6 h-6 relative z-10", isActive && "animate-pulse")} />
+              <StrategyIcon className={cn("w-7 h-7 relative z-10", isActive && "animate-pulse")} />
             </div>
             
-            <div className="flex flex-col items-center gap-1">
+            <div className="flex flex-col items-center gap-1.5 w-full">
               <span className={cn(
-                "text-[10px] font-black uppercase tracking-[0.2em] text-center px-4",
+                "text-[11px] font-black uppercase tracking-[0.25em] text-center px-4",
                 isActive ? "text-primary" : "text-muted-foreground/40"
               )}>
                 {market.name}
               </span>
               
-              <div className="flex flex-col items-center gap-1 mt-2">
+              <div className="flex flex-col items-center gap-2 mt-2 w-full">
                 {isActive && (
                   <div className={cn(
-                    "px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border flex items-center gap-2 mb-1",
+                    "px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-[0.3em] border flex items-center gap-2 mb-2",
                     activeTrend === 'up' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : activeTrend === 'down' ? "bg-rose-500/10 border-rose-500/20 text-rose-500" : "bg-primary/10 border-primary/20 text-primary"
                   )}>
-                    {activeTrend === 'up' ? 'Bullish Trend' : activeTrend === 'down' ? 'Bearish Trend' : 'Market Stable'}
+                    {activeTrend === 'up' ? 'Trend Bullish' : activeTrend === 'down' ? 'Trend Bearish' : 'Neutral Range'}
                   </div>
                 )}
 
-                <StrategySignal strategy={strategy} distribution={distribution} isActive={isActive} />
+                <StrategySignal strategy={strategy} ticks={isActive ? ticks : []} isActive={isActive} />
               </div>
             </div>
 
             {isActive && (
-              <div className="absolute top-4 right-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-                  <span className="text-[7px] font-black uppercase tracking-widest text-primary/60">Live Engine</span>
-                </div>
+              <div className="absolute top-6 right-6 flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
+                <span className="text-[7px] font-black uppercase tracking-[0.2em] text-primary/60">Live Engine</span>
               </div>
             )}
           </div>
@@ -244,8 +279,6 @@ export default function DigitFlowApp() {
     const underCount = windowTicks.filter(d => d < ouDigit).length;
     const total = windowTicks.length || 1;
 
-    const lastTicks = ticks.slice(-25);
-
     return {
       high: sorted[0]?.digit,
       secondHigh: sorted[1]?.digit,
@@ -256,18 +289,6 @@ export default function DigitFlowApp() {
         odd: total - evenCount,
         over: overCount,
         under: underCount,
-      },
-      comparisons: {
-        even: Math.round((evenCount / total) * 100),
-        odd: Math.round(((total - evenCount) / total) * 100),
-        over: Math.round((overCount / total) * 100),
-        under: Math.round((underCount / total) * 100),
-      },
-      patterns: {
-        eo: lastTicks.map(d => ({
-          label: d % 2 === 0 ? 'E' : 'O',
-          color: d % 2 === 0 ? 'bg-primary text-white' : 'bg-rose-500 text-white'
-        }))
       }
     };
   }, [distribution, ticks, windowSize, ouDigit]);
@@ -408,7 +429,7 @@ export default function DigitFlowApp() {
                   <CardHeader className="border-b border-border/40 bg-muted/20 p-2 sm:p-4 shrink-0">
                     <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1">
                       {[
-                        { id: 'OVER_UNDER', label: 'Over 5 / Under 4', icon: ArrowUpDown },
+                        { id: 'OVER_UNDER', label: 'Over 4 / Under 5', icon: ArrowUpDown },
                         { id: 'EVEN_ODD', label: 'Even / Odd', icon: Hash },
                         { id: 'MATCHES', label: 'Matches', icon: Target },
                         { id: 'RISE_FALL', label: 'Rise / Fall', icon: TrendingUp },
@@ -435,7 +456,7 @@ export default function DigitFlowApp() {
                           onSelect={handleMarketSelect} 
                           activeTrend={activeTrend}
                           strategy={tabId}
-                          distribution={distribution}
+                          ticks={ticks}
                         />
                       </TabsContent>
                     ))}
@@ -467,3 +488,4 @@ export default function DigitFlowApp() {
     </SidebarProvider>
   );
 }
+
