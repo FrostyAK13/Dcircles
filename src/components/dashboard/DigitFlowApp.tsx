@@ -49,8 +49,8 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const window10 = ticks.slice(-10);
 
   if (strategy === 'OVER_UNDER') {
-    const overCount = window150.filter(d => d > 3).length; // Over 3: 4,5,6,7,8,9
-    const underCount = window150.filter(d => d < 6).length; // Under 6: 0,1,2,3,4,5
+    const overCount = window150.filter(d => d > 3).length;
+    const underCount = window150.filter(d => d < 6).length;
     const last10Over = window10.filter(d => d > 3).length;
     const last10Under = window10.filter(d => d < 6).length;
 
@@ -261,7 +261,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
             (isFlashy || isGolden) && "animate-pulse"
           )} />
           <span className={cn("text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em]", isGolden ? "text-amber-500" : analysis.color)}>
-            {isGolden ? "PRIME SIGNAL" : (isFlashy ? analysis.signal : "SCANNING")}
+            {isGolden ? `PRIME ${analysis.signal}` : (isFlashy ? analysis.signal : "SCANNING")}
           </span>
         </div>
       </div>
@@ -363,7 +363,6 @@ export default function DigitFlowApp() {
     setMounted(true);
   }, []);
 
-  // Clear signals on tab change to ensure isolation
   useEffect(() => {
     setSignalRegistry({});
   }, [activeStrategy]);
