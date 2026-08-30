@@ -64,6 +64,7 @@ export class DerivWS {
         const response: TickResponse = JSON.parse(event.data);
         
         if (response.error && Object.keys(response.error).length > 0) {
+          // Quietly handle errors to avoid overlay interruptions
           this.onStatusCallback('error');
           return;
         }
@@ -109,15 +110,17 @@ export class DerivWS {
   }
 
   private subscribeAll() {
-    if (this.ws?.readyState === WebSocket.OPEN) {
+    if (this.ws?.readyState === WebSocket.OPEN && Array.isArray(this.symbols)) {
       this.symbols.forEach(symbol => {
-        this.ws?.send(JSON.stringify({
-          ticks_history: symbol,
-          style: 'ticks',
-          count: 200,
-          end: 'latest',
-          subscribe: 1
-        }));
+        if (symbol) {
+          this.ws?.send(JSON.stringify({
+            ticks_history: symbol,
+            style: 'ticks',
+            count: 200,
+            end: 'latest',
+            subscribe: 1
+          }));
+        }
       });
     }
   }

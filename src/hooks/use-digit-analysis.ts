@@ -15,7 +15,9 @@ export function useDigitAnalysis(symbol: string = 'R_10') {
   
   const wsRef = useRef<DerivWS | null>(null);
 
-  const onHistory = useCallback((historicalPrices: number[]) => {
+  const onHistory = useCallback((_symbol: string, historicalPrices: number[]) => {
+    if (!Array.isArray(historicalPrices)) return;
+    
     const historicalDigits = historicalPrices.map(price => {
       const quoteStr = price.toFixed(2);
       return parseInt(quoteStr.slice(-1));
