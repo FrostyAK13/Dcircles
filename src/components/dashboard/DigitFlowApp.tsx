@@ -46,6 +46,28 @@ function calculateEMA(prices: number[], period: number) {
   return ema;
 }
 
+function calculateRSI(prices: number[], period: number = 14) {
+  if (prices.length <= period) return null;
+  let gains = 0, losses = 0;
+  for (let i = 1; i <= period; i++) {
+    const diff = prices[prices.length - i] - prices[prices.length - i - 1];
+    if (diff > 0) gains += diff;
+    else losses -= diff;
+  }
+  if (losses === 0) return 100;
+  const rs = (gains / period) / (losses / period);
+  return 100 - (100 / (1 + rs));
+}
+
+function calculateATR(prices: number[], period: number = 14) {
+  if (prices.length <= period) return null;
+  let sum = 0;
+  for (let i = 1; i <= period; i++) {
+    sum += Math.abs(prices[prices.length - i] - prices[prices.length - i - 1]);
+  }
+  return sum / period;
+}
+
 function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastSignalTime?: number) {
   const ticks = data?.ticks || [];
   const prices = data?.prices || [];
@@ -57,12 +79,12 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
     timing: 'STANDBY', 
     isHit: false, 
     score: 0,
-    direction: ''
+    direction: '',
+    barrier: null as string | null
   };
   
   if (ticks.length < 50) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
 
-  // 100/20 Rule: Density 60/100, Momentum 13/20
   if (strategy === 'OVER_UNDER') {
     if (ticks.length < 100) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
     const w100 = ticks.slice(-100);
@@ -72,8 +94,8 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
     const last20Over = w20.filter(d => d > 3).length;
     const last20Under = w20.filter(d => d < 6).length;
 
-    if (overCount >= 60 && last20Over >= 13) return { signal: 'OVER', direction: 'OVER', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: overCount };
-    if (underCount >= 60 && last20Under >= 13) return { signal: 'UNDER', direction: 'UNDER', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: underCount };
+    if (overCount >= 60 && last20Over >= 13) return { signal: 'OVER', direction: 'OVER', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: overCount, barrier: null };
+    if (underCount >= 60 && last20Under >= 13) return { signal: 'UNDER', direction: 'UNDER', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: underCount, barrier: null };
   }
 
   if (strategy === 'EVEN_ODD') {
@@ -85,11 +107,10 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
     const last20Even = w20.filter(d => d % 2 === 0).length;
     const last20Odd = w20.filter(d => d % 2 !== 0).length;
 
-    if (evenCount >= 60 && last20Even >= 13) return { signal: 'EVEN', direction: 'EVEN', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: evenCount };
-    if (oddCount >= 60 && last20Odd >= 13) return { signal: 'ODD', direction: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount };
+    if (evenCount >= 60 && last20Even >= 13) return { signal: 'EVEN', direction: 'EVEN', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: evenCount, barrier: null };
+    if (oddCount >= 60 && last20Odd >= 13) return { signal: 'ODD', direction: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount, barrier: null };
   }
 
-  // MATCHES: 200/50 Rule
   if (strategy === 'MATCHES') {
     if (ticks.length < 200) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
     const w200 = ticks.slice(-200);
@@ -106,61 +127,73 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
       const targetDigit = maxDigits[0];
       const match50 = w50.filter(d => d === targetDigit).length;
       if (match50 >= 9) {
-        return { signal: `MATCH ${targetDigit}`, direction: `MATCH ${targetDigit}`, color: 'text-amber-500 font-black', led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', flash: true, timing: 'RUN BOT', isHit: true, score: maxVal };
+        return { signal: `MATCH ${targetDigit}`, direction: `MATCH ${targetDigit}`, color: 'text-amber-500 font-black', led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', flash: true, timing: 'RUN BOT', isHit: true, score: maxVal, barrier: null };
       }
     }
   }
 
-  // RISE/FALL Strategy: EMA 20/50 + Momentum
   if (strategy === 'RISE_FALL') {
     if (prices.length < 100) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
-    
-    // Cooldown logic: wait 20 seconds (approx 20 ticks)
-    if (lastSignalTime && Date.now() - lastSignalTime < 20000) {
-      return { ...defaultState, signal: 'COOLDOWN', timing: 'WAITING', color: 'text-muted-foreground/40' };
-    }
+    if (lastSignalTime && Date.now() - lastSignalTime < 20000) return { ...defaultState, signal: 'COOLDOWN', timing: 'WAITING', color: 'text-muted-foreground/40', barrier: null };
 
     const ema20 = calculateEMA(prices, 20);
     const ema50 = calculateEMA(prices, 50);
     const currentPrice = prices[prices.length - 1];
     const price10Ago = prices[prices.length - 11];
-    const last10Prices = prices.slice(-11, -1);
-    const high10 = Math.max(...last10Prices);
-    const low10 = Math.min(...last10Prices);
+    const high10 = Math.max(...prices.slice(-11, -1));
+    const low10 = Math.min(...prices.slice(-11, -1));
     const last3 = prices.slice(-3);
     
     if (ema20 !== null && ema50 !== null) {
-      // RISE CONDITIONS
-      const emaRise = ema20 > ema50;
-      const priceAboveEMA = currentPrice > ema20;
-      const momentumUp = currentPrice > price10Ago;
-      const breakoutUp = currentPrice > high10;
-      const notFalling = !(last3[2] < last3[1] && last3[1] < last3[0]);
-
-      if (emaRise && priceAboveEMA && momentumUp && breakoutUp && notFalling) {
-        return { signal: 'RISE', direction: 'RISE', color: 'text-emerald-500 font-black', led: 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: 85 };
+      if (ema20 > ema50 && currentPrice > ema20 && currentPrice > price10Ago && currentPrice > high10 && !(last3[2] < last3[1] && last3[1] < last3[0])) {
+        return { signal: 'RISE', direction: 'RISE', color: 'text-emerald-500 font-black', led: 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: 85, barrier: null };
       }
-
-      // FALL CONDITIONS
-      const emaFall = ema20 < ema50;
-      const priceBelowEMA = currentPrice < ema20;
-      const momentumDown = currentPrice < price10Ago;
-      const breakoutDown = currentPrice < low10;
-      const notRising = !(last3[2] > last3[1] && last3[1] > last3[0]);
-
-      if (emaFall && priceBelowEMA && momentumDown && breakoutDown && notRising) {
-        return { signal: 'FALL', direction: 'FALL', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: 85 };
+      if (ema20 < ema50 && currentPrice < ema20 && currentPrice < price10Ago && currentPrice < low10 && !(last3[2] > last3[1] && last3[1] > last3[0])) {
+        return { signal: 'FALL', direction: 'FALL', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: 85, barrier: null };
       }
     }
   }
 
   if (strategy === 'HIGHER_LOWER') {
-    if (prices.length >= 50) {
-      const current = prices[prices.length - 1];
-      const sma = prices.slice(-20).reduce((a, b) => a + b, 0) / 20;
-      const dev = Math.abs(current - sma);
-      if (dev > 0.0005) {
-        return { signal: current > sma ? 'HIGHER' : 'LOWER', direction: current > sma ? 'HIGHER' : 'LOWER', color: current > sma ? 'text-primary font-black' : 'text-rose-500 font-black', led: current > sma ? 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]' : 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'TREND POS', isHit: true, score: dev * 10000 };
+    if (prices.length < 50) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
+    
+    const ema20 = calculateEMA(prices, 20);
+    const ema50 = calculateEMA(prices, 50);
+    const rsi = calculateRSI(prices, 14);
+    const atr = calculateATR(prices, 14);
+    const current = prices[prices.length - 1];
+    const last3 = prices.slice(-4, -1);
+    
+    if (ema20 && ema50 && rsi && atr) {
+      // HIGHER Strategy
+      if (ema20 > ema50 && current > ema20 && rsi >= 55 && rsi <= 70 && current > Math.max(...last3)) {
+        const barrier = current - (atr * 0.2);
+        return { 
+          signal: `HIGHER | Barrier: ${barrier.toFixed(3)}`, 
+          direction: 'HIGHER', 
+          color: 'text-primary font-black', 
+          led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', 
+          flash: true, 
+          timing: 'ENTRY NOW', 
+          isHit: true, 
+          score: rsi, 
+          barrier: barrier.toFixed(3) 
+        };
+      }
+      // LOWER Strategy
+      if (ema20 < ema50 && current < ema20 && rsi >= 30 && rsi <= 45 && current < Math.min(...last3)) {
+        const barrier = current + (atr * 0.2);
+        return { 
+          signal: `LOWER | Barrier: ${barrier.toFixed(3)}`, 
+          direction: 'LOWER', 
+          color: 'text-rose-500 font-black', 
+          led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', 
+          flash: true, 
+          timing: 'ENTRY NOW', 
+          isHit: true, 
+          score: 100 - rsi, 
+          barrier: barrier.toFixed(3) 
+        };
       }
     }
   }
@@ -170,8 +203,8 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
       const last5 = prices.slice(-5);
       const isUp = last5.every((p, i) => i === 0 || p > last5[i - 1]);
       const isDown = last5.every((p, i) => i === 0 || p < last5[i - 1]);
-      if (isUp) return { signal: 'ONLY UPS', direction: 'ONLY UPS', color: 'text-emerald-400 font-black', led: 'bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,1)]', flash: true, timing: 'VELOCITY UP', isHit: true, score: 95 };
-      if (isDown) return { signal: 'ONLY DOWNS', direction: 'ONLY DOWNS', color: 'text-rose-400 font-black', led: 'bg-rose-400 shadow-[0_0_20px_rgba(251,113,133,1)]', flash: true, timing: 'VELOCITY DOWN', isHit: true, score: 95 };
+      if (isUp) return { signal: 'ONLY UPS', direction: 'ONLY UPS', color: 'text-emerald-400 font-black', led: 'bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,1)]', flash: true, timing: 'VELOCITY UP', isHit: true, score: 95, barrier: null };
+      if (isDown) return { signal: 'ONLY DOWNS', direction: 'ONLY DOWNS', color: 'text-rose-400 font-black', led: 'bg-rose-400 shadow-[0_0_20px_rgba(251,113,133,1)]', flash: true, timing: 'VELOCITY DOWN', isHit: true, score: 95, barrier: null };
     }
   }
 
@@ -192,7 +225,6 @@ interface MarketEngineCardProps {
 function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGolden, expiryTimestamp, lastSignalTime }: MarketEngineCardProps) {
   const [countdown, setCountdown] = useState(5);
   const [lifeRemaining, setLifeRemaining] = useState(30);
-  const prices = data?.prices || [];
   
   const analysis = useMemo(() => getMarketAnalysis(data, strategy, lastSignalTime), [data, strategy, lastSignalTime]);
   const isFlashy = analysis.isHit; 
@@ -296,21 +328,20 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
             isGolden ? "bg-amber-400 shadow-[0_0_15px_rgba(251,191,36,1)]" : analysis.led,
             (isFlashy || isGolden) && "animate-pulse"
           )} />
-          <span className={cn("text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em]", isGolden ? "text-amber-500" : analysis.color)}>
+          <span className={cn("text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em] text-center truncate w-full px-1", isGolden ? "text-amber-500" : analysis.color)}>
             {isGolden ? analysis.direction : (isFlashy ? analysis.signal : "SCANNING")}
           </span>
         </div>
 
-        {strategy === 'RISE_FALL' && (
-          <div className="flex items-center gap-1.5 mt-1 opacity-60">
-             <Badge variant="outline" className="text-[6px] font-black px-1.5 py-0 rounded-lg border-border/30 text-muted-foreground">100T ANALYSIS</Badge>
-             <Badge variant="outline" className="text-[6px] font-black px-1.5 py-0 rounded-lg border-primary/30 text-primary">5T DURATION</Badge>
-          </div>
+        {strategy === 'HIGHER_LOWER' && analysis.barrier && (
+           <Badge variant="outline" className="text-[7px] font-black px-2 py-0.5 rounded-lg border-primary/30 text-primary mt-1">
+             BARRIER: {analysis.barrier}
+           </Badge>
         )}
       </div>
 
       <div className="absolute bottom-2 right-2 flex items-center gap-1 z-10 opacity-30">
-        <div className={cn("w-1 h-1 rounded-full", prices.length > 0 ? "bg-primary animate-ping" : "bg-muted")} />
+        <div className={cn("w-1 h-1 rounded-full", data?.prices?.length ? "bg-primary animate-ping" : "bg-muted")} />
         <span className="text-[6px] font-bold uppercase tracking-tighter">Live Link</span>
       </div>
     </div>
@@ -330,7 +361,7 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
       case 'EVEN_ODD': return '100 Ticks Density / 20 Ticks Momentum';
       case 'MATCHES': return '200 Ticks Density / 50 Ticks Momentum';
       case 'RISE_FALL': return '100 Ticks Analysis / 5 Ticks Duration';
-      case 'HIGHER_LOWER': return '50 Ticks SMA Deviation Analysis';
+      case 'HIGHER_LOWER': return '50 Ticks EMA & ATR Analysis';
       case 'ONLY_UPS_DOWNS': return '5 Ticks Consecutive Velocity';
       default: return 'Real-time Statistical Engine';
     }
