@@ -1,5 +1,4 @@
 export const APP_ID = '84799';
-// Using the recommended public trading endpoint for better stability
 export const DERIV_WS_URL = `wss://api.derivws.com/trading/v1/options/ws/public?app_id=${APP_ID}`;
 
 export type Tick = {
@@ -17,6 +16,9 @@ export interface TickResponse {
     prices: number[];
     times: number[];
   };
+  echo_req: {
+    ticks_history?: string;
+  };
   msg_type: string;
   error?: {
     code: string;
@@ -27,19 +29,19 @@ export interface TickResponse {
 export class DerivWS {
   private ws: WebSocket | null = null;
   private onTickCallback: (tick: Tick) => void;
-  private onHistoryCallback?: (prices: number[]) => void;
+  private onHistoryCallback: (symbol: string, prices: number[]) => void;
   private onStatusCallback: (status: ConnectionStatus) => void;
-  private symbol: string;
+  private symbols: string[];
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private pingInterval: NodeJS.Timeout | null = null;
 
   constructor(
-    symbol: string, 
+    symbols: string[], 
     onTick: (tick: Tick) => void, 
     onStatus: (status: ConnectionStatus) => void,
-    onHistory?: (prices: number[]) => void
+    onHistory: (symbol: string, prices: number[]) => void
   ) {
-    this.symbol = symbol;
+    this.symbols = symbols;
     this.onTickCallback = onTick;
     this.onStatusCallback = onStatus;
     this.onHistoryCallback = onHistory;
@@ -47,14 +49,14 @@ export class DerivWS {
 
   connect() {
     this.disconnect();
-    
     this.onStatusCallback('connecting');
+    
     try {
       this.ws = new WebSocket(DERIV_WS_URL);
 
       this.ws.onopen = () => {
         this.onStatusCallback('connected');
-        this.subscribeToTicks();
+        this.subscribeAll();
         this.startPing();
       };
 
@@ -62,14 +64,13 @@ export class DerivWS {
         const response: TickResponse = JSON.parse(event.data);
         
         if (response.error && Object.keys(response.error).length > 0) {
-          // Removed console.error to prevent Next.js development error overlay
-          // The error state is handled via the status callback
+          // Standard error handling without console.error
           this.onStatusCallback('error');
           return;
         }
 
-        if (response.msg_type === 'history' && response.history && this.onHistoryCallback) {
-          this.onHistoryCallback(response.history.prices);
+        if (response.msg_type === 'history' && response.history && response.echo_req.ticks_history) {
+          this.onHistoryCallback(response.echo_req.ticks_history, response.history.prices);
         }
         
         if (response.msg_type === 'tick' && response.tick) {
@@ -108,35 +109,25 @@ export class DerivWS {
     }
   }
 
-  private subscribeToTicks() {
-    if (this.ws?.readyState === WebSocket.OPEN && this.symbol) {
-      this.ws.send(JSON.stringify({
-        ticks_history: this.symbol,
-        style: 'ticks',
-        count: 1000,
-        end: 'latest',
-        subscribe: 1
-      }));
+  private subscribeAll() {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.symbols.forEach(symbol => {
+        this.ws?.send(JSON.stringify({
+          ticks_history: symbol,
+          style: 'ticks',
+          count: 150,
+          end: 'latest',
+          subscribe: 1
+        }));
+      });
     }
   }
 
   private attemptReconnect() {
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
     this.reconnectTimeout = setTimeout(() => {
-      if (this.ws === null) return;
       this.connect();
     }, 5000);
-  }
-
-  setSymbol(symbol: string) {
-    if (this.symbol === symbol) return;
-    this.symbol = symbol;
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ forget_all: 'ticks' }));
-      this.subscribeToTicks();
-    } else {
-      this.connect();
-    }
   }
 
   disconnect() {
