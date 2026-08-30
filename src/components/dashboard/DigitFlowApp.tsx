@@ -180,13 +180,6 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
     return () => clearInterval(timer);
   }, [expiryTimestamp]);
 
-  const trend = useMemo(() => {
-    if (prices.length < 10) return 'neutral';
-    const last = prices[prices.length - 1];
-    const prev = prices[prices.length - 10];
-    return last > prev ? 'up' : last < prev ? 'down' : 'neutral';
-  }, [prices]);
-
   const StrategyIcon = useMemo(() => {
     switch(strategy) {
       case 'OVER_UNDER': return ArrowUpDown;
@@ -258,13 +251,6 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
           {isGolden && "⭐ "}{market.name.replace('Index', '').trim()}
         </span>
         
-        <div className={cn(
-          "px-3 py-0.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-[0.15em] border flex items-center gap-1",
-          trend === 'up' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : trend === 'down' ? "bg-rose-500/10 border-rose-500/20 text-rose-500" : "bg-primary/10 border-primary/20 text-primary"
-        )}>
-          {trend === 'up' ? 'UP TREND' : trend === 'down' ? 'DOWN TREND' : 'NEUTRAL'}
-        </div>
-
         <div className={cn(
           "flex items-center gap-2 px-3 py-1.5 rounded-xl border mt-1 w-full justify-center transition-all duration-500",
           isGolden ? "bg-amber-400/20 border-amber-400/50" : "bg-black/5 dark:bg-white/5 border-border/10"
