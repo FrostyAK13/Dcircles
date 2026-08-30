@@ -37,63 +37,63 @@ export const CONTINUOUS_INDICES = [
 ];
 
 /**
- * Strategy-Specific Tactical Engine
+ * Strategy-Specific Tactical Engine (100/20 Rule)
  */
 function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const ticks = data?.ticks || [];
   const prices = data?.prices || [];
   
-  if (ticks.length < 150) return { signal: 'CALIBRATING', color: 'text-muted-foreground/30', led: 'bg-muted/20', flash: false, timing: 'WAITING', isHit: false, score: 0 };
+  if (ticks.length < 100) return { signal: 'CALIBRATING', color: 'text-muted-foreground/30', led: 'bg-muted/20', flash: false, timing: 'WAITING', isHit: false, score: 0 };
 
   if (strategy === 'OVER_UNDER') {
-    const window150 = ticks.slice(-150);
-    const window10 = ticks.slice(-10);
-    const overCount = window150.filter(d => d > 3).length; // Over 3 (4,5,6,7,8,9)
-    const underCount = window150.filter(d => d < 6).length; // Under 6 (0,1,2,3,4,5)
-    const last10Over = window10.filter(d => d > 3).length;
-    const last10Under = window10.filter(d => d < 6).length;
+    const window100 = ticks.slice(-100);
+    const window20 = ticks.slice(-20);
+    const overCount = window100.filter(d => d > 3).length; // Over 3 (4,5,6,7,8,9)
+    const underCount = window100.filter(d => d < 6).length; // Under 6 (0,1,2,3,4,5)
+    const last20Over = window20.filter(d => d > 3).length;
+    const last20Under = window20.filter(d => d < 6).length;
 
-    if (overCount >= 90 && last10Over >= 6) {
+    if (overCount >= 60 && last20Over >= 13) {
       return { signal: 'OVER', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: overCount };
     }
-    if (underCount >= 90 && last10Under >= 6) {
+    if (underCount >= 60 && last20Under >= 13) {
       return { signal: 'UNDER', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: underCount };
     }
   }
 
   if (strategy === 'EVEN_ODD') {
-    const window150 = ticks.slice(-150);
-    const window30 = ticks.slice(-30);
-    const evenCount150 = window150.filter(d => d % 2 === 0).length;
-    const oddCount150 = window150.filter(d => d % 2 !== 0).length;
-    const evenCount30 = window30.filter(d => d % 2 === 0).length;
-    const oddCount30 = window30.filter(d => d % 2 !== 0).length;
+    const window100 = ticks.slice(-100);
+    const window20 = ticks.slice(-20);
+    const evenCount100 = window100.filter(d => d % 2 === 0).length;
+    const oddCount100 = window100.filter(d => d % 2 !== 0).length;
+    const evenCount20 = window20.filter(d => d % 2 === 0).length;
+    const oddCount20 = window20.filter(d => d % 2 !== 0).length;
 
-    if (evenCount150 >= 90 && evenCount30 >= 18) {
-      return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: evenCount150 };
+    if (evenCount100 >= 60 && evenCount20 >= 13) {
+      return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: evenCount100 };
     }
-    if (oddCount150 >= 90 && oddCount30 >= 18) {
-      return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount150 };
+    if (oddCount100 >= 60 && oddCount20 >= 13) {
+      return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount100 };
     }
   }
 
   if (strategy === 'MATCHES') {
-    const window150 = ticks.slice(-150);
-    const window10 = ticks.slice(-10);
+    const window100 = ticks.slice(-100);
+    const window20 = ticks.slice(-20);
     const counts = new Array(10).fill(0);
-    window150.forEach(d => counts[d]++);
+    window100.forEach(d => counts[d]++);
     const max = Math.max(...counts);
     const digit = counts.indexOf(max);
-    const last10Match = window10.filter(d => d === digit).length;
+    const last20Match = window20.filter(d => d === digit).length;
 
-    if (max >= 25 && last10Match >= 2) {
+    if (max >= 20 && last20Match >= 3) {
       return { signal: `MATCH ${digit}`, color: 'text-amber-500 font-black', led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', flash: true, timing: 'MATCH FOUND', isHit: true, score: max };
     }
   }
 
   if (strategy === 'RISE_FALL') {
-    if (prices.length >= 10) {
-      const diff = prices[prices.length - 1] - prices[prices.length - 10];
+    if (prices.length >= 20) {
+      const diff = prices[prices.length - 1] - prices[prices.length - 20];
       if (Math.abs(diff) > 0.05) {
         return {
           signal: diff > 0 ? 'RISE' : 'FALL',
