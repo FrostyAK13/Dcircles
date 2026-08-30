@@ -45,10 +45,9 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   
   if (ticks.length < 150) return { signal: 'CALIBRATING', color: 'text-muted-foreground/30', led: 'bg-muted/20', flash: false, timing: 'WAITING', isHit: false, score: 0 };
 
-  const window150 = ticks.slice(-150);
-  const window10 = ticks.slice(-10);
-
   if (strategy === 'OVER_UNDER') {
+    const window150 = ticks.slice(-150);
+    const window10 = ticks.slice(-10);
     const overCount = window150.filter(d => d > 3).length; // Over 3 (4,5,6,7,8,9)
     const underCount = window150.filter(d => d < 6).length; // Under 6 (0,1,2,3,4,5)
     const last10Over = window10.filter(d => d > 3).length;
@@ -63,20 +62,24 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   }
 
   if (strategy === 'EVEN_ODD') {
-    const evenCount = window150.filter(d => d % 2 === 0).length;
-    const oddCount = window150.filter(d => d % 2 !== 0).length;
-    const last10Even = window10.filter(d => d % 2 === 0).length;
-    const last10Odd = window10.filter(d => d % 2 !== 0).length;
+    const window150 = ticks.slice(-150);
+    const window30 = ticks.slice(-30);
+    const evenCount150 = window150.filter(d => d % 2 === 0).length;
+    const oddCount150 = window150.filter(d => d % 2 !== 0).length;
+    const evenCount30 = window30.filter(d => d % 2 === 0).length;
+    const oddCount30 = window30.filter(d => d % 2 !== 0).length;
 
-    if (evenCount >= 90 && last10Even >= 6) {
-      return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: evenCount };
+    if (evenCount150 >= 90 && evenCount30 >= 18) {
+      return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: evenCount150 };
     }
-    if (oddCount >= 90 && last10Odd >= 6) {
-      return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount };
+    if (oddCount150 >= 90 && oddCount30 >= 18) {
+      return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount150 };
     }
   }
 
   if (strategy === 'MATCHES') {
+    const window150 = ticks.slice(-150);
+    const window10 = ticks.slice(-10);
     const counts = new Array(10).fill(0);
     window150.forEach(d => counts[d]++);
     const max = Math.max(...counts);
