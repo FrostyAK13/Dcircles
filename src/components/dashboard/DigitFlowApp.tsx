@@ -9,10 +9,22 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle, Radio, Star, Timer } from 'lucide-react';
+import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle, Radio, Star, Timer, AreaChart as AreaChartIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
+import { 
+  Bar, 
+  BarChart, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Area,
+  AreaChart
+} from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -35,6 +47,17 @@ export const CONTINUOUS_INDICES = [
   { id: 'JD75', name: 'Jump 75 Index', short: 'J75' },
   { id: 'JD100', name: 'Jump 100 Index', short: 'J100' },
 ];
+
+const chartConfig = {
+  percentage: {
+    label: "Frequency %",
+    color: "hsl(var(--primary))",
+  },
+  price: {
+    label: "Price",
+    color: "hsl(var(--primary))",
+  }
+} satisfies ChartConfig;
 
 function calculateEMA(prices: number[], period: number) {
   if (prices.length < period) return null;
@@ -480,7 +503,7 @@ export default function DigitFlowApp() {
   const { marketData, status } = useMultiMarketAnalysis(marketIds);
 
   const currentSymbol = strategySelections[activeStrategy] || 'R_10';
-  const { distribution, latestDigit, latestPrice, totalTicks } = useDigitAnalysis(currentSymbol);
+  const { distribution, latestDigit, latestPrice, totalTicks, prices } = useDigitAnalysis(currentSymbol);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -539,7 +562,13 @@ export default function DigitFlowApp() {
     return getMarketAnalysis(marketData[currentSymbol], activeStrategy);
   }, [marketData, currentSymbol, activeStrategy]);
 
-  // Statistical Trigger Logic for Analysis Tab
+  const priceChartData = useMemo(() => {
+    return prices.slice(-50).map((p, i) => ({
+      index: i,
+      price: p
+    }));
+  }, [prices]);
+
   const analysisTrigger = useMemo(() => {
     if (tradeSide === 'none') return null;
 
@@ -556,7 +585,6 @@ export default function DigitFlowApp() {
       targetAvg = (p9 + p8 + p7) / 3;
     }
 
-    // Find closest digit to targetAvg
     let closestDigit = 0;
     let minDiff = Infinity;
 
@@ -598,89 +626,162 @@ export default function DigitFlowApp() {
           </div>
 
           <TabsContent value="dashboard" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-            <Card className="border-none bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
-              <CardContent className="p-4 sm:p-8 lg:p-12 space-y-6 sm:space-y-8">
-                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-between w-full">
-                  <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <div className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
-                        <BarChart2 className="w-5 h-5 text-primary" />
-                        <div className="flex flex-col">
-                          <span className="text-[10px] sm:text-[11px] font-bold text-foreground group-hover:text-primary transition-colors truncate">
-                            {CONTINUOUS_INDICES.find(m => m.id === currentSymbol)?.name}
-                          </span>
-                          <span className="text-[9px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                            <Database className="w-2.5 h-2.5" />{totalTicks} Ticks
-                          </span>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-2 border-none bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
+                <CardContent className="p-4 sm:p-8 lg:p-12 space-y-6 sm:space-y-8">
+                  <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-between w-full">
+                    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                      <PopoverTrigger asChild>
+                        <div className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
+                          <BarChart2 className="w-5 h-5 text-primary" />
+                          <div className="flex flex-col">
+                            <span className="text-[10px] sm:text-[11px] font-bold text-foreground group-hover:text-primary transition-colors truncate">
+                              {CONTINUOUS_INDICES.find(m => m.id === currentSymbol)?.name}
+                            </span>
+                            <span className="text-[9px] font-bold text-muted-foreground uppercase flex items-center gap-1">
+                              <Database className="w-2.5 h-2.5" />{totalTicks} Ticks
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-72 p-0 bg-card border-border/50 shadow-2xl backdrop-blur-2xl text-card-foreground" align="start">
-                      <div className="p-3 border-b border-border/40"><span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2">Market Selector</span></div>
-                      <div className="max-h-[50vh] overflow-y-auto p-1">
-                        {CONTINUOUS_INDICES.map((market) => (
-                          <button key={market.id} onClick={() => { handleMarketSelect(market.id); setIsPopoverOpen(false); }} className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors", currentSymbol === market.id ? "bg-primary/10 text-primary" : "hover:bg-muted/40 text-foreground")}>
-                            <span className="text-xs font-semibold">{market.name}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                  <Select value={tradeSide} onValueChange={setTradeSide}>
-                    <SelectTrigger className="w-full sm:w-32 h-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
-                      <SelectValue placeholder="Focus" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-card border-border/50">
-                      <SelectItem value="none" className="text-[9px] font-black uppercase tracking-widest">General</SelectItem>
-                      <SelectItem value="over" className="text-[9px] font-black uppercase tracking-widest text-primary">OVER</SelectItem>
-                      <SelectItem value="under" className="text-[9px] font-black uppercase tracking-widest text-rose-500">UNDER</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="flex flex-col items-center justify-center py-4 gap-6">
-                  <div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-primary">
-                    {latestPrice?.toFixed(2) || "---"}
+                      </PopoverTrigger>
+                      <PopoverContent className="w-72 p-0 bg-card border-border/50 shadow-2xl backdrop-blur-2xl text-card-foreground" align="start">
+                        <div className="p-3 border-b border-border/40"><span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2">Market Selector</span></div>
+                        <div className="max-h-[50vh] overflow-y-auto p-1">
+                          {CONTINUOUS_INDICES.map((market) => (
+                            <button key={market.id} onClick={() => { handleMarketSelect(market.id); setIsPopoverOpen(false); }} className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors", currentSymbol === market.id ? "bg-primary/10 text-primary" : "hover:bg-muted/40 text-foreground")}>
+                              <span className="text-xs font-semibold">{market.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                    <Select value={tradeSide} onValueChange={setTradeSide}>
+                      <SelectTrigger className="w-full sm:w-32 h-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
+                        <SelectValue placeholder="Focus" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card border-border/50">
+                        <SelectItem value="none" className="text-[9px] font-black uppercase tracking-widest">General</SelectItem>
+                        <SelectItem value="over" className="text-[9px] font-black uppercase tracking-widest text-primary">OVER</SelectItem>
+                        <SelectItem value="under" className="text-[9px] font-black uppercase tracking-widest text-rose-500">UNDER</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   
-                  {/* Digit Calculator Entry Point Display */}
-                  <div className={cn(
-                    "flex flex-col items-center gap-3 px-8 py-4 rounded-[2.5rem] border-2 transition-all duration-700 animate-in fade-in zoom-in",
-                    (currentMarketAnalysis.isHit || analysisTrigger)
-                      ? "bg-primary/10 border-primary shadow-[0_0_50px_rgba(0,166,166,0.3)] scale-110" 
-                      : "bg-muted/10 border-border/20 opacity-40 scale-100"
-                  )}>
-                    <div className="flex items-center gap-3">
-                      <div className={cn(
-                        "w-4 h-4 rounded-full transition-all duration-300",
-                        (currentMarketAnalysis.isHit || analysisTrigger) ? "bg-primary animate-ping" : "bg-muted-foreground/30"
-                      )} />
-                      <span className={cn(
-                        "text-xs sm:text-xl font-black uppercase tracking-[0.4em] transition-colors",
-                        (currentMarketAnalysis.isHit || analysisTrigger) ? "text-primary" : "text-muted-foreground/60"
-                      )}>
-                        {analysisTrigger 
-                          ? `${analysisTrigger.side} TRIGGER: DIGIT ${analysisTrigger.digit}`
-                          : currentMarketAnalysis.isHit 
-                            ? (activeStrategy === 'MATCHES' ? `RUN BOT: ${currentMarketAnalysis.signal}` : currentMarketAnalysis.signal) 
-                            : "SCANNING ENGINE ACTIVE"}
-                      </span>
+                  <div className="flex flex-col items-center justify-center py-4 gap-6">
+                    <div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-primary">
+                      {latestPrice?.toFixed(2) || "---"}
                     </div>
-                    {(currentMarketAnalysis.isHit || analysisTrigger) && (
-                      <Badge variant="outline" className="bg-primary text-white border-primary text-[8px] sm:text-[10px] font-black tracking-[0.2em] px-4 py-1 rounded-xl animate-pulse">
-                        HIGH CONFIDENCE ENTRY
-                      </Badge>
-                    )}
+                    
+                    <div className={cn(
+                      "flex flex-col items-center gap-3 px-8 py-4 rounded-[2.5rem] border-2 transition-all duration-700 animate-in fade-in zoom-in",
+                      (currentMarketAnalysis.isHit || analysisTrigger)
+                        ? "bg-primary/10 border-primary shadow-[0_0_50px_rgba(0,166,166,0.3)] scale-110" 
+                        : "bg-muted/10 border-border/20 opacity-40 scale-100"
+                    )}>
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          "w-4 h-4 rounded-full transition-all duration-300",
+                          (currentMarketAnalysis.isHit || analysisTrigger) ? "bg-primary animate-ping" : "bg-muted-foreground/30"
+                        )} />
+                        <span className={cn(
+                          "text-xs sm:text-xl font-black uppercase tracking-[0.4em] transition-colors",
+                          (currentMarketAnalysis.isHit || analysisTrigger) ? "text-primary" : "text-muted-foreground/60"
+                        )}>
+                          {analysisTrigger 
+                            ? `${analysisTrigger.side} TRIGGER: DIGIT ${analysisTrigger.digit}`
+                            : currentMarketAnalysis.isHit 
+                              ? (activeStrategy === 'MATCHES' ? `RUN BOT: ${currentMarketAnalysis.signal}` : currentMarketAnalysis.signal) 
+                              : "SCANNING ENGINE ACTIVE"}
+                        </span>
+                      </div>
+                      {(currentMarketAnalysis.isHit || analysisTrigger) && (
+                        <Badge variant="outline" className="bg-primary text-white border-primary text-[8px] sm:text-[10px] font-black tracking-[0.2em] px-4 py-1 rounded-xl animate-pulse">
+                          HIGH CONFIDENCE ENTRY
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-5 gap-2 sm:gap-8 max-w-4xl mx-auto px-1 sm:px-4">
-                  {distribution.map((d) => (
-                    <DigitCard key={d.digit} digit={d.digit} percentage={d.percentage} isHigh={d.digit === stats.high} isSecondHigh={d.digit === stats.secondHigh} isLow={d.digit === stats.low} isSecondLow={d.digit === stats.secondLow} isLatest={d.digit === latestDigit} onClick={() => {}} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="grid grid-cols-5 gap-2 sm:gap-8 max-w-4xl mx-auto px-1 sm:px-4">
+                    {distribution.map((d) => (
+                      <DigitCard key={d.digit} digit={d.digit} percentage={d.percentage} isHigh={d.digit === stats.high} isSecondHigh={d.digit === stats.secondHigh} isLow={d.digit === stats.low} isSecondLow={d.digit === stats.secondLow} isLatest={d.digit === latestDigit} onClick={() => {}} />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="space-y-6">
+                <Card className="border border-border/40 bg-card rounded-3xl shadow-xl overflow-hidden icy-glass">
+                  <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                      <AreaChartIcon className="w-3.5 h-3.5 text-primary" /> Price History
+                    </h3>
+                    <Badge variant="outline" className="text-[8px] px-2 py-0 border-primary/20 text-primary">LIVE</Badge>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <ChartContainer config={chartConfig} className="h-40 w-full">
+                      <AreaChart data={priceChartData}>
+                        <defs>
+                          <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.2} />
+                        <XAxis dataKey="index" hide />
+                        <YAxis hide domain={['auto', 'auto']} />
+                        <Tooltip content={<ChartTooltipContent hideLabel />} />
+                        <Area 
+                          type="monotone" 
+                          dataKey="price" 
+                          stroke="hsl(var(--primary))" 
+                          fillOpacity={1} 
+                          fill="url(#colorPrice)" 
+                          strokeWidth={2}
+                          animationDuration={500}
+                        />
+                      </AreaChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+
+                <Card className="border border-border/40 bg-card rounded-3xl shadow-xl overflow-hidden icy-glass">
+                  <CardHeader className="py-4 px-6 border-b border-border/10">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
+                      <BarChart2 className="w-3.5 h-3.5 text-primary" /> Distribution (%)
+                    </h3>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <ChartContainer config={chartConfig} className="h-40 w-full">
+                      <BarChart data={distribution}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.2} />
+                        <XAxis 
+                          dataKey="digit" 
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fontSize: 10, fontWeight: 'bold' }}
+                        />
+                        <YAxis hide domain={[0, 'auto']} />
+                        <Tooltip content={<ChartTooltipContent hideLabel />} />
+                        <Bar 
+                          dataKey="percentage" 
+                          radius={[4, 4, 0, 0]}
+                          animationDuration={1000}
+                        >
+                          {distribution.map((entry, index) => (
+                            <rect 
+                              key={`cell-${index}`} 
+                              fill={entry.digit === stats.high ? 'hsl(var(--primary))' : entry.digit === stats.low ? 'hsl(var(--destructive))' : 'hsl(var(--muted-foreground))'} 
+                              opacity={0.6}
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
@@ -741,6 +842,15 @@ export default function DigitFlowApp() {
           <TabsContent value="digits" className="mt-0 outline-none"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/digitshome" className="w-full h-full" /></Card></TabsContent>
           <TabsContent value="percentage" className="mt-0 outline-none"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://api.binarytool.site" className="w-full h-full" /></Card></TabsContent>
         </Tabs>
+
+        {/* Brand Footer Signature */}
+        <div className="w-full pt-12 pb-8 flex flex-col items-center justify-center gap-2 border-t border-border/10 mt-8 opacity-60">
+          <div className="flex items-center gap-2 text-[10px] sm:text-[12px] font-black uppercase tracking-[0.3em] text-[#A67C52] transition-all hover:opacity-100 hover:scale-105">
+            <div className="w-2 h-2 rounded-full bg-[#A67C52] animate-pulse" />
+            Created by Alex
+          </div>
+          <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.1em]">© 2025 INDEX NAVIGATOR TAC HUB</span>
+        </div>
       </main>
     </div>
   );
