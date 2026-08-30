@@ -68,10 +68,22 @@ function calculateATR(prices: number[], period: number = 14) {
   return sum / period;
 }
 
-function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastSignalTime?: number) {
+interface AnalysisResult {
+  signal: string;
+  color: string;
+  led: string;
+  flash: boolean;
+  timing: string;
+  isHit: boolean;
+  score: number;
+  direction: string;
+  barrier: string | null;
+}
+
+function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastSignalTime?: number): AnalysisResult {
   const ticks = data?.ticks || [];
   const prices = data?.prices || [];
-  const defaultState = { 
+  const defaultState: AnalysisResult = { 
     signal: 'SCANNING', 
     color: 'text-muted-foreground/30', 
     led: 'bg-muted/20', 
@@ -80,7 +92,7 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
     isHit: false, 
     score: 0,
     direction: '',
-    barrier: null as string | null
+    barrier: null
   };
   
   if (ticks.length < 50) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
@@ -115,6 +127,7 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
     const w50 = ticks.slice(-50);
     const counts = new Array(10).fill(0);
     w200.forEach(d => counts[d]++);
+    
     const maxVal = Math.max(...counts);
     const maxDigits: number[] = [];
     counts.forEach((c, d) => { if (c === maxVal) maxDigits.push(d); });
@@ -174,7 +187,7 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
 
   if (strategy === 'ONLY_UPS_DOWNS') {
     if (prices.length < 71) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
-    if (lastSignalTime && Date.now() - lastSignalTime < 20000) return { ...defaultState, signal: 'COOLDOWN', timing: 'WAITING', color: 'text-muted-foreground/40' };
+    if (lastSignalTime && Date.now() - lastSignalTime < 20000) return { ...defaultState, signal: 'COOLDOWN', timing: 'WAITING', color: 'text-muted-foreground/40', barrier: null };
 
     const ema8 = calculateEMA(prices, 8);
     const ema21 = calculateEMA(prices, 21);
@@ -221,13 +234,19 @@ interface MarketEngineCardProps {
   isGolden?: boolean;
   expiryTimestamp?: number;
   lastSignalTime?: number;
+  cachedAnalysis?: AnalysisResult | null;
 }
 
-function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGolden, expiryTimestamp, lastSignalTime }: MarketEngineCardProps) {
+function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGolden, expiryTimestamp, lastSignalTime, cachedAnalysis }: MarketEngineCardProps) {
   const [countdown, setCountdown] = useState(5);
   const [lifeRemaining, setLifeRemaining] = useState(30);
   
-  const analysis = useMemo(() => getMarketAnalysis(data, strategy, lastSignalTime), [data, strategy, lastSignalTime]);
+  // Use cached analysis if available to ensure 30s persistence
+  const analysis = useMemo(() => {
+    if (cachedAnalysis) return cachedAnalysis;
+    return getMarketAnalysis(data, strategy, lastSignalTime);
+  }, [data, strategy, lastSignalTime, cachedAnalysis]);
+
   const isFlashy = analysis.isHit; 
 
   useEffect(() => {
@@ -362,7 +381,15 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
   );
 }
 
-function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistry }: { marketData: Record<string, MarketData>, strategy: string, signals: string[], goldenIds: string[], signalRegistry: Record<string, number> }) {
+interface SignalScannerProps {
+  marketData: Record<string, MarketData>;
+  strategy: string;
+  signals: string[];
+  goldenIds: string[];
+  signalRegistry: Record<string, { timestamp: number; analysis: AnalysisResult }>;
+}
+
+function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistry }: SignalScannerProps) {
   const sortedSignals = useMemo(() => {
     const goldens = signals.filter(id => goldenIds.includes(id));
     const rest = signals.filter(id => !goldenIds.includes(id));
@@ -408,6 +435,7 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
             {sortedSignals.map((id) => {
               const market = CONTINUOUS_INDICES.find(m => m.id === id);
               if (!market) return null;
+              const entry = signalRegistry[id];
               return (
                 <MarketEngineCard 
                   key={id}
@@ -415,8 +443,9 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
                   data={marketData[id]}
                   strategy={strategy}
                   isGolden={goldenIds.includes(id)}
-                  expiryTimestamp={signalRegistry[id]}
-                  lastSignalTime={signalRegistry[id]}
+                  expiryTimestamp={entry?.timestamp}
+                  lastSignalTime={entry?.timestamp}
+                  cachedAnalysis={entry?.analysis}
                 />
               );
             })}
@@ -444,7 +473,8 @@ export default function DigitFlowApp() {
   const [activeMainTab, setActiveMainTab] = useState('dashboard');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
-  const [multiSignalRegistry, setMultiSignalRegistry] = useState<Record<string, Record<string, number>>>({
+  // Stores signal timing and analysis data for 30s persistence
+  const [multiSignalRegistry, setMultiSignalRegistry] = useState<Record<string, Record<string, { timestamp: number; analysis: AnalysisResult }>>>({
     'OVER_UNDER': {}, 'EVEN_ODD': {}, 'MATCHES': {}, 'RISE_FALL': {}, 'HIGHER_LOWER': {}, 'ONLY_UPS_DOWNS': {},
   });
 
@@ -456,6 +486,7 @@ export default function DigitFlowApp() {
 
   useEffect(() => { setMounted(true); }, []);
 
+  // Registry Management: Handle signal detection and 30s persistence
   useEffect(() => {
     const now = Date.now();
     setMultiSignalRegistry(prev => {
@@ -464,18 +495,21 @@ export default function DigitFlowApp() {
       let changed = false;
 
       Object.entries(marketData).forEach(([id, data]) => {
-        const lastSignalTime = currentRegistry[id];
-        const analysis = getMarketAnalysis(data, activeStrategy, lastSignalTime);
-        if (analysis.isHit) {
-          if (!currentRegistry[id]) {
-            currentRegistry[id] = now;
+        const existing = currentRegistry[id];
+        
+        // If no signal is locked, scan for a new hit
+        if (!existing) {
+          const analysis = getMarketAnalysis(data, activeStrategy);
+          if (analysis.isHit) {
+            currentRegistry[id] = { timestamp: now, analysis };
             changed = true;
           }
         }
       });
 
-      Object.entries(currentRegistry).forEach(([id, timestamp]) => {
-        if (now - timestamp > 30000) {
+      // Remove signals that have been active for more than 30 seconds
+      Object.entries(currentRegistry).forEach(([id, entry]) => {
+        if (now - entry.timestamp > 30000) {
           delete currentRegistry[id];
           changed = true;
         }
@@ -492,15 +526,16 @@ export default function DigitFlowApp() {
   const currentStrategyRegistry = multiSignalRegistry[activeStrategy] || {};
   const persistentSignalIds = useMemo(() => Object.keys(currentStrategyRegistry), [currentStrategyRegistry]);
 
+  // Golden Tier: Select top 4 signals based on their analysis score
   const goldenMarketIds = useMemo(() => {
     if (persistentSignalIds.length === 0) return [];
     const scored = persistentSignalIds.map(id => ({ 
       id, 
-      score: getMarketAnalysis(marketData[id], activeStrategy, currentStrategyRegistry[id]).score 
+      score: currentStrategyRegistry[id].analysis.score 
     }));
     scored.sort((a, b) => b.score - a.score);
     return scored.slice(0, 4).map(s => s.id);
-  }, [persistentSignalIds, marketData, activeStrategy, currentStrategyRegistry]);
+  }, [persistentSignalIds, currentStrategyRegistry]);
 
   const stats = useMemo(() => {
     const sorted = [...distribution].sort((a, b) => b.percentage - a.percentage);
@@ -626,8 +661,9 @@ export default function DigitFlowApp() {
                         isSelected={strategySelections[activeStrategy] === market.id} 
                         onSelect={(id) => handleMarketSelect(id)} 
                         isGolden={goldenMarketIds.includes(market.id)} 
-                        expiryTimestamp={currentStrategyRegistry[market.id]} 
-                        lastSignalTime={currentStrategyRegistry[market.id]}
+                        expiryTimestamp={currentStrategyRegistry[market.id]?.timestamp} 
+                        lastSignalTime={currentStrategyRegistry[market.id]?.timestamp}
+                        cachedAnalysis={currentStrategyRegistry[market.id]?.analysis}
                       />
                     ))}
                   </div>
