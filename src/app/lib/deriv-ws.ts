@@ -116,7 +116,7 @@ export class DerivWS {
         this.ws?.send(JSON.stringify({
           ticks_history: symbol,
           style: 'ticks',
-          count: 200,
+          count: 1000,
           end: 'latest',
           subscribe: 1
         }));

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
@@ -86,21 +87,25 @@ export function useDigitAnalysis(symbol: string = 'R_10') {
     });
 
     const total = windowTicks.length;
-    let percentages = counts.map(count => Math.round((count / total) * 1000) / 10);
     
-    const sum = percentages.reduce((a, b) => a + b, 0);
-    if (sum !== 100 && total > 0) {
-      const diff = Math.round((100 - sum) * 10) / 10;
-      const maxIdx = percentages.indexOf(Math.max(...percentages));
+    // Calculate precise percentages to 1 decimal place
+    let rawPercentages = counts.map(count => (count / total) * 100);
+    let formattedPercentages = rawPercentages.map(p => parseFloat(p.toFixed(1)));
+    
+    // Adjust sum to exactly 100% by modifying the highest frequency digit to handle rounding errors
+    const currentSum = formattedPercentages.reduce((a, b) => a + b, 0);
+    if (currentSum !== 100 && total > 0) {
+      const diff = parseFloat((100 - currentSum).toFixed(1));
+      const maxIdx = formattedPercentages.indexOf(Math.max(...formattedPercentages));
       if (maxIdx !== -1) {
-        percentages[maxIdx] = Math.round((percentages[maxIdx] + diff) * 10) / 10;
+        formattedPercentages[maxIdx] = parseFloat((formattedPercentages[maxIdx] + diff).toFixed(1));
       }
     }
 
     return counts.map((count, idx) => ({
       digit: idx,
       count,
-      percentage: percentages[idx]
+      percentage: formattedPercentages[idx]
     }));
   }, [ticks, windowSize]);
 
