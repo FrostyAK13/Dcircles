@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -8,7 +9,7 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Circle } from 'lucide-react';
+import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -47,27 +48,35 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
   const prices = data?.prices || [];
   
   const analysis = useMemo(() => {
-    if (ticks.length < 150) return { signal: 'CALIBRATING', color: 'text-muted-foreground/30', led: 'bg-muted/20', flash: false };
+    if (ticks.length < 150) return { signal: 'CALIBRATING', color: 'text-muted-foreground/30', led: 'bg-muted/20', flash: false, timing: 'WAITING' };
 
     const window150 = ticks.slice(-150);
     const window10 = ticks.slice(-10);
 
     if (strategy === 'OVER_UNDER') {
-      // Logic for Over 4 / Under 5
-      // Over 4 = digits 5,6,7,8,9
-      // Under 5 = digits 0,1,2,3,4
       const over4Count = window150.filter(d => d >= 5).length;
       const under5Count = window150.filter(d => d <= 4).length;
 
-      // Check last 10 momentum
       const last10OverCount = window10.filter(d => d >= 5).length;
       const last10UnderCount = window10.filter(d => d <= 4).length;
 
       if (over4Count >= 90 && last10OverCount >= 6) {
-        return { signal: 'OVER 4', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_15px_rgba(0,166,166,0.8)]', flash: true };
+        return { 
+          signal: 'OVER 4', 
+          color: 'text-primary font-black', 
+          led: 'bg-primary shadow-[0_0_15px_rgba(0,166,166,0.8)]', 
+          flash: true,
+          timing: 'ENTRY NOW'
+        };
       }
       if (under5Count >= 90 && last10UnderCount >= 6) {
-        return { signal: 'UNDER 5', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.8)]', flash: true };
+        return { 
+          signal: 'UNDER 5', 
+          color: 'text-rose-500 font-black', 
+          led: 'bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.8)]', 
+          flash: true,
+          timing: 'ENTRY NOW'
+        };
       }
     }
 
@@ -77,14 +86,14 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
       const last10OddCount = window10.filter(d => d % 2 !== 0).length;
 
       if (evenCount >= 90 && last10EvenCount >= 6) {
-        return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary', flash: true };
+        return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary', flash: true, timing: 'ENTRY NOW' };
       }
       if (evenCount <= 60 && last10OddCount >= 6) {
-        return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500', flash: true };
+        return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500', flash: true, timing: 'ENTRY NOW' };
       }
     }
 
-    return { signal: 'MONITORING', color: 'text-muted-foreground/40', led: 'bg-muted-foreground/20', flash: false };
+    return { signal: 'MONITORING', color: 'text-muted-foreground/40', led: 'bg-muted-foreground/20', flash: false, timing: 'STANDBY' };
   }, [ticks, strategy]);
 
   const trend = useMemo(() => {
@@ -110,41 +119,51 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
     <div
       onClick={() => onSelect(market.id)}
       className={cn(
-        "group relative flex flex-col items-center justify-between p-4 sm:p-6 rounded-[2rem] border-2 transition-all duration-500 min-h-[180px] sm:min-h-[200px] cursor-default",
+        "group relative flex flex-col items-center justify-between p-4 sm:p-5 rounded-[1.5rem] border-2 transition-all duration-500 min-h-[160px] sm:min-h-[180px] cursor-default overflow-hidden",
         isSelected 
-          ? "bg-card border-primary shadow-[0_0_40px_rgba(0,166,166,0.15)] z-10 scale-[1.02]" 
+          ? "bg-card border-primary shadow-[0_0_30px_rgba(0,166,166,0.1)] z-10 scale-[1.02]" 
           : "bg-muted/5 border-border/10 hover:border-border/30 hover:bg-muted/10 scale-100"
       )}
     >
-      <div className={cn(
-        "w-12 h-12 sm:w-14 sm:h-14 rounded-[1rem] flex items-center justify-center transition-all duration-500",
-        isSelected ? "bg-primary text-white" : "bg-muted/50 text-muted-foreground/30"
-      )}>
-        <StrategyIcon className={cn("w-6 h-6 sm:w-7 sm:h-7", analysis.flash && "animate-pulse")} />
+      <div className="w-full flex justify-between items-start mb-2">
+        <div className={cn(
+          "w-10 h-10 rounded-[0.75rem] flex items-center justify-center transition-all duration-500",
+          isSelected ? "bg-primary text-white" : "bg-muted/50 text-muted-foreground/30"
+        )}>
+          <StrategyIcon className={cn("w-5 h-5", analysis.flash && "animate-pulse")} />
+        </div>
+        
+        <div className={cn(
+          "px-2.5 py-1 rounded-lg text-[7px] font-black uppercase tracking-[0.2em] border flex items-center gap-1.5",
+          analysis.timing === 'ENTRY NOW' ? "bg-primary text-white border-primary shadow-[0_0_10px_rgba(0,166,166,0.5)] animate-pulse" : "bg-black/20 text-muted-foreground/50 border-transparent"
+        )}>
+          <Clock className="w-2.5 h-2.5" />
+          {analysis.timing}
+        </div>
       </div>
       
-      <div className="flex flex-col items-center gap-2 sm:gap-3 w-full">
+      <div className="flex flex-col items-center gap-1.5 w-full">
         <span className={cn(
-          "text-[10px] sm:text-[12px] font-black uppercase tracking-[0.25em] text-center px-1 truncate w-full",
+          "text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-center px-1 truncate w-full",
           isSelected ? "text-primary" : "text-muted-foreground/40"
         )}>
           {market.name.replace('Index', '').trim()}
         </span>
         
         <div className={cn(
-          "px-3 py-1 rounded-full text-[7px] sm:text-[9px] font-black uppercase tracking-[0.2em] border flex items-center gap-1.5",
+          "px-3 py-0.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-[0.15em] border flex items-center gap-1",
           trend === 'up' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : trend === 'down' ? "bg-rose-500/10 border-rose-500/20 text-rose-500" : "bg-primary/10 border-primary/20 text-primary"
         )}>
           {trend === 'up' ? 'OVER' : trend === 'down' ? 'UNDER' : 'NEUTRAL'}
         </div>
 
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-black/5 dark:bg-white/5 border border-border/10 mt-1 w-full justify-center">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/5 border border-border/10 mt-1 w-full justify-center">
           <div className={cn(
             "w-2 h-2 rounded-full transition-all duration-300",
             analysis.led,
             analysis.flash && "animate-pulse"
           )} />
-          <span className={cn("text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em]", analysis.color)}>
+          <span className={cn("text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em]", analysis.color)}>
             {analysis.signal}
           </span>
         </div>

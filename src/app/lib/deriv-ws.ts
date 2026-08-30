@@ -1,3 +1,4 @@
+
 export const APP_ID = '84799';
 export const DERIV_WS_URL = `wss://api.derivws.com/trading/v1/options/ws/public?app_id=${APP_ID}`;
 
@@ -64,7 +65,7 @@ export class DerivWS {
         const response: TickResponse = JSON.parse(event.data);
         
         if (response.error && Object.keys(response.error).length > 0) {
-          // Quietly handle errors to avoid overlay interruptions
+          // Silent failure handling for production-like dashboard feel
           this.onStatusCallback('error');
           return;
         }
@@ -110,17 +111,15 @@ export class DerivWS {
   }
 
   private subscribeAll() {
-    if (this.ws?.readyState === WebSocket.OPEN && Array.isArray(this.symbols)) {
+    if (this.ws?.readyState === WebSocket.OPEN) {
       this.symbols.forEach(symbol => {
-        if (symbol) {
-          this.ws?.send(JSON.stringify({
-            ticks_history: symbol,
-            style: 'ticks',
-            count: 200,
-            end: 'latest',
-            subscribe: 1
-          }));
-        }
+        this.ws?.send(JSON.stringify({
+          ticks_history: symbol,
+          style: 'ticks',
+          count: 200,
+          end: 'latest',
+          subscribe: 1
+        }));
       });
     }
   }
