@@ -273,7 +273,6 @@ export default function DigitFlowApp() {
     }
   };
 
-  // Auto-fetch AI insights when strategy, symbol or tab changes
   useEffect(() => {
     if (mounted && activeMainTab === 'ai') {
       handleFetchAiInsight();
@@ -399,7 +398,6 @@ export default function DigitFlowApp() {
   return (
     <SidebarProvider>
       <div className="flex flex-col min-h-screen w-full bg-background text-foreground relative overflow-hidden">
-        {/* Background Watermark */}
         <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 opacity-[0.05] select-none">
           <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-primary/30">
             INDEXNAV
@@ -463,9 +461,7 @@ export default function DigitFlowApp() {
               <TabsContent value="dashboard" className="space-y-6 sm:space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
                 <Card className="border-none bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
                   <CardContent className="p-4 sm:p-8 lg:p-12 space-y-6 sm:space-y-8">
-                    {/* Controls Toolbar */}
                     <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-between w-full">
-                      {/* Market Selector */}
                       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                         <PopoverTrigger asChild>
                           <div className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
@@ -521,7 +517,6 @@ export default function DigitFlowApp() {
                         </PopoverContent>
                       </Popover>
 
-                      {/* Trade Side Selector */}
                       <div className="w-full sm:w-auto flex items-center gap-3 p-2 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
                         <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Side:</span>
                         <Select value={tradeSide} onValueChange={setTradeSide}>
@@ -562,7 +557,6 @@ export default function DigitFlowApp() {
                       </div>
                       
                       <div className="grid grid-cols-5 gap-2 sm:gap-8 max-w-4xl mx-auto relative px-1 sm:px-4">
-                        {/* Real-time Indicator Arrow */}
                         {latestDigit !== null && (
                           <div 
                             className="absolute z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"
@@ -648,8 +642,7 @@ export default function DigitFlowApp() {
 
               <TabsContent value="ai" className="space-y-6 sm:space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none h-full">
                 <Card className="border-none bg-transparent shadow-none min-h-[70vh] flex flex-col items-center">
-                  {/* Strategic Selector - Immersive Integration */}
-                  <div className="w-full max-w-4xl pt-4 pb-8 sticky top-0 z-40 bg-background/80 backdrop-blur-md">
+                  <div className="w-full max-w-5xl pt-4 pb-8 sticky top-0 z-40 bg-background/80 backdrop-blur-md space-y-6">
                     <Tabs 
                       value={aiTradeType} 
                       onValueChange={(val) => setAiTradeType(val as NavigatorAIInput['tradeType'])} 
@@ -664,6 +657,36 @@ export default function DigitFlowApp() {
                         <TabsTrigger value="ONLY_UPS_DOWNS" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">Ups/Downs</TabsTrigger>
                       </TabsList>
                     </Tabs>
+
+                    <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-6 md:grid-cols-9 gap-2 px-2">
+                      {CONTINUOUS_INDICES.map((market) => (
+                        <button
+                          key={market.id}
+                          onClick={() => setSymbol(market.id)}
+                          className={cn(
+                            "flex flex-col items-center justify-center p-2 rounded-xl border transition-all duration-300 relative group",
+                            symbol === market.id 
+                              ? "bg-primary/20 border-primary shadow-[0_0_10px_rgba(0,166,166,0.3)] scale-105 z-10" 
+                              : "bg-muted/20 border-border/40 hover:border-primary/50 hover:bg-muted/30"
+                          )}
+                        >
+                          <span className={cn(
+                            "text-[10px] font-black tracking-tighter",
+                            symbol === market.id ? "text-primary" : "text-foreground/80"
+                          )}>
+                            {market.short}
+                          </span>
+                          <span className="text-[6px] font-bold uppercase text-muted-foreground/60 truncate w-full text-center">
+                            {market.name.split(' ')[0]}
+                          </span>
+                          {symbol === market.id && (
+                            <div className="absolute -top-1 -right-1">
+                              <CheckCircle2 className="w-2.5 h-2.5 text-primary fill-background" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <CardContent className="p-0 w-full flex-1 flex flex-col items-center justify-center text-center space-y-8">
@@ -789,7 +812,7 @@ export default function DigitFlowApp() {
                 <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
                   <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                      <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
                         <Percent className="w-3.5 h-3.5 sm:w-4 h-4" />
                         Percentage Analysis
                       </CardTitle>
