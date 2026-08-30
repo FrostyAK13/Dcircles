@@ -108,21 +108,20 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
   const prices = data?.prices || [];
   
   const analysis = useMemo(() => getMarketAnalysis(data, strategy), [data, strategy]);
+  const isHit = analysis.isHit;
 
+  // Handle countdown
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (analysis.timing === 'ENTRY NOW') {
+    if (isHit) {
       if (countdown > 0) {
         timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
-      } else {
-        // Reset countdown if conditions are still met
-        setCountdown(5);
       }
     } else {
-      setCountdown(5);
+      setCountdown(5); // Reset if not safe
     }
     return () => clearTimeout(timer);
-  }, [analysis.timing, countdown]);
+  }, [isHit, countdown]);
 
   const trend = useMemo(() => {
     if (prices.length < 10) return 'neutral';
@@ -143,14 +142,15 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
     }
   }, [strategy]);
 
-  const isEntryActive = analysis.timing === 'ENTRY NOW';
+  // Flashy if isHit is true (Safe to trade)
+  const isFlashy = isHit;
 
   return (
     <div
       onClick={() => onSelect?.(market.id)}
       className={cn(
         "group relative flex flex-col items-center justify-between p-4 sm:p-5 rounded-[2rem] border-2 transition-all duration-500 min-h-[160px] sm:min-h-[180px] cursor-default overflow-hidden",
-        isEntryActive 
+        isFlashy 
           ? "bg-card border-primary shadow-[0_0_40px_rgba(0,166,166,0.4)] z-10 scale-[1.02] dark:bg-primary/10 ring-2 ring-primary/20" 
           : isSelected
             ? "bg-card border-primary/40 shadow-[0_0_20px_rgba(0,166,166,0.05)] z-10 scale-[1.01]"
@@ -160,24 +160,27 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
       <div className="w-full flex justify-between items-start mb-2 z-10">
         <div className={cn(
           "w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500",
-          isSelected || isEntryActive ? "bg-primary text-white" : "bg-muted/50 text-muted-foreground/30"
+          isSelected || isFlashy ? "bg-primary text-white" : "bg-muted/50 text-muted-foreground/30"
         )}>
-          <StrategyIcon className={cn("w-5 h-5", analysis.flash && "animate-pulse")} />
+          <StrategyIcon className={cn("w-5 h-5", isFlashy && "animate-pulse")} />
         </div>
         
         <div className={cn(
           "px-2.5 py-1 rounded-xl text-[7px] font-black uppercase tracking-[0.2em] border flex items-center gap-1.5 transition-all duration-300",
-          isEntryActive ? "bg-primary text-white border-primary shadow-[0_0_15px_rgba(0,166,166,0.5)] animate-pulse" : "bg-black/20 text-muted-foreground/50 border-transparent"
+          isFlashy ? "bg-primary text-white border-primary shadow-[0_0_15px_rgba(0,166,166,0.5)] animate-pulse" : "bg-black/20 text-muted-foreground/50 border-transparent"
         )}>
           <Clock className="w-2.5 h-2.5" />
-          {isEntryActive ? `${analysis.timing} (${countdown}s)` : analysis.timing}
+          {isFlashy 
+            ? (countdown > 0 ? `ENTRY NOW (${countdown}s)` : "ACTIVE SIGNAL") 
+            : analysis.timing
+          }
         </div>
       </div>
       
       <div className="flex flex-col items-center gap-1.5 w-full z-10">
         <span className={cn(
           "text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-center px-1 truncate w-full",
-          isSelected || isEntryActive ? "text-primary" : "text-muted-foreground/40"
+          isSelected || isFlashy ? "text-primary" : "text-muted-foreground/40"
         )}>
           {market.name.replace('Index', '').trim()}
         </span>
@@ -193,10 +196,10 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
           <div className={cn(
             "w-2 h-2 rounded-full transition-all duration-300",
             analysis.led,
-            analysis.flash && "animate-pulse"
+            isFlashy && "animate-pulse"
           )} />
           <span className={cn("text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em]", analysis.color)}>
-            {analysis.signal}
+            {isFlashy ? analysis.signal : "SCANNING"}
           </span>
         </div>
       </div>
@@ -205,7 +208,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
         <div className={cn("w-1.5 h-1.5 rounded-full bg-primary", prices.length > 0 && "animate-ping")} />
       </div>
 
-      {isEntryActive && (
+      {isFlashy && (
         <div className="absolute inset-0 bg-primary/5 dark:bg-primary/10 animate-pulse-subtle pointer-events-none" />
       )}
     </div>
@@ -268,7 +271,7 @@ export default function DigitFlowApp() {
   const [activeMainTab, setActiveMainTab] = useState('dashboard');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
-  // Persistence Tracking
+  // Persistence Tracking (Registry of market hits)
   const [signalRegistry, setSignalRegistry] = useState<Record<string, number>>({});
 
   const marketIds = useMemo(() => CONTINUOUS_INDICES.map(m => m.id), []);
@@ -281,14 +284,14 @@ export default function DigitFlowApp() {
     setMounted(true);
   }, []);
 
-  // Update Persistent Signals
+  // Update Persistent Signals registry
   useEffect(() => {
     const now = Date.now();
     setSignalRegistry(prev => {
       const next = { ...prev };
       let changed = false;
 
-      // Add new hits
+      // Add new hits to registry (triggers the 30s window)
       Object.entries(marketData).forEach(([id, data]) => {
         const analysis = getMarketAnalysis(data, activeStrategy);
         if (analysis.isHit) {
