@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -47,6 +48,9 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const window10 = ticks.slice(-10);
 
   if (strategy === 'OVER_UNDER') {
+    // Strategy: Over 4 / Under 5
+    // Over 4 = Digits 5-9
+    // Under 5 = Digits 0-4
     const over4Count = window150.filter(d => d >= 5).length;
     const under5Count = window150.filter(d => d <= 4).length;
 
@@ -110,6 +114,9 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
     if (analysis.timing === 'ENTRY NOW') {
       if (countdown > 0) {
         timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
+      } else {
+        // Reset countdown if conditions are still met
+        setCountdown(5);
       }
     } else {
       setCountdown(5);
@@ -205,14 +212,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
   );
 }
 
-function SignalScanner({ marketData, strategy }: { marketData: Record<string, MarketData>, strategy: string }) {
-  const activeSignals = useMemo(() => {
-    return Object.entries(marketData).filter(([id, data]) => {
-      const analysis = getMarketAnalysis(data, strategy);
-      return analysis.isHit;
-    }).map(([id]) => id);
-  }, [marketData, strategy]);
-
+function SignalScanner({ marketData, strategy, persistentSignals }: { marketData: Record<string, MarketData>, strategy: string, persistentSignals: string[] }) {
   return (
     <Card className="mb-6 bg-card border-primary/20 shadow-2xl icy-glow overflow-hidden rounded-[2.5rem]">
       <CardHeader className="py-4 px-6 border-b border-border/40 flex flex-row items-center justify-between bg-muted/20">
@@ -221,13 +221,13 @@ function SignalScanner({ marketData, strategy }: { marketData: Record<string, Ma
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Live Signal Scanner</h3>
         </div>
         <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.2em] bg-primary/10 text-primary border-primary/20">
-          {activeSignals.length} Active Signals
+          {persistentSignals.length} Active Signals (30s Persist)
         </Badge>
       </CardHeader>
       <CardContent className="p-4 sm:p-6 min-h-[120px] flex items-center justify-center">
-        {activeSignals.length > 0 ? (
+        {persistentSignals.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full">
-            {activeSignals.map((id) => {
+            {persistentSignals.map((id) => {
               const market = CONTINUOUS_INDICES.find(m => m.id === id);
               if (!market) return null;
               return (
@@ -267,6 +267,9 @@ export default function DigitFlowApp() {
   const [mounted, setMounted] = useState(false);
   const [activeMainTab, setActiveMainTab] = useState('dashboard');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  
+  // Persistence Tracking
+  const [signalRegistry, setSignalRegistry] = useState<Record<string, number>>({});
 
   const marketIds = useMemo(() => CONTINUOUS_INDICES.map(m => m.id), []);
   const { marketData, status } = useMultiMarketAnalysis(marketIds);
@@ -277,6 +280,36 @@ export default function DigitFlowApp() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Update Persistent Signals
+  useEffect(() => {
+    const now = Date.now();
+    setSignalRegistry(prev => {
+      const next = { ...prev };
+      let changed = false;
+
+      // Add new hits
+      Object.entries(marketData).forEach(([id, data]) => {
+        const analysis = getMarketAnalysis(data, activeStrategy);
+        if (analysis.isHit) {
+          next[id] = now;
+          changed = true;
+        }
+      });
+
+      // Remove expired signals (older than 30s)
+      Object.entries(next).forEach(([id, timestamp]) => {
+        if (now - timestamp > 30000) {
+          delete next[id];
+          changed = true;
+        }
+      });
+
+      return changed ? next : prev;
+    });
+  }, [marketData, activeStrategy]);
+
+  const persistentSignalIds = useMemo(() => Object.keys(signalRegistry), [signalRegistry]);
 
   const stats = useMemo(() => {
     const sorted = [...distribution].sort((a, b) => b.percentage - a.percentage);
@@ -404,7 +437,7 @@ export default function DigitFlowApp() {
           </TabsContent>
 
           <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-            <SignalScanner marketData={marketData} strategy={activeStrategy} />
+            <SignalScanner marketData={marketData} strategy={activeStrategy} persistentSignals={persistentSignalIds} />
             
             <Card className="border border-border/50 bg-card rounded-[3rem] shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
               <Tabs value={activeStrategy} onValueChange={setActiveStrategy} className="w-full h-full flex flex-col">
