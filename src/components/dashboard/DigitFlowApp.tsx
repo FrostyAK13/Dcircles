@@ -241,7 +241,6 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
   const [countdown, setCountdown] = useState(5);
   const [lifeRemaining, setLifeRemaining] = useState(30);
   
-  // Use cached analysis if available to ensure 30s persistence
   const analysis = useMemo(() => {
     if (cachedAnalysis) return cachedAnalysis;
     return getMarketAnalysis(data, strategy, lastSignalTime);
@@ -473,7 +472,6 @@ export default function DigitFlowApp() {
   const [activeMainTab, setActiveMainTab] = useState('dashboard');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
-  // Stores signal timing and analysis data for 30s persistence
   const [multiSignalRegistry, setMultiSignalRegistry] = useState<Record<string, Record<string, { timestamp: number; analysis: AnalysisResult }>>>({
     'OVER_UNDER': {}, 'EVEN_ODD': {}, 'MATCHES': {}, 'RISE_FALL': {}, 'HIGHER_LOWER': {}, 'ONLY_UPS_DOWNS': {},
   });
@@ -486,7 +484,6 @@ export default function DigitFlowApp() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  // Registry Management: Handle signal detection and 30s persistence
   useEffect(() => {
     const now = Date.now();
     setMultiSignalRegistry(prev => {
@@ -496,8 +493,6 @@ export default function DigitFlowApp() {
 
       Object.entries(marketData).forEach(([id, data]) => {
         const existing = currentRegistry[id];
-        
-        // If no signal is locked, scan for a new hit
         if (!existing) {
           const analysis = getMarketAnalysis(data, activeStrategy);
           if (analysis.isHit) {
@@ -507,7 +502,6 @@ export default function DigitFlowApp() {
         }
       });
 
-      // Remove signals that have been active for more than 30 seconds
       Object.entries(currentRegistry).forEach(([id, entry]) => {
         if (now - entry.timestamp > 30000) {
           delete currentRegistry[id];
@@ -526,7 +520,6 @@ export default function DigitFlowApp() {
   const currentStrategyRegistry = multiSignalRegistry[activeStrategy] || {};
   const persistentSignalIds = useMemo(() => Object.keys(currentStrategyRegistry), [currentStrategyRegistry]);
 
-  // Golden Tier: Select top 4 signals based on their analysis score
   const goldenMarketIds = useMemo(() => {
     if (persistentSignalIds.length === 0) return [];
     const scored = persistentSignalIds.map(id => ({ 
@@ -541,6 +534,10 @@ export default function DigitFlowApp() {
     const sorted = [...distribution].sort((a, b) => b.percentage - a.percentage);
     return { high: sorted[0]?.digit, secondHigh: sorted[1]?.digit, low: sorted[9]?.digit, secondLow: sorted[8]?.digit };
   }, [distribution]);
+
+  const currentMarketAnalysis = useMemo(() => {
+    return getMarketAnalysis(marketData[currentSymbol], activeStrategy);
+  }, [marketData, currentSymbol, activeStrategy]);
 
   const handleMarketSelect = (marketId: string) => setStrategySelections(prev => ({ ...prev, [activeStrategy]: marketId }));
 
@@ -608,7 +605,41 @@ export default function DigitFlowApp() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex flex-col items-center justify-center py-4"><div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-primary">{latestPrice?.toFixed(2) || "---"}</div></div>
+                
+                <div className="flex flex-col items-center justify-center py-4 gap-6">
+                  <div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-primary">
+                    {latestPrice?.toFixed(2) || "---"}
+                  </div>
+                  
+                  {/* Digit Calculator Entry Point Display */}
+                  <div className={cn(
+                    "flex flex-col items-center gap-3 px-8 py-4 rounded-[2.5rem] border-2 transition-all duration-700 animate-in fade-in zoom-in",
+                    currentMarketAnalysis.isHit 
+                      ? "bg-primary/10 border-primary shadow-[0_0_50px_rgba(0,166,166,0.3)] scale-110" 
+                      : "bg-muted/10 border-border/20 opacity-40 scale-100"
+                  )}>
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "w-4 h-4 rounded-full transition-all duration-300",
+                        currentMarketAnalysis.isHit ? "bg-primary animate-ping" : "bg-muted-foreground/30"
+                      )} />
+                      <span className={cn(
+                        "text-xs sm:text-xl font-black uppercase tracking-[0.4em] transition-colors",
+                        currentMarketAnalysis.isHit ? "text-primary" : "text-muted-foreground/60"
+                      )}>
+                        {currentMarketAnalysis.isHit 
+                          ? (activeStrategy === 'MATCHES' ? `RUN BOT: ${currentMarketAnalysis.signal}` : currentMarketAnalysis.signal) 
+                          : "SCANNING ENGINE ACTIVE"}
+                      </span>
+                    </div>
+                    {currentMarketAnalysis.isHit && (
+                      <Badge variant="outline" className="bg-primary text-white border-primary text-[8px] sm:text-[10px] font-black tracking-[0.2em] px-4 py-1 rounded-xl animate-pulse">
+                        HIGH CONFIDENCE ENTRY
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-5 gap-2 sm:gap-8 max-w-4xl mx-auto px-1 sm:px-4">
                   {distribution.map((d) => (
                     <DigitCard key={d.digit} digit={d.digit} percentage={d.percentage} isHigh={d.digit === stats.high} isSecondHigh={d.digit === stats.secondHigh} isLow={d.digit === stats.low} isSecondLow={d.digit === stats.secondLow} isLatest={d.digit === latestDigit} onClick={() => {}} />
