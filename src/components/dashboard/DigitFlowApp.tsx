@@ -227,34 +227,36 @@ function DetailedComparison({
 
 function MarketCardGrid({ currentSymbol, onSelect }: { currentSymbol: string, onSelect: (id: string) => void }) {
   return (
-    <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3 p-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 p-4">
       {CONTINUOUS_INDICES.map((market) => (
         <button
           key={market.id}
           onClick={() => onSelect(market.id)}
           className={cn(
-            "group relative flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all duration-300",
+            "group relative flex flex-col items-center justify-center p-6 sm:p-8 rounded-[2rem] border-4 transition-all duration-500",
             currentSymbol === market.id 
-              ? "bg-primary/20 border-primary shadow-[0_0_15px_rgba(0,166,166,0.3)] scale-[1.05]" 
-              : "bg-muted/30 border-border/50 hover:border-primary/50 hover:bg-muted/50"
+              ? "bg-primary/20 border-primary shadow-[0_0_30px_rgba(0,166,166,0.5)] scale-[1.08] z-20" 
+              : "bg-muted/20 border-border/30 hover:border-primary/40 hover:bg-muted/40 hover:scale-[1.03]"
           )}
         >
           <div className={cn(
-            "w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs mb-1.5 transition-colors",
-            currentSymbol === market.id ? "bg-primary text-white" : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"
+            "w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center font-black text-base sm:text-xl mb-3 sm:mb-4 transition-all duration-500 shadow-lg",
+            currentSymbol === market.id 
+              ? "bg-primary text-white scale-110 shadow-primary/20" 
+              : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
           )}>
             {market.short}
           </div>
           <span className={cn(
-            "text-[8px] sm:text-[9px] font-bold uppercase tracking-tighter text-center line-clamp-1",
-            currentSymbol === market.id ? "text-primary" : "text-muted-foreground"
+            "text-[10px] sm:text-[12px] font-black uppercase tracking-widest text-center line-clamp-2 px-2 transition-colors duration-500",
+            currentSymbol === market.id ? "text-primary" : "text-muted-foreground/80"
           )}>
             {market.name.replace(' Index', '')}
           </span>
           {currentSymbol === market.id && (
-            <div className="absolute -top-1 -right-1">
-              <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shadow-lg">
-                <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+            <div className="absolute -top-2 -right-2">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-xl animate-pulse">
+                <CheckCircle2 className="w-5 h-5 text-white" />
               </div>
             </div>
           )}
@@ -681,9 +683,12 @@ export default function DigitFlowApp() {
                         'OVER_UNDER', 'EVEN_ODD', 'MATCHES', 'RISE_FALL', 'HIGHER_LOWER', 'ONLY_UPS_DOWNS'
                       ].map((tabId) => (
                         <TabsContent key={tabId} value={tabId} className="mt-0 outline-none">
-                          <div className="p-4 space-y-6">
-                            <div className="flex flex-col gap-2">
-                              <h3 className="text-[10px] sm:text-[12px] font-black uppercase tracking-[0.2em] text-primary px-2">Select Market for {tabId.replace('_', ' ')}</h3>
+                          <div className="p-4 sm:p-8 space-y-8">
+                            <div className="flex flex-col gap-4">
+                              <div className="flex items-center justify-between px-4 border-l-4 border-primary bg-primary/5 py-3 rounded-r-2xl">
+                                <h3 className="text-sm sm:text-base font-black uppercase tracking-[0.2em] text-primary">Strategic Markets for {tabId.replace('_', ' ')}</h3>
+                                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Select an active index</div>
+                              </div>
                               <MarketCardGrid currentSymbol={symbol} onSelect={setSymbol} />
                             </div>
                           </div>
