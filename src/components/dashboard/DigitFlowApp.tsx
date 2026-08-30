@@ -48,6 +48,7 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const window10 = ticks.slice(-10);
 
   if (strategy === 'OVER_UNDER') {
+    // Strategy: OVER 3 (digits 4-9) and UNDER 6 (digits 0-5)
     const overCount = window150.filter(d => d >= 4).length;
     const underCount = window150.filter(d => d <= 5).length;
 
@@ -226,13 +227,13 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
   );
 }
 
-function SignalScanner({ marketData, strategy, signals, goldenId }: { marketData: Record<string, MarketData>, strategy: string, signals: string[], goldenId: string | null }) {
-  // Sort signals to put goldenId first
+function SignalScanner({ marketData, strategy, signals, goldenIds }: { marketData: Record<string, MarketData>, strategy: string, signals: string[], goldenIds: string[] }) {
+  // Sort signals: Top goldenIds first, then other signals
   const sortedSignals = useMemo(() => {
-    if (!goldenId) return signals;
-    const rest = signals.filter(id => id !== goldenId);
-    return [goldenId, ...rest];
-  }, [signals, goldenId]);
+    const goldens = signals.filter(id => goldenIds.includes(id));
+    const rest = signals.filter(id => !goldenIds.includes(id));
+    return [...goldens, ...rest];
+  }, [signals, goldenIds]);
 
   return (
     <Card className="mb-6 bg-card border-primary/20 shadow-2xl icy-glow overflow-hidden rounded-[2.5rem]">
@@ -242,9 +243,9 @@ function SignalScanner({ marketData, strategy, signals, goldenId }: { marketData
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Live Signal Scanner</h3>
         </div>
         <div className="flex items-center gap-2">
-          {goldenId && (
+          {goldenIds.length > 0 && (
             <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.2em] bg-amber-400/10 text-amber-500 border-amber-400/20">
-              PRIME DETECTED
+              PRIME TIER ACTIVE
             </Badge>
           )}
           <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.2em] bg-primary/10 text-primary border-primary/20">
@@ -264,7 +265,7 @@ function SignalScanner({ marketData, strategy, signals, goldenId }: { marketData
                   market={market}
                   data={marketData[id]}
                   strategy={strategy}
-                  isGolden={id === goldenId}
+                  isGolden={goldenIds.includes(id)}
                 />
               );
             })}
@@ -323,6 +324,7 @@ export default function DigitFlowApp() {
         }
       });
 
+      // Maintain signals for 30 seconds
       Object.entries(next).forEach(([id, timestamp]) => {
         if (now - timestamp > 30000) {
           delete next[id];
@@ -336,21 +338,18 @@ export default function DigitFlowApp() {
 
   const persistentSignalIds = useMemo(() => Object.keys(signalRegistry), [signalRegistry]);
 
-  // Identify Golden Market (Highest Score)
-  const goldenMarketId = useMemo(() => {
-    if (persistentSignalIds.length === 0) return null;
-    let maxScore = -1;
-    let winner = null;
+  // Identify Golden Markets (Top 4 by Score)
+  const goldenMarketIds = useMemo(() => {
+    if (persistentSignalIds.length === 0) return [];
+    
+    const scoredSignals = persistentSignalIds.map(id => ({
+      id,
+      score: getMarketAnalysis(marketData[id], activeStrategy).score
+    }));
 
-    persistentSignalIds.forEach(id => {
-      const analysis = getMarketAnalysis(marketData[id], activeStrategy);
-      if (analysis.score > maxScore) {
-        maxScore = analysis.score;
-        winner = id;
-      }
-    });
-
-    return winner;
+    // Sort by score descending and take top 4
+    scoredSignals.sort((a, b) => b.score - a.score);
+    return scoredSignals.slice(0, 4).map(s => s.id);
   }, [persistentSignalIds, marketData, activeStrategy]);
 
   const stats = useMemo(() => {
@@ -483,7 +482,7 @@ export default function DigitFlowApp() {
               marketData={marketData} 
               strategy={activeStrategy} 
               signals={persistentSignalIds} 
-              goldenId={goldenMarketId}
+              goldenIds={goldenMarketIds}
             />
             
             <Card className="border border-border/50 bg-card rounded-[3rem] shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
@@ -522,7 +521,7 @@ export default function DigitFlowApp() {
                             strategy={tabId}
                             isSelected={strategySelections[tabId] === market.id}
                             onSelect={(id) => handleMarketSelect(id)}
-                            isGolden={market.id === goldenMarketId}
+                            isGolden={goldenMarketIds.includes(market.id)}
                           />
                         ))}
                       </div>
