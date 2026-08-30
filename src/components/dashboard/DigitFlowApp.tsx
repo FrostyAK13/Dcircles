@@ -52,6 +52,7 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   
   if (ticks.length < 100) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
 
+  // 100/20 Rule for Over/Under and Even/Odd
   const w100 = ticks.slice(-100);
   const w20 = ticks.slice(-20);
 
@@ -75,14 +76,39 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
     if (oddCount >= 60 && last20Odd >= 13) return { signal: 'ODD', direction: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount };
   }
 
+  // 200/50 Rule for Matches
   if (strategy === 'MATCHES') {
+    if (ticks.length < 200) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
+    const w200 = ticks.slice(-200);
+    const w50 = ticks.slice(-50);
+    
     const counts = new Array(10).fill(0);
-    w100.forEach(d => counts[d]++);
+    w200.forEach(d => counts[d]++);
+    
     const maxVal = Math.max(...counts);
-    const digit = counts.indexOf(maxVal);
-    const last20Match = w20.filter(d => d === digit).length;
+    const maxDigits: number[] = [];
+    counts.forEach((c, d) => { if (c === maxVal) maxDigits.push(d); });
 
-    if (maxVal >= 18 && last20Match >= 5) return { signal: `MATCH ${digit}`, direction: `MATCH ${digit}`, color: 'text-amber-500 font-black', led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', flash: true, timing: 'MATCH FOUND', isHit: true, score: maxVal * 2 };
+    // Condition 3: At least 32 times
+    // Condition 6: No tie
+    if (maxDigits.length === 1 && maxVal >= 32) {
+      const targetDigit = maxDigits[0];
+      const match50 = w50.filter(d => d === targetDigit).length;
+      
+      // Condition 4: At least 9 times in last 50
+      if (match50 >= 9) {
+        return { 
+          signal: `MATCH ${targetDigit}`, 
+          direction: `MATCH ${targetDigit}`, 
+          color: 'text-amber-500 font-black', 
+          led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', 
+          flash: true, 
+          timing: 'MATCH FOUND', 
+          isHit: true, 
+          score: maxVal 
+        };
+      }
+    }
   }
 
   if (strategy === 'RISE_FALL') {
