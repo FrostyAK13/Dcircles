@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -235,6 +236,7 @@ export default function DigitFlowApp() {
   const [aiInsight, setAiInsight] = useState<NavigatorAIOutput | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiTradeType, setAiTradeType] = useState<NavigatorAIInput['tradeType']>('OVER_UNDER');
+  const [activeMainTab, setActiveMainTab] = useState('dashboard');
 
   const { 
     distribution, 
@@ -251,6 +253,32 @@ export default function DigitFlowApp() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleFetchAiInsight = async () => {
+    if (isAiLoading) return;
+    setIsAiLoading(true);
+    try {
+      const insight = await getNavigatorAIInsight({
+        symbol,
+        latestPrice,
+        distribution,
+        windowSize,
+        tradeType: aiTradeType
+      });
+      setAiInsight(insight);
+    } catch (error) {
+      console.error("AI Insight Error:", error);
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
+  // Auto-fetch AI insights when strategy, symbol or tab changes
+  useEffect(() => {
+    if (mounted && activeMainTab === 'ai') {
+      handleFetchAiInsight();
+    }
+  }, [aiTradeType, symbol, activeMainTab, mounted]);
 
   const engineResults = useMemo(() => {
     if (distribution.length < 10) return null;
@@ -366,25 +394,6 @@ export default function DigitFlowApp() {
     setWindowSize(safeVal);
   };
 
-  const handleFetchAiInsight = async () => {
-    setIsAiLoading(true);
-    setAiInsight(null);
-    try {
-      const insight = await getNavigatorAIInsight({
-        symbol,
-        latestPrice,
-        distribution,
-        windowSize,
-        tradeType: aiTradeType
-      });
-      setAiInsight(insight);
-    } catch (error) {
-      console.error("AI Insight Error:", error);
-    } finally {
-      setIsAiLoading(false);
-    }
-  };
-
   const currentMarket = CONTINUOUS_INDICES.find(m => m.id === symbol) || CONTINUOUS_INDICES[0];
 
   return (
@@ -406,7 +415,11 @@ export default function DigitFlowApp() {
               <p className="text-sm font-black uppercase tracking-[0.3em] text-primary animate-pulse">Initializing Navigator...</p>
             </div>
           ) : (
-            <Tabs defaultValue="dashboard" className="w-full">
+            <Tabs 
+              value={activeMainTab} 
+              onValueChange={setActiveMainTab} 
+              className="w-full"
+            >
               <div className="flex justify-center mb-6 sm:mb-8 sticky top-0 z-40 bg-background/80 backdrop-blur-md py-2 -mx-3 sm:mx-0 px-3">
                 <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start sm:justify-center w-full max-w-fit scrollbar-hide">
                   <TabsTrigger 
@@ -633,97 +646,91 @@ export default function DigitFlowApp() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="ai" className="space-y-6 sm:space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-                <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden min-h-[60vh] flex flex-col">
-                  <CardHeader className="border-b border-border/40 bg-muted/20 py-4 px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-primary/10 border border-primary/20">
-                        <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-                      </div>
-                      <CardTitle className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-primary">
-                        NAVIGATOR AI Agent
-                      </CardTitle>
-                    </div>
-                    
+              <TabsContent value="ai" className="space-y-6 sm:space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none h-full">
+                <Card className="border-none bg-transparent shadow-none min-h-[70vh] flex flex-col items-center">
+                  {/* Strategic Selector - Immersive Integration */}
+                  <div className="w-full max-w-4xl pt-4 pb-8 sticky top-0 z-40 bg-background/80 backdrop-blur-md">
                     <Tabs 
                       value={aiTradeType} 
                       onValueChange={(val) => setAiTradeType(val as NavigatorAIInput['tradeType'])} 
-                      className="w-full md:w-auto"
+                      className="w-full"
                     >
-                      <TabsList className="bg-background/50 border border-border/40 p-1 h-auto flex-wrap justify-center md:justify-start">
-                        <TabsTrigger value="OVER_UNDER" className="text-[8px] font-bold py-1 px-3">O/U</TabsTrigger>
-                        <TabsTrigger value="EVEN_ODD" className="text-[8px] font-bold py-1 px-3">E/O</TabsTrigger>
-                        <TabsTrigger value="MATCHES" className="text-[8px] font-bold py-1 px-3">MATCH</TabsTrigger>
-                        <TabsTrigger value="RISE_FALL" className="text-[8px] font-bold py-1 px-3">R/F</TabsTrigger>
-                        <TabsTrigger value="HIGHER_LOWER" className="text-[8px] font-bold py-1 px-3">H/L</TabsTrigger>
-                        <TabsTrigger value="ONLY_UPS_DOWNS" className="text-[8px] font-bold py-1 px-3">U/D</TabsTrigger>
+                      <TabsList className="bg-muted/30 border border-border/20 p-1.5 h-auto flex-wrap justify-center rounded-2xl w-full">
+                        <TabsTrigger value="OVER_UNDER" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">Over/Under</TabsTrigger>
+                        <TabsTrigger value="EVEN_ODD" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">Even/Odd</TabsTrigger>
+                        <TabsTrigger value="MATCHES" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">Matches</TabsTrigger>
+                        <TabsTrigger value="RISE_FALL" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">Rise/Fall</TabsTrigger>
+                        <TabsTrigger value="HIGHER_LOWER" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">H/L</TabsTrigger>
+                        <TabsTrigger value="ONLY_UPS_DOWNS" className="text-[9px] font-black uppercase tracking-widest py-2 px-4 rounded-xl data-[state=active]:bg-primary data-[state=active]:shadow-lg">Ups/Downs</TabsTrigger>
                       </TabsList>
                     </Tabs>
+                  </div>
 
-                    <Button 
-                      onClick={handleFetchAiInsight} 
-                      disabled={isAiLoading}
-                      className="w-full md:w-auto rounded-xl font-bold uppercase tracking-widest text-[10px] px-6 shadow-[0_0_15px_rgba(0,166,166,0.3)] hover:scale-105 transition-all"
-                    >
-                      {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Brain className="w-4 h-4 mr-2" />}
-                      Generate AI Insight
-                    </Button>
-                  </CardHeader>
-                  <CardContent className="p-6 sm:p-12 flex-1 flex flex-col items-center justify-center text-center space-y-8">
-                    {!aiInsight && !isAiLoading && (
-                      <div className="max-w-md space-y-4">
-                        <div className="w-20 h-20 bg-muted/30 rounded-full flex items-center justify-center mx-auto border border-border/50">
-                          <Target className="w-10 h-10 text-muted-foreground/40" />
-                        </div>
-                        <h3 className="text-lg font-black uppercase tracking-widest text-foreground">Ready for {aiTradeType.replace('_', ' ')} Analysis</h3>
-                        <p className="text-sm text-muted-foreground font-medium">Click the button above to start the NAVIGATOR AI engine focusing on {aiTradeType.replace('_', '/')} strategy.</p>
-                      </div>
-                    )}
-
-                    {isAiLoading && (
-                      <div className="flex flex-col items-center gap-6">
+                  <CardContent className="p-0 w-full flex-1 flex flex-col items-center justify-center text-center space-y-8">
+                    {isAiLoading ? (
+                      <div className="flex flex-col items-center gap-8 py-20">
                         <div className="relative">
-                          <div className="w-24 h-24 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-                          <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-primary animate-pulse" />
+                          <div className="w-32 h-32 border-8 border-primary/10 border-t-primary rounded-full animate-spin" />
+                          <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 text-primary animate-pulse" />
                         </div>
-                        <div className="space-y-2">
-                          <p className="text-xs font-black uppercase tracking-[0.3em] text-primary animate-pulse">Running {aiTradeType.replace('_', ' ')} Analysis...</p>
-                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Aggregating {windowSize} ticks for strategic momentum</p>
+                        <div className="space-y-4">
+                          <h3 className="text-xl font-black uppercase tracking-[0.4em] text-primary animate-pulse">Analyzing {aiTradeType.replace('_', ' ')}</h3>
+                          <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-widest">Processing {windowSize} ticks of live distribution data...</p>
                         </div>
                       </div>
-                    )}
-
-                    {aiInsight && !isAiLoading && (
-                      <div className="w-full max-w-3xl space-y-8 animate-in fade-in zoom-in-95 duration-500 text-left">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <Card className="bg-muted/30 border-border/50 p-6 rounded-3xl text-center space-y-2">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Confidence</span>
-                            <div className="text-4xl font-black text-primary tabular-nums">{aiInsight.confidence}%</div>
-                            <div className="h-2 w-full bg-background rounded-full overflow-hidden">
-                              <div className="h-full bg-primary transition-all duration-1000" style={{ width: `${aiInsight.confidence}%` }} />
+                    ) : aiInsight ? (
+                      <div className="w-full max-w-5xl space-y-10 animate-in fade-in zoom-in-95 duration-700 text-left px-4 pb-20">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                          <Card className="bg-card border-border/50 p-8 rounded-[2rem] text-center space-y-4 icy-glow shadow-2xl">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Analysis Confidence</span>
+                            <div className="text-6xl font-black text-primary tabular-nums drop-shadow-[0_0_15px_rgba(0,166,166,0.3)]">{aiInsight.confidence}%</div>
+                            <div className="h-3 w-full bg-muted/40 rounded-full overflow-hidden p-0.5">
+                              <div className="h-full bg-primary rounded-full transition-all duration-1000 ease-out" style={{ width: `${aiInsight.confidence}%` }} />
                             </div>
+                            <div className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-widest">Real-time Statistical Validation</div>
                           </Card>
-                          <Card className="md:col-span-2 bg-primary/5 border-primary/20 p-6 rounded-3xl space-y-2 flex flex-col justify-center border-l-4">
-                            <div className="flex items-center gap-2">
-                              <ShieldCheck className="w-4 h-4 text-primary" />
-                              <span className="text-[10px] font-black uppercase tracking-widest text-primary">Strategic Recommendation</span>
+                          
+                          <Card className="lg:col-span-2 bg-primary/10 border-primary/30 p-8 rounded-[2rem] space-y-4 flex flex-col justify-center border-l-8 shadow-2xl relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                              <Brain className="w-24 h-24 text-primary" />
                             </div>
-                            <div className="text-3xl sm:text-4xl font-black uppercase tracking-tighter text-foreground">
+                            <div className="flex items-center gap-3">
+                              <ShieldCheck className="w-6 h-6 text-primary" />
+                              <span className="text-[11px] font-black uppercase tracking-[0.3em] text-primary">Priority Recommendation</span>
+                            </div>
+                            <div className="text-4xl sm:text-6xl font-black uppercase tracking-tighter text-foreground brand-glow">
                               {aiInsight.recommendation}
                             </div>
-                            <div className="text-[9px] font-bold text-primary/60 uppercase tracking-widest">Strategy: {aiTradeType.replace('_', ' ')}</div>
+                            <div className="flex items-center gap-4">
+                              <Badge variant="outline" className="border-primary/40 text-primary font-black uppercase tracking-widest py-1 px-3">
+                                {aiTradeType.replace('_', ' ')}
+                              </Badge>
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                                <Activity className="w-3.5 h-3.5" />
+                                Momentum Optimal
+                              </span>
+                            </div>
                           </Card>
                         </div>
 
-                        <Card className="bg-card border-border/50 p-8 rounded-3xl shadow-xl icy-glow">
-                          <div className="flex items-center gap-2 mb-4">
-                            <Activity className="w-4 h-4 text-primary" />
-                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Detailed Technical Analysis</span>
+                        <Card className="bg-card border-border/50 p-10 rounded-[2.5rem] shadow-2xl icy-glow relative overflow-hidden">
+                           <div className="absolute top-0 left-0 w-2 h-full bg-primary/40" />
+                          <div className="flex items-center gap-3 mb-6">
+                            <Layers className="w-5 h-5 text-primary" />
+                            <span className="text-[11px] font-black uppercase tracking-[0.3em] text-muted-foreground">Technical Market Breakdown</span>
                           </div>
-                          <p className="text-sm sm:text-base leading-relaxed font-medium text-foreground/90">
+                          <p className="text-base sm:text-lg leading-relaxed font-medium text-foreground/90 first-letter:text-4xl first-letter:font-black first-letter:text-primary first-letter:mr-1 first-letter:float-left">
                             {aiInsight.analysis}
                           </p>
                         </Card>
+                      </div>
+                    ) : (
+                      <div className="py-20 max-w-md space-y-6">
+                        <div className="w-24 h-24 bg-muted/20 rounded-[2rem] flex items-center justify-center mx-auto border border-border/20 icy-glow">
+                          <Brain className="w-12 h-12 text-primary/40" />
+                        </div>
+                        <h3 className="text-xl font-black uppercase tracking-[0.2em] text-foreground">Initializing AI Engine</h3>
+                        <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">Awaiting strategic parameters for {aiTradeType.replace('_', ' ')} verification...</p>
                       </div>
                     )}
                   </CardContent>
