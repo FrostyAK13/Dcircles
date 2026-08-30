@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -661,16 +660,17 @@ export default function DigitFlowApp() {
   }, [marketData, currentSymbol, activeStrategy]);
 
   const tacticalStats = useMemo(() => {
-    const last100 = ticks.slice(-100);
-    const last100Prices = prices.slice(-100);
+    // Corrected to use 1000 ticks for analysis as requested
+    const lastWindow = ticks.slice(-1000);
+    const lastWindowPrices = prices.slice(-1000);
     
-    const ouCounts: [number, number] = [last100.filter(d => d > ouTarget).length, last100.filter(d => d < (ouTarget + 1)).length];
-    const eoCounts: [number, number] = [last100.filter(d => d % 2 === 0).length, last100.filter(d => d % 2 !== 0).length];
-    const matchCounts: [number, number] = [last100.filter(d => d === matchTarget).length, last100.filter(d => d !== matchTarget).length];
+    const ouCounts: [number, number] = [lastWindow.filter(d => d > ouTarget).length, lastWindow.filter(d => d < (ouTarget + 1)).length];
+    const eoCounts: [number, number] = [lastWindow.filter(d => d % 2 === 0).length, lastWindow.filter(d => d % 2 !== 0).length];
+    const matchCounts: [number, number] = [lastWindow.filter(d => d === matchTarget).length, lastWindow.filter(d => d !== matchTarget).length];
     
-    const rfHistory = last100Prices.slice(-10).map((p, i, arr) => i === 0 ? 0 : (p > arr[i-1] ? 1 : -1));
-    const riseCount = last100Prices.filter((p, i, arr) => i > 0 && p > arr[i-1]).length;
-    const fallCount = last100Prices.filter((p, i, arr) => i > 0 && p < arr[i-1]).length;
+    const rfHistory = lastWindowPrices.slice(-10).map((p, i, arr) => i === 0 ? 0 : (p > arr[i-1] ? 1 : -1));
+    const riseCount = lastWindowPrices.filter((p, i, arr) => i > 0 && p > arr[i-1]).length;
+    const fallCount = lastWindowPrices.filter((p, i, arr) => i > 0 && p < arr[i-1]).length;
 
     return { ouCounts, eoCounts, matchCounts, riseCount, fallCount, rfHistory };
   }, [ticks, prices, ouTarget, matchTarget]);
