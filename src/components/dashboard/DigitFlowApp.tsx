@@ -9,7 +9,7 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle, Radio, Star } from 'lucide-react';
+import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle, Radio, Star, Timer } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
@@ -103,15 +103,18 @@ interface MarketEngineCardProps {
   isSelected?: boolean;
   onSelect?: (id: string) => void;
   isGolden?: boolean;
+  expiryTimestamp?: number;
 }
 
-function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGolden }: MarketEngineCardProps) {
+function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGolden, expiryTimestamp }: MarketEngineCardProps) {
   const [countdown, setCountdown] = useState(5);
+  const [lifeRemaining, setLifeRemaining] = useState(30);
   const prices = data?.prices || [];
   
   const analysis = useMemo(() => getMarketAnalysis(data, strategy), [data, strategy]);
   const isHit = analysis.isHit;
 
+  // 5s Entry Countdown
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isHit) {
@@ -123,6 +126,21 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
     }
     return () => clearTimeout(timer);
   }, [isHit, countdown]);
+
+  // 30s Signal Life Countdown
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (expiryTimestamp) {
+      const updateLife = () => {
+        const elapsed = Math.floor((Date.now() - expiryTimestamp) / 1000);
+        const remaining = Math.max(0, 30 - elapsed);
+        setLifeRemaining(remaining);
+      };
+      updateLife();
+      timer = setInterval(updateLife, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [expiryTimestamp]);
 
   const trend = useMemo(() => {
     if (prices.length < 10) return 'neutral';
@@ -171,15 +189,26 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
           {isGolden ? <Star className="w-5 h-5 fill-current" /> : <StrategyIcon className={cn("w-5 h-5", isFlashy && "animate-pulse")} />}
         </div>
         
-        <div className={cn(
-          "px-2.5 py-1 rounded-xl text-[7px] font-black uppercase tracking-[0.2em] border flex items-center gap-1.5 transition-all duration-300",
-          isGolden ? "bg-amber-400 text-black border-amber-500" : isFlashy ? "bg-primary text-white border-primary shadow-[0_0_15px_rgba(0,166,166,0.5)]" : "bg-black/20 text-muted-foreground/50 border-transparent"
-        )}>
-          <Clock className="w-2.5 h-2.5" />
-          {isFlashy 
-            ? (countdown > 0 ? `ENTRY NOW (${countdown}s)` : "ACTIVE SIGNAL") 
-            : analysis.timing
-          }
+        <div className="flex flex-col items-end gap-1">
+          <div className={cn(
+            "px-2.5 py-1 rounded-xl text-[7px] font-black uppercase tracking-[0.2em] border flex items-center gap-1.5 transition-all duration-300",
+            isGolden ? "bg-amber-400 text-black border-amber-500" : isFlashy ? "bg-primary text-white border-primary shadow-[0_0_15px_rgba(0,166,166,0.5)]" : "bg-black/20 text-muted-foreground/50 border-transparent"
+          )}>
+            <Clock className="w-2.5 h-2.5" />
+            {isFlashy 
+              ? (countdown > 0 ? `ENTRY NOW (${countdown}s)` : "ACTIVE SIGNAL") 
+              : analysis.timing
+            }
+          </div>
+          {expiryTimestamp && (
+            <div className={cn(
+              "px-2 py-0.5 rounded-lg text-[6px] font-black uppercase tracking-[0.1em] border flex items-center gap-1",
+              lifeRemaining < 10 ? "text-rose-500 border-rose-500/30 bg-rose-500/5 animate-pulse" : "text-muted-foreground/60 border-border/20 bg-muted/5"
+            )}>
+              <Timer className="w-2 h-2" />
+              LIFE: {lifeRemaining}s
+            </div>
+          )}
         </div>
       </div>
       
@@ -227,7 +256,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
   );
 }
 
-function SignalScanner({ marketData, strategy, signals, goldenIds }: { marketData: Record<string, MarketData>, strategy: string, signals: string[], goldenIds: string[] }) {
+function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistry }: { marketData: Record<string, MarketData>, strategy: string, signals: string[], goldenIds: string[], signalRegistry: Record<string, number> }) {
   // Sort signals: Top goldenIds first, then other signals
   const sortedSignals = useMemo(() => {
     const goldens = signals.filter(id => goldenIds.includes(id));
@@ -266,6 +295,7 @@ function SignalScanner({ marketData, strategy, signals, goldenIds }: { marketDat
                   data={marketData[id]}
                   strategy={strategy}
                   isGolden={goldenIds.includes(id)}
+                  expiryTimestamp={signalRegistry[id]}
                 />
               );
             })}
@@ -319,8 +349,11 @@ export default function DigitFlowApp() {
       Object.entries(marketData).forEach(([id, data]) => {
         const analysis = getMarketAnalysis(data, activeStrategy);
         if (analysis.isHit) {
-          next[id] = now;
-          changed = true;
+          // Only set if not already present to preserve initial hit time
+          if (!next[id]) {
+            next[id] = now;
+            changed = true;
+          }
         }
       });
 
@@ -483,6 +516,7 @@ export default function DigitFlowApp() {
               strategy={activeStrategy} 
               signals={persistentSignalIds} 
               goldenIds={goldenMarketIds}
+              signalRegistry={signalRegistry}
             />
             
             <Card className="border border-border/50 bg-card rounded-[3rem] shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
@@ -522,6 +556,7 @@ export default function DigitFlowApp() {
                             isSelected={strategySelections[tabId] === market.id}
                             onSelect={(id) => handleMarketSelect(id)}
                             isGolden={goldenMarketIds.includes(market.id)}
+                            expiryTimestamp={signalRegistry[market.id]}
                           />
                         ))}
                       </div>
