@@ -86,7 +86,6 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
   if (ticks.length < 50) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
 
   if (strategy === 'OVER_UNDER') {
-    if (ticks.length < 100) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
     const w100 = ticks.slice(-100);
     const w20 = ticks.slice(-20);
     const overCount = w100.filter(d => d > 3).length; 
@@ -99,7 +98,6 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
   }
 
   if (strategy === 'EVEN_ODD') {
-    if (ticks.length < 100) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
     const w100 = ticks.slice(-100);
     const w20 = ticks.slice(-20);
     const evenCount = w100.filter(d => d % 2 === 0).length;
@@ -115,10 +113,8 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
     if (ticks.length < 200) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
     const w200 = ticks.slice(-200);
     const w50 = ticks.slice(-50);
-    
     const counts = new Array(10).fill(0);
     w200.forEach(d => counts[d]++);
-    
     const maxVal = Math.max(...counts);
     const maxDigits: number[] = [];
     counts.forEach((c, d) => { if (c === maxVal) maxDigits.push(d); });
@@ -165,35 +161,13 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
     const last3 = prices.slice(-4, -1);
     
     if (ema20 && ema50 && rsi && atr) {
-      // HIGHER Strategy
       if (ema20 > ema50 && current > ema20 && rsi >= 55 && rsi <= 70 && current > Math.max(...last3)) {
         const barrier = current - (atr * 0.2);
-        return { 
-          signal: `HIGHER | Barrier: ${barrier.toFixed(3)}`, 
-          direction: 'HIGHER', 
-          color: 'text-primary font-black', 
-          led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', 
-          flash: true, 
-          timing: 'ENTRY NOW', 
-          isHit: true, 
-          score: rsi, 
-          barrier: barrier.toFixed(3) 
-        };
+        return { signal: `HIGHER`, direction: 'HIGHER', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: rsi, barrier: barrier.toFixed(3) };
       }
-      // LOWER Strategy
       if (ema20 < ema50 && current < ema20 && rsi >= 30 && rsi <= 45 && current < Math.min(...last3)) {
         const barrier = current + (atr * 0.2);
-        return { 
-          signal: `LOWER | Barrier: ${barrier.toFixed(3)}`, 
-          direction: 'LOWER', 
-          color: 'text-rose-500 font-black', 
-          led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', 
-          flash: true, 
-          timing: 'ENTRY NOW', 
-          isHit: true, 
-          score: 100 - rsi, 
-          barrier: barrier.toFixed(3) 
-        };
+        return { signal: `LOWER`, direction: 'LOWER', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: 100 - rsi, barrier: barrier.toFixed(3) };
       }
     }
   }
@@ -271,7 +245,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
     <div
       onClick={() => onSelect?.(market.id)}
       className={cn(
-        "group relative flex flex-col items-center justify-between p-4 sm:p-5 rounded-[2rem] border-2 transition-all duration-500 min-h-[160px] sm:min-h-[180px] cursor-default overflow-hidden",
+        "group relative flex flex-col items-center justify-between p-4 sm:p-5 rounded-[2.5rem] border-2 transition-all duration-500 min-h-[180px] sm:min-h-[200px] cursor-default overflow-hidden",
         isGolden 
           ? "bg-amber-400/10 border-amber-400 shadow-[0_0_40px_rgba(251,191,36,0.5)] z-20 scale-[1.05]" 
           : isFlashy 
@@ -329,14 +303,22 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
             (isFlashy || isGolden) && "animate-pulse"
           )} />
           <span className={cn("text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em] text-center truncate w-full px-1", isGolden ? "text-amber-500" : analysis.color)}>
-            {isGolden ? analysis.direction : (isFlashy ? analysis.signal : "SCANNING")}
+            {isGolden ? (analysis.direction || "GOLDEN") : (isFlashy ? analysis.signal : "SCANNING")}
           </span>
         </div>
 
         {strategy === 'HIGHER_LOWER' && analysis.barrier && (
-           <Badge variant="outline" className="text-[7px] font-black px-2 py-0.5 rounded-lg border-primary/30 text-primary mt-1">
-             BARRIER: {analysis.barrier}
-           </Badge>
+           <div className="mt-3 w-full flex flex-col items-center gap-1 animate-in fade-in zoom-in duration-500">
+             <span className="text-[6px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">Calculated Barrier</span>
+             <div className={cn(
+               "px-4 py-1.5 rounded-xl font-black text-[11px] tabular-nums border shadow-lg transition-all",
+               analysis.direction === 'HIGHER' 
+                 ? "bg-primary/10 border-primary/40 text-primary shadow-[0_0_15px_rgba(0,166,166,0.2)]" 
+                 : "bg-rose-500/10 border-rose-500/40 text-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)]"
+             )}>
+               {analysis.barrier}
+             </div>
+           </div>
         )}
       </div>
 
