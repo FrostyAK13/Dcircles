@@ -539,6 +539,38 @@ export default function DigitFlowApp() {
     return getMarketAnalysis(marketData[currentSymbol], activeStrategy);
   }, [marketData, currentSymbol, activeStrategy]);
 
+  // Statistical Trigger Logic for Analysis Tab
+  const analysisTrigger = useMemo(() => {
+    if (tradeSide === 'none') return null;
+
+    let targetAvg = 0;
+    if (tradeSide === 'over') {
+      const p0 = distribution.find(d => d.digit === 0)?.percentage || 0;
+      const p1 = distribution.find(d => d.digit === 1)?.percentage || 0;
+      const p2 = distribution.find(d => d.digit === 2)?.percentage || 0;
+      targetAvg = (p0 + p1 + p2) / 3;
+    } else if (tradeSide === 'under') {
+      const p9 = distribution.find(d => d.digit === 9)?.percentage || 0;
+      const p8 = distribution.find(d => d.digit === 8)?.percentage || 0;
+      const p7 = distribution.find(d => d.digit === 7)?.percentage || 0;
+      targetAvg = (p9 + p8 + p7) / 3;
+    }
+
+    // Find closest digit to targetAvg
+    let closestDigit = 0;
+    let minDiff = Infinity;
+
+    distribution.forEach(d => {
+      const diff = Math.abs(d.percentage - targetAvg);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestDigit = d.digit;
+      }
+    });
+
+    return { digit: closestDigit, side: tradeSide.toUpperCase() };
+  }, [tradeSide, distribution]);
+
   const handleMarketSelect = (marketId: string) => setStrategySelections(prev => ({ ...prev, [activeStrategy]: marketId }));
 
   if (!mounted) return null;
@@ -595,13 +627,13 @@ export default function DigitFlowApp() {
                     </PopoverContent>
                   </Popover>
                   <Select value={tradeSide} onValueChange={setTradeSide}>
-                    <SelectTrigger className="w-full sm:w-28 h-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
+                    <SelectTrigger className="w-full sm:w-32 h-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
                       <SelectValue placeholder="Focus" />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border/50">
                       <SelectItem value="none" className="text-[9px] font-black uppercase tracking-widest">General</SelectItem>
-                      <SelectItem value="over" className="text-[9px] font-black uppercase tracking-widest text-primary">OVER 3</SelectItem>
-                      <SelectItem value="under" className="text-[9px] font-black uppercase tracking-widest text-rose-500">UNDER 6</SelectItem>
+                      <SelectItem value="over" className="text-[9px] font-black uppercase tracking-widest text-primary">OVER</SelectItem>
+                      <SelectItem value="under" className="text-[9px] font-black uppercase tracking-widest text-rose-500">UNDER</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -614,25 +646,27 @@ export default function DigitFlowApp() {
                   {/* Digit Calculator Entry Point Display */}
                   <div className={cn(
                     "flex flex-col items-center gap-3 px-8 py-4 rounded-[2.5rem] border-2 transition-all duration-700 animate-in fade-in zoom-in",
-                    currentMarketAnalysis.isHit 
+                    (currentMarketAnalysis.isHit || analysisTrigger)
                       ? "bg-primary/10 border-primary shadow-[0_0_50px_rgba(0,166,166,0.3)] scale-110" 
                       : "bg-muted/10 border-border/20 opacity-40 scale-100"
                   )}>
                     <div className="flex items-center gap-3">
                       <div className={cn(
                         "w-4 h-4 rounded-full transition-all duration-300",
-                        currentMarketAnalysis.isHit ? "bg-primary animate-ping" : "bg-muted-foreground/30"
+                        (currentMarketAnalysis.isHit || analysisTrigger) ? "bg-primary animate-ping" : "bg-muted-foreground/30"
                       )} />
                       <span className={cn(
                         "text-xs sm:text-xl font-black uppercase tracking-[0.4em] transition-colors",
-                        currentMarketAnalysis.isHit ? "text-primary" : "text-muted-foreground/60"
+                        (currentMarketAnalysis.isHit || analysisTrigger) ? "text-primary" : "text-muted-foreground/60"
                       )}>
-                        {currentMarketAnalysis.isHit 
-                          ? (activeStrategy === 'MATCHES' ? `RUN BOT: ${currentMarketAnalysis.signal}` : currentMarketAnalysis.signal) 
-                          : "SCANNING ENGINE ACTIVE"}
+                        {analysisTrigger 
+                          ? `${analysisTrigger.side} TRIGGER: DIGIT ${analysisTrigger.digit}`
+                          : currentMarketAnalysis.isHit 
+                            ? (activeStrategy === 'MATCHES' ? `RUN BOT: ${currentMarketAnalysis.signal}` : currentMarketAnalysis.signal) 
+                            : "SCANNING ENGINE ACTIVE"}
                       </span>
                     </div>
-                    {currentMarketAnalysis.isHit && (
+                    {(currentMarketAnalysis.isHit || analysisTrigger) && (
                       <Badge variant="outline" className="bg-primary text-white border-primary text-[8px] sm:text-[10px] font-black tracking-[0.2em] px-4 py-1 rounded-xl animate-pulse">
                         HIGH CONFIDENCE ENTRY
                       </Badge>
