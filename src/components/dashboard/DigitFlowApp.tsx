@@ -36,10 +36,6 @@ export const CONTINUOUS_INDICES = [
   { id: 'JD100', name: 'Jump 100 Index', short: 'J100' },
 ];
 
-/**
- * NAVIGATOR AI - Strategy Tactical Hub
- * Implements 100/20 Rule (60 Density, 13 Momentum) for all strategy modes.
- */
 function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const ticks = data?.ticks || [];
   const prices = data?.prices || [];
@@ -59,10 +55,9 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const w100 = ticks.slice(-100);
   const w20 = ticks.slice(-20);
 
-  // OVER/UNDER: 100/20 Rule (60/13)
   if (strategy === 'OVER_UNDER') {
-    const overCount = w100.filter(d => d > 3).length; // Over 3: 4,5,6,7,8,9
-    const underCount = w100.filter(d => d < 6).length; // Under 6: 0,1,2,3,4,5
+    const overCount = w100.filter(d => d > 3).length; 
+    const underCount = w100.filter(d => d < 6).length; 
     const last20Over = w20.filter(d => d > 3).length;
     const last20Under = w20.filter(d => d < 6).length;
 
@@ -70,7 +65,6 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
     if (underCount >= 60 && last20Under >= 13) return { signal: 'UNDER', direction: 'UNDER', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: underCount };
   }
 
-  // EVEN/ODD: 100/20 Rule (60/13)
   if (strategy === 'EVEN_ODD') {
     const evenCount = w100.filter(d => d % 2 === 0).length;
     const oddCount = w100.filter(d => d % 2 !== 0).length;
@@ -81,7 +75,6 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
     if (oddCount >= 60 && last20Odd >= 13) return { signal: 'ODD', direction: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount };
   }
 
-  // MATCHES: High Frequency Detection (Using 100/20 principles)
   if (strategy === 'MATCHES') {
     const counts = new Array(10).fill(0);
     w100.forEach(d => counts[d]++);
@@ -92,7 +85,6 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
     if (maxVal >= 18 && last20Match >= 5) return { signal: `MATCH ${digit}`, direction: `MATCH ${digit}`, color: 'text-amber-500 font-black', led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', flash: true, timing: 'MATCH FOUND', isHit: true, score: maxVal * 2 };
   }
 
-  // RISE/FALL: Velocity logic
   if (strategy === 'RISE_FALL') {
     if (prices.length >= 20) {
       const diff = prices[prices.length - 1] - prices[prices.length - 20];
@@ -103,7 +95,6 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
     }
   }
 
-  // HIGHER/LOWER: Moving Average logic
   if (strategy === 'HIGHER_LOWER') {
     if (prices.length >= 50) {
       const current = prices[prices.length - 1];
@@ -115,7 +106,6 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
     }
   }
 
-  // ONLY UPS/DOWNS: Velocity check
   if (strategy === 'ONLY_UPS_DOWNS') {
     if (prices.length >= 5) {
       const last5 = prices.slice(-5);
@@ -247,7 +237,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
             (isFlashy || isGolden) && "animate-pulse"
           )} />
           <span className={cn("text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em]", isGolden ? "text-amber-500" : analysis.color)}>
-            {isGolden ? `PRIME ${analysis.direction}` : (isFlashy ? analysis.signal : "SCANNING")}
+            {isGolden ? analysis.direction : (isFlashy ? analysis.signal : "SCANNING")}
           </span>
         </div>
       </div>
@@ -277,7 +267,7 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
         <div className="flex items-center gap-2">
           {goldenIds.length > 0 && (
             <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.2em] bg-amber-400/10 text-amber-500 border-amber-400/20">
-              PRIME TIER ACTIVE
+              GOLDEN TIER ACTIVE
             </Badge>
           )}
           <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.2em] bg-primary/10 text-primary border-primary/20">
@@ -326,7 +316,6 @@ export default function DigitFlowApp() {
   const [activeMainTab, setActiveMainTab] = useState('dashboard');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
-  // Isolated multi-strategy registry
   const [multiSignalRegistry, setMultiSignalRegistry] = useState<Record<string, Record<string, number>>>({
     'OVER_UNDER': {}, 'EVEN_ODD': {}, 'MATCHES': {}, 'RISE_FALL': {}, 'HIGHER_LOWER': {}, 'ONLY_UPS_DOWNS': {},
   });
@@ -339,7 +328,6 @@ export default function DigitFlowApp() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  // Registry Loop: Isolates strategy signals and handles expiry/persistence
   useEffect(() => {
     const now = Date.now();
     setMultiSignalRegistry(prev => {
@@ -347,7 +335,6 @@ export default function DigitFlowApp() {
       const currentRegistry = { ...next[activeStrategy] };
       let changed = false;
 
-      // Scan all market data for hits under CURRENT strategy
       Object.entries(marketData).forEach(([id, data]) => {
         const analysis = getMarketAnalysis(data, activeStrategy);
         if (analysis.isHit) {
@@ -356,7 +343,6 @@ export default function DigitFlowApp() {
         }
       });
 
-      // Cleanup expired signals (30s)
       Object.entries(currentRegistry).forEach(([id, timestamp]) => {
         if (now - timestamp > 30000) {
           delete currentRegistry[id];
@@ -417,7 +403,6 @@ export default function DigitFlowApp() {
           </div>
 
           <TabsContent value="dashboard" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-            {/* Dashboard View */}
             <Card className="border-none bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
               <CardContent className="p-4 sm:p-8 lg:p-12 space-y-6 sm:space-y-8">
                 <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-between w-full">
@@ -468,7 +453,6 @@ export default function DigitFlowApp() {
           </TabsContent>
 
           <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-            {/* Wrap Strategy Hub in its own Tabs root to avoid empty page crashes */}
             <Tabs value={activeStrategy} onValueChange={setActiveStrategy} className="flex flex-col gap-6">
               <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md py-2 px-1">
                 <TabsList className="bg-card/80 p-1.5 rounded-[1.5rem] border border-primary/20 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1.5 shadow-lg backdrop-blur-xl">
@@ -491,7 +475,6 @@ export default function DigitFlowApp() {
                 </TabsList>
               </div>
 
-              {/* The following components react to the activeStrategy state */}
               <SignalScanner 
                 marketData={marketData} 
                 strategy={activeStrategy} 
