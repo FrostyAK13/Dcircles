@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -59,32 +60,32 @@ function LargePriceDisplay({
   return (
     <div className="flex flex-col items-center justify-center gap-6 py-4">
       <div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-foreground">
-        <span className="drop-shadow-[0_0_15px_rgba(0,166,166,0.3)]">{priceStr}</span>
+        <span className="drop-shadow-[0_0_15px_rgba(0,166,166,0.3)] text-[#00a6a6]">{priceStr}</span>
       </div>
 
       {side !== 'none' && engineResult && (
         <div className={cn(
           "flex flex-col items-center justify-center p-4 sm:p-6 rounded-3xl border transition-all duration-300 icy-glow animate-in zoom-in-95 w-full max-w-[200px]",
           (isMatch || isHoveredMatch) 
-            ? "bg-primary/20 border-primary shadow-[0_0_20px_rgba(0,166,166,0.4)]" 
-            : "bg-primary/10 border-primary/20"
+            ? "bg-[#00a6a6]/20 border-[#00a6a6] shadow-[0_0_20px_rgba(0,166,166,0.4)]" 
+            : "bg-[#00a6a6]/10 border-[#00a6a6]/20"
         )}>
           <div className="flex items-center gap-2 mb-2">
             {isMatch ? (
-              <CheckCircle2 className="w-4 h-4 text-primary animate-bounce" />
+              <CheckCircle2 className="w-4 h-4 text-[#00a6a6] animate-bounce" />
             ) : (
-              <Activity className={cn("w-4 h-4 animate-pulse", isHoveredMatch ? "text-primary" : "text-primary/60")} />
+              <Activity className={cn("w-4 h-4 animate-pulse", isHoveredMatch ? "text-[#00a6a6]" : "text-[#00a6a6]/60")} />
             )}
             <span className={cn(
               "text-[9px] sm:text-[10px] font-black uppercase tracking-widest",
-              (isMatch || isHoveredMatch) ? "text-primary" : "text-muted-foreground"
+              (isMatch || isHoveredMatch) ? "text-[#00a6a6]" : "text-muted-foreground"
             )}>
-              {isMatch ? "Digit Appeared!" : "Engine Signal"}
+              {isMatch ? "Digit Appeared!" : "Navigator Signal"}
             </span>
           </div>
           <div className={cn(
             "text-3xl sm:text-4xl font-black flex items-center gap-3",
-            (isMatch || isHoveredMatch) ? "text-primary" : "text-primary/70"
+            (isMatch || isHoveredMatch) ? "text-[#d6b36a]" : "text-[#d6b36a]/70"
           )}>
             <Target className="w-6 h-6 sm:w-8 sm:h-8" />
             <span>{signalDigit}</span>
@@ -122,7 +123,7 @@ function DetailedComparison({
   return (
     <Card className="border border-border/50 bg-card text-card-foreground shadow-xl icy-glow overflow-hidden transition-all hover:scale-[1.01]">
       <CardHeader className="p-3 sm:p-4 border-b border-border/40 bg-muted/20">
-        <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+        <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-[#00a6a6]">
           {title}
         </CardTitle>
       </CardHeader>
@@ -138,8 +139,8 @@ function DetailedComparison({
                   className={cn(
                     "w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-[10px] sm:text-xs font-bold transition-all flex items-center justify-center",
                     selectedDigit === num 
-                      ? "bg-primary text-white shadow-[0_0_15px_rgba(0,166,166,0.5)] scale-110" 
-                      : "bg-background text-muted-foreground hover:bg-primary/10"
+                      ? "bg-[#00a6a6] text-white shadow-[0_0_15px_rgba(0,166,166,0.5)] scale-110" 
+                      : "bg-background text-muted-foreground hover:bg-[#00a6a6]/10"
                   )}
                 >
                   {num}
@@ -152,7 +153,7 @@ function DetailedComparison({
         <div className="flex justify-around items-center text-center py-2">
           <div className="space-y-1">
             <span className="text-[9px] sm:text-[10px] uppercase tracking-tighter text-muted-foreground font-bold">{label1}</span>
-            <div className="text-2xl sm:text-3xl font-black text-primary tabular-nums">{count1}</div>
+            <div className="text-2xl sm:text-3xl font-black text-[#00a6a6] tabular-nums">{count1}</div>
           </div>
           <div className="h-10 w-px bg-border/50" />
           <div className="space-y-1">
@@ -166,7 +167,7 @@ function DetailedComparison({
             <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted-foreground font-bold block">Recent History</span>
             <button 
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-primary flex items-center gap-1 hover:opacity-70 transition-opacity"
+              className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-[#00a6a6] flex items-center gap-1 hover:opacity-70 transition-opacity"
             >
               {isExpanded ? (
                 <>Less <ChevronUp className="w-3 h-3" /></>
@@ -195,12 +196,12 @@ function DetailedComparison({
           <div className="space-y-4">
             <div className="space-y-1.5">
               <div className="flex justify-between text-[9px] sm:text-[10px] font-bold uppercase tracking-widest px-1">
-                <span className="text-primary">{label1}</span>
-                <span className="text-primary">{val1}%</span>
+                <span className="text-[#00a6a6]">{label1}</span>
+                <span className="text-[#00a6a6]">{val1}%</span>
               </div>
               <div className="h-4 sm:h-6 w-full bg-muted/40 rounded-full overflow-hidden p-0.5">
                 <div 
-                  className="h-full bg-primary rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(0,166,166,0.3)]" 
+                  className="h-full bg-[#00a6a6] rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(0,166,166,0.3)]" 
                   style={{ width: `${val1}%` }} 
                 />
               </div>
@@ -227,19 +228,35 @@ function DetailedComparison({
 function MarketCardGrid({ 
   currentSymbol, 
   onSelect, 
-  activeTrend 
+  activeTrend,
+  strategy 
 }: { 
   currentSymbol: string, 
   onSelect: (id: string) => void,
-  activeTrend: 'up' | 'down' | 'neutral'
+  activeTrend: 'up' | 'down' | 'neutral',
+  strategy: string
 }) {
   const getPseudoTrend = (id: string) => {
     const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return hash % 3 === 0 ? 'up' : hash % 3 === 1 ? 'down' : 'neutral';
   };
 
+  const getStrategyIcon = (type: string) => {
+    switch(type) {
+      case 'OVER_UNDER': return ArrowUpDown;
+      case 'EVEN_ODD': return Hash;
+      case 'MATCHES': return Target;
+      case 'RISE_FALL': return TrendingUp;
+      case 'HIGHER_LOWER': return Layers;
+      case 'ONLY_UPS_DOWNS': return Zap;
+      default: return Activity;
+    }
+  };
+
+  const StrategyIcon = getStrategyIcon(strategy);
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 p-4 max-w-7xl mx-auto">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 p-4 max-w-7xl mx-auto">
       {CONTINUOUS_INDICES.map((market) => {
         const isActive = currentSymbol === market.id;
         const trend = isActive ? activeTrend : getPseudoTrend(market.id);
@@ -249,50 +266,45 @@ function MarketCardGrid({
             key={market.id}
             onClick={() => onSelect(market.id)}
             className={cn(
-              "group relative flex flex-col items-center justify-center p-6 sm:p-8 rounded-[2rem] border-2 transition-all duration-300",
+              "group relative flex flex-col items-center justify-center p-4 sm:p-5 rounded-[1.5rem] border-2 transition-all duration-300",
               isActive 
-                ? "bg-primary/20 border-primary shadow-[0_0_30px_rgba(0,166,166,0.4)] scale-[1.05] z-20" 
-                : "bg-muted/20 border-border/30 hover:border-primary/40 hover:bg-muted/40 hover:scale-[1.02]"
+                ? "bg-[#00a6a6]/20 border-[#00a6a6] shadow-[0_0_20px_rgba(0,166,166,0.3)] scale-[1.02] z-20" 
+                : "bg-muted/20 border-border/30 hover:border-[#00a6a6]/40 hover:bg-muted/40 hover:scale-[1.01]"
             )}
           >
             <div className={cn(
-              "w-12 h-12 sm:w-16 sm:h-16 rounded-[1rem] flex items-center justify-center mb-4 transition-all duration-300 shadow-lg relative overflow-hidden",
+              "w-10 h-10 sm:w-12 sm:h-12 rounded-[0.75rem] flex items-center justify-center mb-3 transition-all duration-300 shadow-lg relative overflow-hidden",
               isActive 
-                ? "bg-primary text-white scale-110 shadow-primary/20" 
-                : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+                ? "bg-[#00a6a6] text-white shadow-[#00a6a6]/20" 
+                : "bg-muted text-muted-foreground group-hover:bg-[#00a6a6]/10 group-hover:text-[#00a6a6]"
             )}>
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50" />
-              {trend === 'up' ? (
-                <TrendingUp className={cn("w-7 h-7 sm:w-9 sm:h-9 relative z-10", isActive && "animate-bounce")} />
-              ) : trend === 'down' ? (
-                <TrendingDown className={cn("w-7 h-7 sm:w-9 sm:h-9 relative z-10", isActive && "animate-bounce")} />
-              ) : (
-                <Activity className={cn("w-7 h-7 sm:w-9 sm:h-9 relative z-10", isActive && "animate-pulse")} />
-              )}
+              <StrategyIcon className={cn("w-5 h-5 sm:w-6 sm:h-6 relative z-10", isActive && "animate-pulse")} />
             </div>
             
-            <div className="flex flex-col items-center gap-1.5">
+            <div className="flex flex-col items-center gap-1">
               <span className={cn(
-                "text-[10px] sm:text-sm font-black uppercase tracking-[0.2em] text-center line-clamp-2 px-2 transition-colors duration-300",
-                isActive ? "text-primary" : "text-muted-foreground/80"
+                "text-[9px] sm:text-[11px] font-black uppercase tracking-[0.1em] text-center line-clamp-1 px-2 transition-colors duration-300",
+                isActive ? "text-[#00a6a6]" : "text-muted-foreground/80"
               )}>
-                {market.name.replace(' Index', '')}
+                {market.short} Index
               </span>
               
               <div className={cn(
-                "px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border transition-all duration-300",
+                "px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest border flex items-center gap-1 transition-all duration-300",
                 isActive 
-                  ? (trend === 'up' ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-500" : trend === 'down' ? "bg-rose-500/20 border-rose-500/30 text-rose-500" : "bg-primary/20 border-primary/30 text-primary")
+                  ? (trend === 'up' ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-500" : trend === 'down' ? "bg-rose-500/20 border-rose-500/30 text-rose-500" : "bg-[#00a6a6]/20 border-[#00a6a6]/30 text-[#00a6a6]")
                   : "bg-muted/50 border-border/50 text-muted-foreground opacity-50"
               )}>
-                {trend === 'up' ? 'Bullish' : trend === 'down' ? 'Bearish' : 'Neutral'}
+                {trend === 'up' ? <TrendingUp className="w-2 h-2" /> : trend === 'down' ? <TrendingDown className="w-2 h-2" /> : <Activity className="w-2 h-2" />}
+                {trend === 'up' ? 'Bullish' : trend === 'down' ? 'Bearish' : 'Stable'}
               </div>
             </div>
 
             {isActive && (
-              <div className="absolute -top-3 -right-3">
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-xl animate-pulse ring-4 ring-background">
-                  <CheckCircle2 className="w-5 h-5 text-white" />
+              <div className="absolute -top-2 -right-2">
+                <div className="w-6 h-6 rounded-full bg-[#d6b36a] flex items-center justify-center shadow-xl animate-bounce ring-2 ring-background">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                 </div>
               </div>
             )}
@@ -304,7 +316,15 @@ function MarketCardGrid({
 }
 
 export default function DigitFlowApp() {
-  const [symbol, setSymbol] = useState('1HZ10V');
+  const [strategySelections, setStrategySelections] = useState<Record<string, string>>({
+    'OVER_UNDER': '1HZ10V',
+    'EVEN_ODD': 'R_10',
+    'MATCHES': '1HZ15V',
+    'RISE_FALL': 'R_15',
+    'HIGHER_LOWER': '1HZ25V',
+    'ONLY_UPS_DOWNS': 'R_25',
+  });
+  const [activeStrategy, setActiveStrategy] = useState('OVER_UNDER');
   const [tradeSide, setTradeSide] = useState('none');
   const [ouDigit, setOuDigit] = useState(4);
   const [mdDigit, setMdDigit] = useState(0);
@@ -312,6 +332,9 @@ export default function DigitFlowApp() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [hoveredDigit, setHoveredDigit] = useState<number | null>(null);
   const [activeMainTab, setActiveMainTab] = useState('dashboard');
+
+  // The symbol being analyzed is the one selected for the current active strategy
+  const currentSymbol = strategySelections[activeStrategy];
 
   const { 
     distribution, 
@@ -323,7 +346,7 @@ export default function DigitFlowApp() {
     setWindowSize, 
     totalTicks, 
     status 
-  } = useDigitAnalysis(symbol);
+  } = useDigitAnalysis(currentSymbol);
 
   useEffect(() => {
     setMounted(true);
@@ -401,19 +424,19 @@ export default function DigitFlowApp() {
     const patterns = {
       eo: lastTicks.map(d => ({
         label: d % 2 === 0 ? 'E' : 'O',
-        color: d % 2 === 0 ? 'bg-primary text-primary-foreground' : 'bg-rose-500 text-white'
+        color: d % 2 === 0 ? 'bg-[#00a6a6] text-white' : 'bg-rose-500 text-white'
       })),
       ou: lastTicks.map(d => ({
         label: d > ouDigit ? 'O' : d < ouDigit ? 'U' : d.toString(),
-        color: d === ouDigit ? 'bg-muted/40 text-muted-foreground' : (d > ouDigit ? 'bg-primary text-primary-foreground' : 'bg-rose-500 text-white')
+        color: d === ouDigit ? 'bg-muted/40 text-muted-foreground' : (d > ouDigit ? 'bg-[#00a6a6] text-white' : 'bg-rose-500 text-white')
       })),
       rf: lastPrices.slice(1).map((p, i) => ({
         label: p > lastPrices[i] ? 'R' : 'F',
-        color: p > lastPrices[i] ? 'bg-primary text-primary-foreground' : 'bg-rose-500 text-white'
+        color: p > lastPrices[i] ? 'bg-[#00a6a6] text-white' : 'bg-rose-500 text-white'
       })),
       md: lastTicks.map(d => ({
         label: d === mdDigit ? 'M' : 'D',
-        color: d === mdDigit ? 'bg-primary text-primary-foreground' : 'bg-rose-500 text-white'
+        color: d === mdDigit ? 'bg-[#00a6a6] text-white' : 'bg-rose-500 text-white'
       }))
     };
 
@@ -452,13 +475,20 @@ export default function DigitFlowApp() {
     setWindowSize(safeVal);
   };
 
-  const currentMarket = CONTINUOUS_INDICES.find(m => m.id === symbol) || CONTINUOUS_INDICES[0];
+  const handleMarketSelect = (marketId: string) => {
+    setStrategySelections(prev => ({
+      ...prev,
+      [activeStrategy]: marketId
+    }));
+  };
+
+  const currentMarket = CONTINUOUS_INDICES.find(m => m.id === currentSymbol) || CONTINUOUS_INDICES[0];
 
   return (
     <SidebarProvider>
       <div className="flex flex-col min-h-screen w-full bg-background text-foreground relative overflow-hidden">
-        <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 opacity-[0.05] select-none">
-          <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-primary/30">
+        <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 opacity-[0.03] select-none">
+          <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-[#00a6a6]/30">
             INDEXNAV
           </span>
         </div>
@@ -468,8 +498,8 @@ export default function DigitFlowApp() {
         <main className="relative z-10 flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6 sm:space-y-8 overflow-y-auto">
           {!mounted ? (
             <div className="w-full h-96 flex flex-col items-center justify-center gap-4">
-              <Loader2 className="w-12 h-12 text-primary animate-spin" />
-              <p className="text-sm font-black uppercase tracking-[0.3em] text-primary animate-pulse">Initializing Navigator...</p>
+              <Loader2 className="w-12 h-12 text-[#00a6a6] animate-spin" />
+              <p className="text-sm font-black uppercase tracking-[0.3em] text-[#00a6a6] animate-pulse">Initializing Navigator...</p>
             </div>
           ) : (
             <Tabs 
@@ -479,41 +509,22 @@ export default function DigitFlowApp() {
             >
               <div className="flex justify-center mb-6 sm:mb-8 sticky top-0 z-40 bg-background/80 backdrop-blur-md py-2 -mx-3 sm:mx-0 px-3">
                 <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start sm:justify-center w-full max-w-fit scrollbar-hide">
-                  <TabsTrigger 
-                    value="dashboard" 
-                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
-                  >
-                    <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
-                    Analysis
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="navigator-ai" 
-                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
-                  >
-                    <BrainCircuit className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
-                    Navigator AI
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="scanner" 
-                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
-                  >
-                    <ExternalLink className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
-                    Scanner
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="digits" 
-                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
-                  >
-                    <LayoutGrid className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
-                    Digits
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="percentage" 
-                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
-                  >
-                    <Percent className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
-                    %
-                  </TabsTrigger>
+                  {[
+                    { value: 'dashboard', label: 'Analysis', icon: BarChart2 },
+                    { value: 'navigator-ai', label: 'Navigator AI', icon: BrainCircuit },
+                    { value: 'scanner', label: 'Scanner', icon: ExternalLink },
+                    { value: 'digits', label: 'Digits', icon: LayoutGrid },
+                    { value: 'percentage', label: 'Percentage', icon: Percent },
+                  ].map((tab) => (
+                    <TabsTrigger 
+                      key={tab.value}
+                      value={tab.value} 
+                      className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-[#00a6a6] data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
+                    >
+                      <tab.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
                 </TabsList>
               </div>
 
@@ -525,17 +536,17 @@ export default function DigitFlowApp() {
                         <PopoverTrigger asChild>
                           <div className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
                             <div className="relative shrink-0">
-                              <BarChart2 className="w-5 h-5 text-primary" />
-                              <div className="absolute -top-1.5 -right-1.5 bg-primary text-[7px] font-bold px-1 rounded text-primary-foreground">
+                              <BarChart2 className="w-5 h-5 text-[#00a6a6]" />
+                              <div className="absolute -top-1.5 -right-1.5 bg-[#d6b36a] text-[7px] font-bold px-1 rounded text-white shadow-sm">
                                 {currentMarket.short}
                               </div>
                             </div>
                             <div className="flex flex-col min-0">
                               <div className="flex items-center gap-1">
-                                <span className="text-[10px] sm:text-[11px] font-bold text-foreground group-hover:text-primary transition-colors truncate">
+                                <span className="text-[10px] sm:text-[11px] font-bold text-foreground group-hover:text-[#00a6a6] transition-colors truncate">
                                   {currentMarket.name}
                                 </span>
-                                <ChevronDown className="w-3 h-3 text-muted-foreground group-hover:text-primary transition-transform group-data-[state=open]:rotate-180" />
+                                <ChevronDown className="w-3 h-3 text-muted-foreground group-hover:text-[#00a6a6] transition-transform group-data-[state=open]:rotate-180" />
                               </div>
                               <div className="flex items-center gap-2">
                                 <span className="text-[9px] font-bold text-muted-foreground uppercase flex items-center gap-1">
@@ -555,12 +566,12 @@ export default function DigitFlowApp() {
                               <button
                                 key={market.id}
                                 onClick={() => {
-                                  setSymbol(market.id);
+                                  handleMarketSelect(market.id);
                                   setIsPopoverOpen(false);
                                 }}
                                 className={cn(
                                   "w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors",
-                                  symbol === market.id ? "bg-primary/10 text-primary" : "hover:bg-muted/40 text-foreground"
+                                  currentSymbol === market.id ? "bg-[#00a6a6]/10 text-[#00a6a6]" : "hover:bg-muted/40 text-foreground"
                                 )}
                               >
                                 <div className="flex items-center gap-3">
@@ -569,7 +580,7 @@ export default function DigitFlowApp() {
                                   </div>
                                   <span className="text-xs font-semibold">{market.name}</span>
                                 </div>
-                                {symbol === market.id && <Zap className="w-3.5 h-3.5 fill-primary text-primary" />}
+                                {currentSymbol === market.id && <Zap className="w-3.5 h-3.5 fill-[#d6b36a] text-[#d6b36a]" />}
                               </button>
                             ))}
                           </div>
@@ -577,14 +588,14 @@ export default function DigitFlowApp() {
                       </Popover>
 
                       <div className="w-full sm:w-auto flex items-center gap-3 p-2 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
-                        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Side:</span>
+                        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Focus:</span>
                         <Select value={tradeSide} onValueChange={setTradeSide}>
                           <SelectTrigger className="flex-1 sm:w-28 h-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
-                            <SelectValue placeholder="Trade Side" />
+                            <SelectValue placeholder="Side" />
                           </SelectTrigger>
                           <SelectContent className="bg-card border-border/50">
                             <SelectItem value="none" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">None</SelectItem>
-                            <SelectItem value="over" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary">Over</SelectItem>
+                            <SelectItem value="over" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-[#00a6a6]">Over</SelectItem>
                             <SelectItem value="under" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-rose-500">Under</SelectItem>
                           </SelectContent>
                         </Select>
@@ -602,14 +613,14 @@ export default function DigitFlowApp() {
                     <div className="space-y-6 sm:space-y-8 relative">
                       <div className="flex flex-col items-center gap-3">
                         <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-muted/30 border border-border/40 shadow-inner">
-                          <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Window</span>
+                          <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Analysis Range</span>
                           <Input 
                             type="number"
                             value={windowSize}
                             onChange={(e) => handleWindowSizeChange(parseInt(e.target.value))}
                             min={5}
                             max={HISTORY_BUFFER_SIZE}
-                            className="w-16 sm:w-20 h-6 sm:h-7 p-0 text-xs sm:text-sm font-black text-primary bg-transparent border-none text-center focus-visible:ring-0 tabular-nums"
+                            className="w-16 sm:w-20 h-6 sm:h-7 p-0 text-xs sm:text-sm font-black text-[#00a6a6] bg-transparent border-none text-center focus-visible:ring-0 tabular-nums"
                           />
                           <span className="text-[9px] sm:text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest">Ticks</span>
                         </div>
@@ -618,14 +629,14 @@ export default function DigitFlowApp() {
                       <div className="grid grid-cols-5 gap-2 sm:gap-8 max-w-4xl mx-auto relative px-1 sm:px-4">
                         {latestDigit !== null && (
                           <div 
-                            className="absolute z-20 text-primary transition-all duration-300 ease-in-out pointer-events-none"
+                            className="absolute z-20 text-[#00a6a6] transition-all duration-300 ease-in-out pointer-events-none"
                             style={{
                               left: `${(latestDigit % 5) * 20 + 10}%`,
                               top: latestDigit >= 5 ? '55%' : '-1.5rem',
                               transform: 'translateX(-50%)'
                             }}
                           >
-                            <ChevronDown className={cn("w-6 h-6 sm:w-8 h-8 fill-primary animate-bounce", latestDigit >= 5 && "rotate-180")} />
+                            <ChevronDown className={cn("w-6 h-6 sm:w-8 h-8 fill-[#00a6a6] animate-bounce", latestDigit >= 5 && "rotate-180")} />
                           </div>
                         )}
 
@@ -651,7 +662,7 @@ export default function DigitFlowApp() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <DetailedComparison 
-                    title="Over / Under Analysis"
+                    title="Over / Under Threshold"
                     label1="Over"
                     label2="Under"
                     val1={stats.comparisons.over}
@@ -664,7 +675,7 @@ export default function DigitFlowApp() {
                     onDigitSelect={setOuDigit}
                   />
                   <DetailedComparison 
-                    title="Even / Odd Analysis"
+                    title="Even / Odd Balance"
                     label1="Even"
                     label2="Odd"
                     val1={stats.comparisons.even}
@@ -674,9 +685,9 @@ export default function DigitFlowApp() {
                     pattern={stats.patterns.eo}
                   />
                   <DetailedComparison 
-                    title="Matches / Differs"
-                    label1="Matches"
-                    label2="Differs"
+                    title="Frequency Matches"
+                    label1="Match"
+                    label2="Differ"
                     val1={stats.comparisons.matches}
                     val2={stats.comparisons.differs}
                     count1={stats.counts.matches}
@@ -687,7 +698,7 @@ export default function DigitFlowApp() {
                     onDigitSelect={setMdDigit}
                   />
                   <DetailedComparison 
-                    title="Rise / Fall Trend"
+                    title="Volatility Trend"
                     label1="Rise"
                     label2="Fall"
                     val1={stats.comparisons.rise}
@@ -701,7 +712,11 @@ export default function DigitFlowApp() {
 
               <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
                 <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
-                  <Tabs defaultValue="OVER_UNDER" className="w-full h-full flex flex-col">
+                  <Tabs 
+                    value={activeStrategy} 
+                    onValueChange={setActiveStrategy} 
+                    className="w-full h-full flex flex-col"
+                  >
                     <CardHeader className="border-b border-border/40 bg-muted/20 p-2 sm:p-4 shrink-0">
                       <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1">
                         {[
@@ -715,7 +730,7 @@ export default function DigitFlowApp() {
                           <TabsTrigger 
                             key={tab.id}
                             value={tab.id} 
-                            className="rounded-xl px-2 sm:px-4 py-1.5 font-bold uppercase tracking-widest text-[7px] sm:text-[9px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shrink-0 flex items-center gap-1.5"
+                            className="rounded-xl px-2 sm:px-4 py-1.5 font-bold uppercase tracking-widest text-[7px] sm:text-[9px] data-[state=active]:bg-[#00a6a6] data-[state=active]:text-white shrink-0 flex items-center gap-1.5"
                           >
                             <tab.icon className="w-3 h-3" />
                             {tab.label}
@@ -729,19 +744,20 @@ export default function DigitFlowApp() {
                         'OVER_UNDER', 'EVEN_ODD', 'MATCHES', 'RISE_FALL', 'HIGHER_LOWER', 'ONLY_UPS_DOWNS'
                       ].map((tabId) => (
                         <TabsContent key={tabId} value={tabId} className="mt-0 outline-none">
-                          <div className="p-4 sm:p-8 space-y-8">
-                            <div className="flex flex-col gap-8">
-                              <div className="flex items-center justify-between px-6 border-l-8 border-primary bg-primary/5 py-4 rounded-r-2xl">
-                                <h3 className="text-sm sm:text-xl font-black uppercase tracking-[0.2em] text-primary">Strategic Markets for {tabId.replace('_', ' ')}</h3>
+                          <div className="p-4 sm:p-8 space-y-6">
+                            <div className="flex flex-col gap-6">
+                              <div className="flex items-center justify-between px-6 border-l-8 border-[#00a6a6] bg-[#00a6a6]/5 py-4 rounded-r-2xl">
+                                <h3 className="text-sm sm:text-xl font-black uppercase tracking-[0.2em] text-[#00a6a6]">{tabId.replace('_', ' ')} Strategy Markets</h3>
                                 <div className="text-[8px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-                                  Live Network
+                                  <div className="w-1.5 h-1.5 rounded-full bg-[#d6b36a] animate-ping" />
+                                  Strategic Sync
                                 </div>
                               </div>
                               <MarketCardGrid 
-                                currentSymbol={symbol} 
-                                onSelect={setSymbol} 
-                                activeTrend={activeTrend} 
+                                currentSymbol={strategySelections[tabId]} 
+                                onSelect={handleMarketSelect} 
+                                activeTrend={activeTrend}
+                                strategy={tabId}
                               />
                             </div>
                           </div>
@@ -756,13 +772,13 @@ export default function DigitFlowApp() {
                 <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
                   <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                      <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-[#00a6a6] flex items-center gap-2">
                         <BarChart2 className="w-3.5 h-3.5 sm:w-4 h-4" />
-                        Live Market Scanner
+                        Strategic Market Scanner
                       </CardTitle>
                       <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary animate-pulse" />
-                        <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Real-time Stream</span>
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#d6b36a] animate-pulse" />
+                        <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Live Sync</span>
                       </div>
                     </div>
                   </CardHeader>
@@ -780,13 +796,13 @@ export default function DigitFlowApp() {
                 <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
                   <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                      <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] text-[#00a6a6] flex items-center gap-2">
                         <LayoutGrid className="w-3.5 h-3.5 sm:w-4 h-4" />
-                        Advanced Digits
+                        Advanced Digit Matrix
                       </CardTitle>
                       <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary animate-pulse" />
-                        <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Active</span>
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#d6b36a] animate-pulse" />
+                        <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Active Data</span>
                       </div>
                     </div>
                   </CardHeader>
@@ -804,13 +820,13 @@ export default function DigitFlowApp() {
                 <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden h-[80vh] flex flex-col">
                   <CardHeader className="border-b border-border/40 bg-muted/20 py-3 sm:py-4 px-4">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                      <CardTitle className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-[#00a6a6] flex items-center gap-2">
                         <Percent className="w-3.5 h-3.5 sm:w-4 h-4" />
-                        Percentage Analysis
+                        Distribution Probability
                       </CardTitle>
                       <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-primary animate-pulse" />
-                        <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Live Data</span>
+                        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-[#d6b36a] animate-pulse" />
+                        <span className="text-[8px] sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest hidden xs:inline">Calculated</span>
                       </div>
                     </div>
                   </CardHeader>
@@ -830,3 +846,4 @@ export default function DigitFlowApp() {
     </SidebarProvider>
   );
 }
+
