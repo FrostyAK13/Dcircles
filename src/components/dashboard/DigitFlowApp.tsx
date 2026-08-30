@@ -117,7 +117,7 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastS
     
     // Cooldown logic: wait 20 seconds (approx 20 ticks)
     if (lastSignalTime && Date.now() - lastSignalTime < 20000) {
-      return { ...defaultState, signal: 'COOLDOWN', timing: 'WAITING' };
+      return { ...defaultState, signal: 'COOLDOWN', timing: 'WAITING', color: 'text-muted-foreground/40' };
     }
 
     const ema20 = calculateEMA(prices, 20);
@@ -300,6 +300,13 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
             {isGolden ? analysis.direction : (isFlashy ? analysis.signal : "SCANNING")}
           </span>
         </div>
+
+        {strategy === 'RISE_FALL' && (
+          <div className="flex items-center gap-1.5 mt-1 opacity-60">
+             <Badge variant="outline" className="text-[6px] font-black px-1.5 py-0 rounded-lg border-border/30 text-muted-foreground">100T ANALYSIS</Badge>
+             <Badge variant="outline" className="text-[6px] font-black px-1.5 py-0 rounded-lg border-primary/30 text-primary">5T DURATION</Badge>
+          </div>
+        )}
       </div>
 
       <div className="absolute bottom-2 right-2 flex items-center gap-1 z-10 opacity-30">
@@ -317,12 +324,27 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
     return [...goldens, ...rest];
   }, [signals, goldenIds]);
 
+  const strategyMeta = useMemo(() => {
+    switch(strategy) {
+      case 'OVER_UNDER': return '100 Ticks Density / 20 Ticks Momentum';
+      case 'EVEN_ODD': return '100 Ticks Density / 20 Ticks Momentum';
+      case 'MATCHES': return '200 Ticks Density / 50 Ticks Momentum';
+      case 'RISE_FALL': return '100 Ticks Analysis / 5 Ticks Duration';
+      case 'HIGHER_LOWER': return '50 Ticks SMA Deviation Analysis';
+      case 'ONLY_UPS_DOWNS': return '5 Ticks Consecutive Velocity';
+      default: return 'Real-time Statistical Engine';
+    }
+  }, [strategy]);
+
   return (
     <Card className="bg-card border-primary/20 shadow-2xl icy-glow overflow-hidden rounded-[2.5rem]">
       <CardHeader className="py-4 px-6 border-b border-border/40 flex flex-row items-center justify-between bg-muted/20">
-        <div className="flex items-center gap-3">
-          <Radio className="w-5 h-5 text-primary animate-pulse" />
-          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Live Signal Scanner</h3>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3">
+            <Radio className="w-5 h-5 text-primary animate-pulse" />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Live Signal Scanner</h3>
+          </div>
+          <span className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.1em] ml-8">{strategyMeta}</span>
         </div>
         <div className="flex items-center gap-2">
           {goldenIds.length > 0 && (
