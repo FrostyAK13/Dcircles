@@ -38,95 +38,95 @@ export const CONTINUOUS_INDICES = [
 
 /**
  * NAVIGATOR AI - Strategy Tactical Hub
- * Implements independent, high-precision analysis for all strategy modes.
+ * Implements 100/20 Rule (60 Density, 13 Momentum) for all strategy modes.
  */
 function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const ticks = data?.ticks || [];
   const prices = data?.prices || [];
+  const defaultState = { 
+    signal: 'SCANNING', 
+    color: 'text-muted-foreground/30', 
+    led: 'bg-muted/20', 
+    flash: false, 
+    timing: 'STANDBY', 
+    isHit: false, 
+    score: 0,
+    direction: ''
+  };
   
-  if (ticks.length < 100) return { signal: 'CALIBRATING', color: 'text-muted-foreground/30', led: 'bg-muted/20', flash: false, timing: 'WAITING', isHit: false, score: 0 };
+  if (ticks.length < 100) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
 
-  // OVER/UNDER: 100/20 Rule (60 density, 13 momentum)
+  const w100 = ticks.slice(-100);
+  const w20 = ticks.slice(-20);
+
+  // OVER/UNDER: 100/20 Rule (60/13)
   if (strategy === 'OVER_UNDER') {
-    const w100 = ticks.slice(-100);
-    const w20 = ticks.slice(-20);
-    const overCount = w100.filter(d => d > 3).length; // 4,5,6,7,8,9
-    const underCount = w100.filter(d => d < 6).length; // 0,1,2,3,4,5
+    const overCount = w100.filter(d => d > 3).length; // Over 3: 4,5,6,7,8,9
+    const underCount = w100.filter(d => d < 6).length; // Under 6: 0,1,2,3,4,5
     const last20Over = w20.filter(d => d > 3).length;
     const last20Under = w20.filter(d => d < 6).length;
 
-    if (overCount >= 60 && last20Over >= 13) return { signal: 'OVER', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: overCount };
-    if (underCount >= 60 && last20Under >= 13) return { signal: 'UNDER', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: underCount };
+    if (overCount >= 60 && last20Over >= 13) return { signal: 'OVER', direction: 'OVER', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: overCount };
+    if (underCount >= 60 && last20Under >= 13) return { signal: 'UNDER', direction: 'UNDER', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: underCount };
   }
 
-  // EVEN/ODD: 100/20 Rule (60 density, 13 momentum)
+  // EVEN/ODD: 100/20 Rule (60/13)
   if (strategy === 'EVEN_ODD') {
-    const w100 = ticks.slice(-100);
-    const w20 = ticks.slice(-20);
     const evenCount = w100.filter(d => d % 2 === 0).length;
     const oddCount = w100.filter(d => d % 2 !== 0).length;
     const last20Even = w20.filter(d => d % 2 === 0).length;
     const last20Odd = w20.filter(d => d % 2 !== 0).length;
 
-    if (evenCount >= 60 && last20Even >= 13) return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: evenCount };
-    if (oddCount >= 60 && last20Odd >= 13) return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount };
+    if (evenCount >= 60 && last20Even >= 13) return { signal: 'EVEN', direction: 'EVEN', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: evenCount };
+    if (oddCount >= 60 && last20Odd >= 13) return { signal: 'ODD', direction: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount };
   }
 
   // MATCHES: High Frequency Detection
   if (strategy === 'MATCHES') {
-    const w100 = ticks.slice(-100);
-    const w20 = ticks.slice(-20);
     const counts = new Array(10).fill(0);
     w100.forEach(d => counts[d]++);
     const maxVal = Math.max(...counts);
     const digit = counts.indexOf(maxVal);
     const last20Match = w20.filter(d => d === digit).length;
 
-    if (maxVal >= 18 && last20Match >= 5) return { signal: `MATCH ${digit}`, color: 'text-amber-500 font-black', led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', flash: true, timing: 'MATCH FOUND', isHit: true, score: maxVal * 2 };
+    if (maxVal >= 18 && last20Match >= 5) return { signal: `MATCH ${digit}`, direction: `MATCH ${digit}`, color: 'text-amber-500 font-black', led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', flash: true, timing: 'MATCH FOUND', isHit: true, score: maxVal * 2 };
   }
 
-  // RISE/FALL: Price Velocity + Digit Bias
+  // RISE/FALL: Velocity logic
   if (strategy === 'RISE_FALL') {
     if (prices.length >= 20) {
       const diff = prices[prices.length - 1] - prices[prices.length - 20];
-      const w20 = ticks.slice(-20);
       const highDigits = w20.filter(d => d > 4).length;
       const lowDigits = w20.filter(d => d < 5).length;
-      
-      if (diff > 0.02 && highDigits >= 13) return { signal: 'RISE', color: 'text-emerald-500 font-black', led: 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]', flash: true, timing: 'UP MOMENTUM', isHit: true, score: highDigits * 3 };
-      if (diff < -0.02 && lowDigits >= 13) return { signal: 'FALL', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'DOWN MOMENTUM', isHit: true, score: lowDigits * 3 };
+      if (diff > 0.02 && highDigits >= 13) return { signal: 'RISE', direction: 'RISE', color: 'text-emerald-500 font-black', led: 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]', flash: true, timing: 'UP MOMENTUM', isHit: true, score: highDigits * 3 };
+      if (diff < -0.02 && lowDigits >= 13) return { signal: 'FALL', direction: 'FALL', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'DOWN MOMENTUM', isHit: true, score: lowDigits * 3 };
     }
   }
 
-  // HIGHER/LOWER: Moving Average Positioning
+  // HIGHER/LOWER: Moving Average
   if (strategy === 'HIGHER_LOWER') {
     if (prices.length >= 50) {
       const current = prices[prices.length - 1];
       const sma = prices.slice(-20).reduce((a, b) => a + b, 0) / 20;
       const dev = Math.abs(current - sma);
       if (dev > 0.05) {
-        return { 
-          signal: current > sma ? 'HIGHER' : 'LOWER', 
-          color: current > sma ? 'text-primary font-black' : 'text-rose-500 font-black', 
-          led: current > sma ? 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]' : 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]',
-          flash: true, timing: 'TREND POS', isHit: true, score: dev * 1000 
-        };
+        return { signal: current > sma ? 'HIGHER' : 'LOWER', direction: current > sma ? 'HIGHER' : 'LOWER', color: current > sma ? 'text-primary font-black' : 'text-rose-500 font-black', led: current > sma ? 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]' : 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'TREND POS', isHit: true, score: dev * 1000 };
       }
     }
   }
 
-  // ONLY UPS/DOWNS: Consecutive Velocity
+  // ONLY UPS/DOWNS: Velocity
   if (strategy === 'ONLY_UPS_DOWNS') {
     if (prices.length >= 6) {
       const last6 = prices.slice(-6);
       const isUp = last6.every((p, i) => i === 0 || p > last6[i - 1]);
       const isDown = last6.every((p, i) => i === 0 || p < last6[i - 1]);
-      if (isUp) return { signal: 'ONLY UPS', color: 'text-emerald-400 font-black', led: 'bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,1)]', flash: true, timing: 'VELOCITY UP', isHit: true, score: 95 };
-      if (isDown) return { signal: 'ONLY DOWNS', color: 'text-rose-400 font-black', led: 'bg-rose-400 shadow-[0_0_20px_rgba(251,113,133,1)]', flash: true, timing: 'VELOCITY DOWN', isHit: true, score: 95 };
+      if (isUp) return { signal: 'ONLY UPS', direction: 'ONLY UPS', color: 'text-emerald-400 font-black', led: 'bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,1)]', flash: true, timing: 'VELOCITY UP', isHit: true, score: 95 };
+      if (isDown) return { signal: 'ONLY DOWNS', direction: 'ONLY DOWNS', color: 'text-rose-400 font-black', led: 'bg-rose-400 shadow-[0_0_20px_rgba(251,113,133,1)]', flash: true, timing: 'VELOCITY DOWN', isHit: true, score: 95 };
     }
   }
 
-  return { signal: 'SCANNING', color: 'text-muted-foreground/40', led: 'bg-muted-foreground/20', flash: false, timing: 'STANDBY', isHit: false, score: 0 };
+  return defaultState;
 }
 
 interface MarketEngineCardProps {
@@ -145,11 +145,11 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
   const prices = data?.prices || [];
   
   const analysis = useMemo(() => getMarketAnalysis(data, strategy), [data, strategy]);
-  const isHit = analysis.isHit;
+  const isFlashy = analysis.isHit; // Remains flashy only while signal is safe/active
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (isHit) {
+    if (isFlashy) {
       if (countdown > 0) {
         timer = setTimeout(() => setCountdown(prev => prev - 1), 1000);
       }
@@ -157,7 +157,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
       setCountdown(5);
     }
     return () => clearTimeout(timer);
-  }, [isHit, countdown]);
+  }, [isFlashy, countdown]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -184,8 +184,6 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
       default: return Activity;
     }
   }, [strategy]);
-
-  const isFlashy = isHit;
 
   return (
     <div
@@ -249,7 +247,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
             (isFlashy || isGolden) && "animate-pulse"
           )} />
           <span className={cn("text-[8px] sm:text-[9px] font-black uppercase tracking-[0.15em]", isGolden ? "text-amber-500" : analysis.color)}>
-            {isGolden ? `PRIME ${analysis.signal}` : (isFlashy ? analysis.signal : "SCANNING")}
+            {isGolden ? `PRIME ${analysis.direction}` : (isFlashy ? analysis.signal : "SCANNING")}
           </span>
         </div>
       </div>
@@ -258,8 +256,6 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
         <div className={cn("w-1 h-1 rounded-full", prices.length > 0 ? "bg-primary animate-ping" : "bg-muted")} />
         <span className="text-[6px] font-bold uppercase tracking-tighter">Live Link</span>
       </div>
-
-      {(isFlashy || isGolden) && <div className={cn("absolute inset-0 animate-pulse-subtle pointer-events-none", isGolden ? "bg-amber-400/5" : "bg-primary/5 dark:bg-primary/10")} />}
     </div>
   );
 }
@@ -292,22 +288,26 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
       <CardContent className="p-4 sm:p-6 min-h-[120px] flex items-center justify-center">
         {sortedSignals.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full">
-            {sortedSignals.map((id) => (
-              <MarketEngineCard 
-                key={id}
-                market={CONTINUOUS_INDICES.find(m => m.id === id)!}
-                data={marketData[id]}
-                strategy={strategy}
-                isGolden={goldenIds.includes(id)}
-                expiryTimestamp={signalRegistry[id]}
-              />
-            ))}
+            {sortedSignals.map((id) => {
+              const market = CONTINUOUS_INDICES.find(m => m.id === id);
+              if (!market) return null;
+              return (
+                <MarketEngineCard 
+                  key={id}
+                  market={market}
+                  data={marketData[id]}
+                  strategy={strategy}
+                  isGolden={goldenIds.includes(id)}
+                  expiryTimestamp={signalRegistry[id]}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 opacity-20">
             <AlertCircle className="w-8 h-8" />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-center">
-              Scanning 19 indices for tactical confirmations...
+              Scanning indices for confirmations...
             </span>
           </div>
         )}
@@ -318,12 +318,7 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
 
 export default function DigitFlowApp() {
   const [strategySelections, setStrategySelections] = useState<Record<string, string>>({
-    'OVER_UNDER': '1HZ10V',
-    'EVEN_ODD': 'R_10',
-    'MATCHES': '1HZ15V',
-    'RISE_FALL': 'R_15',
-    'HIGHER_LOWER': '1HZ25V',
-    'ONLY_UPS_DOWNS': 'R_25',
+    'OVER_UNDER': '1HZ10V', 'EVEN_ODD': 'R_10', 'MATCHES': '1HZ15V', 'RISE_FALL': 'R_15', 'HIGHER_LOWER': '1HZ25V', 'ONLY_UPS_DOWNS': 'R_25',
   });
   const [activeStrategy, setActiveStrategy] = useState('OVER_UNDER');
   const [tradeSide, setTradeSide] = useState('none');
@@ -338,12 +333,12 @@ export default function DigitFlowApp() {
   const marketIds = useMemo(() => CONTINUOUS_INDICES.map(m => m.id), []);
   const { marketData, status } = useMultiMarketAnalysis(marketIds);
 
-  const currentSymbol = strategySelections[activeStrategy];
+  const currentSymbol = strategySelections[activeStrategy] || 'R_10';
   const { distribution, latestDigit, latestPrice, totalTicks } = useDigitAnalysis(currentSymbol);
 
   useEffect(() => { setMounted(true); }, []);
 
-  // Central Registry Loop: Manages signal persistence and expiry for the active tab
+  // Registry Loop: Isolates strategy signals and handles expiry/persistence
   useEffect(() => {
     const now = Date.now();
     setMultiSignalRegistry(prev => {
@@ -379,7 +374,10 @@ export default function DigitFlowApp() {
 
   const goldenMarketIds = useMemo(() => {
     if (persistentSignalIds.length === 0) return [];
-    const scored = persistentSignalIds.map(id => ({ id, score: getMarketAnalysis(marketData[id], activeStrategy).score }));
+    const scored = persistentSignalIds.map(id => ({ 
+      id, 
+      score: getMarketAnalysis(marketData[id], activeStrategy).score 
+    }));
     scored.sort((a, b) => b.score - a.score);
     return scored.slice(0, 4).map(s => s.id);
   }, [persistentSignalIds, marketData, activeStrategy]);
@@ -395,10 +393,6 @@ export default function DigitFlowApp() {
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-background text-foreground relative overflow-hidden">
-      <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 opacity-[0.03] select-none">
-        <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-primary/30">INDEXNAV</span>
-      </div>
-
       <DashboardHeader status={status} />
       
       <main className="relative z-10 flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6 sm:space-y-8 overflow-y-auto">
@@ -407,7 +401,7 @@ export default function DigitFlowApp() {
             <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start sm:justify-center w-full max-w-fit scrollbar-hide">
               {[
                 { value: 'dashboard', label: 'Analysis', icon: BarChart2 },
-                { value: 'navigator-ai', label: 'Navigator Engine', icon: ArrowUpDown },
+                { value: 'navigator-ai', label: 'Navigator Hub', icon: ArrowUpDown },
                 { value: 'scanner', label: 'Scanner', icon: ExternalLink },
                 { value: 'digits', label: 'Digits', icon: LayoutGrid },
                 { value: 'percentage', label: 'Percentage', icon: Percent },
@@ -450,12 +444,12 @@ export default function DigitFlowApp() {
                   </Popover>
                   <Select value={tradeSide} onValueChange={setTradeSide}>
                     <SelectTrigger className="w-full sm:w-28 h-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
-                      <SelectValue placeholder="Trade Focus" />
+                      <SelectValue placeholder="Focus" />
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border/50">
-                      <SelectItem value="none" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">General</SelectItem>
-                      <SelectItem value="over" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary">OVER Focus</SelectItem>
-                      <SelectItem value="under" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-rose-500">UNDER Focus</SelectItem>
+                      <SelectItem value="none" className="text-[9px] font-black uppercase tracking-widest">General</SelectItem>
+                      <SelectItem value="over" className="text-[9px] font-black uppercase tracking-widest text-primary">OVER 3</SelectItem>
+                      <SelectItem value="under" className="text-[9px] font-black uppercase tracking-widest text-rose-500">UNDER 6</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -508,6 +502,7 @@ export default function DigitFlowApp() {
               </div>
             </Card>
           </TabsContent>
+          
           <TabsContent value="scanner" className="mt-0 outline-none"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/signals" className="w-full h-full" /></Card></TabsContent>
           <TabsContent value="digits" className="mt-0 outline-none"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/digitshome" className="w-full h-full" /></Card></TabsContent>
           <TabsContent value="percentage" className="mt-0 outline-none"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://api.binarytool.site" className="w-full h-full" /></Card></TabsContent>
