@@ -36,7 +36,17 @@ export const CONTINUOUS_INDICES = [
   { id: 'JD100', name: 'Jump 100 Index', short: 'J100' },
 ];
 
-function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
+function calculateEMA(prices: number[], period: number) {
+  if (prices.length < period) return null;
+  const k = 2 / (period + 1);
+  let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
+  for (let i = period; i < prices.length; i++) {
+    ema = prices[i] * k + ema * (1 - k);
+  }
+  return ema;
+}
+
+function getMarketAnalysis(data: MarketData | undefined, strategy: string, lastSignalTime?: number) {
   const ticks = data?.ticks || [];
   const prices = data?.prices || [];
   const defaultState = { 
@@ -50,13 +60,13 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
     direction: ''
   };
   
-  if (ticks.length < 100) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
+  if (ticks.length < 50) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
 
   // 100/20 Rule: Density 60/100, Momentum 13/20
-  const w100 = ticks.slice(-100);
-  const w20 = ticks.slice(-20);
-
   if (strategy === 'OVER_UNDER') {
+    if (ticks.length < 100) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
+    const w100 = ticks.slice(-100);
+    const w20 = ticks.slice(-20);
     const overCount = w100.filter(d => d > 3).length; 
     const underCount = w100.filter(d => d < 6).length; 
     const last20Over = w20.filter(d => d > 3).length;
@@ -67,6 +77,9 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   }
 
   if (strategy === 'EVEN_ODD') {
+    if (ticks.length < 100) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
+    const w100 = ticks.slice(-100);
+    const w20 = ticks.slice(-20);
     const evenCount = w100.filter(d => d % 2 === 0).length;
     const oddCount = w100.filter(d => d % 2 !== 0).length;
     const last20Even = w20.filter(d => d % 2 === 0).length;
@@ -89,32 +102,56 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
     const maxDigits: number[] = [];
     counts.forEach((c, d) => { if (c === maxVal) maxDigits.push(d); });
 
-    // Condition: At least 32 times in last 200 + No tie
     if (maxDigits.length === 1 && maxVal >= 32) {
       const targetDigit = maxDigits[0];
       const match50 = w50.filter(d => d === targetDigit).length;
-      
-      // Confirmation: At least 9 times in last 50
       if (match50 >= 9) {
-        return { 
-          signal: `MATCH ${targetDigit}`, 
-          direction: `MATCH ${targetDigit}`, 
-          color: 'text-amber-500 font-black', 
-          led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', 
-          flash: true, 
-          timing: 'RUN BOT', 
-          isHit: true, 
-          score: maxVal 
-        };
+        return { signal: `MATCH ${targetDigit}`, direction: `MATCH ${targetDigit}`, color: 'text-amber-500 font-black', led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', flash: true, timing: 'RUN BOT', isHit: true, score: maxVal };
       }
     }
   }
 
+  // RISE/FALL Strategy: EMA 20/50 + Momentum
   if (strategy === 'RISE_FALL') {
-    const riseCount = w100.filter((d, i) => i > 0 && prices[i] > prices[i-1]).length;
-    const fallCount = w100.filter((i) => i > 0 && prices[i] < prices[i-1]).length;
-    if (riseCount >= 60 && last20Over >= 13) return { signal: 'RISE', direction: 'RISE', color: 'text-emerald-500 font-black', led: 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: riseCount };
-    if (fallCount >= 60 && last20Under >= 13) return { signal: 'FALL', direction: 'FALL', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: fallCount };
+    if (prices.length < 100) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
+    
+    // Cooldown logic: wait 20 seconds (approx 20 ticks)
+    if (lastSignalTime && Date.now() - lastSignalTime < 20000) {
+      return { ...defaultState, signal: 'COOLDOWN', timing: 'WAITING' };
+    }
+
+    const ema20 = calculateEMA(prices, 20);
+    const ema50 = calculateEMA(prices, 50);
+    const currentPrice = prices[prices.length - 1];
+    const price10Ago = prices[prices.length - 11];
+    const last10Prices = prices.slice(-11, -1);
+    const high10 = Math.max(...last10Prices);
+    const low10 = Math.min(...last10Prices);
+    const last3 = prices.slice(-3);
+    
+    if (ema20 !== null && ema50 !== null) {
+      // RISE CONDITIONS
+      const emaRise = ema20 > ema50;
+      const priceAboveEMA = currentPrice > ema20;
+      const momentumUp = currentPrice > price10Ago;
+      const breakoutUp = currentPrice > high10;
+      const notFalling = !(last3[2] < last3[1] && last3[1] < last3[0]);
+
+      if (emaRise && priceAboveEMA && momentumUp && breakoutUp && notFalling) {
+        return { signal: 'RISE', direction: 'RISE', color: 'text-emerald-500 font-black', led: 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: 85 };
+      }
+
+      // FALL CONDITIONS
+      const emaFall = ema20 < ema50;
+      const priceBelowEMA = currentPrice < ema20;
+      const momentumDown = currentPrice < price10Ago;
+      const breakoutDown = currentPrice < low10;
+      const notRising = !(last3[2] > last3[1] && last3[1] > last3[0]);
+
+      if (emaFall && priceBelowEMA && momentumDown && breakoutDown && notRising) {
+        return { signal: 'FALL', direction: 'FALL', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: 85 };
+      }
+    }
   }
 
   if (strategy === 'HIGHER_LOWER') {
@@ -149,14 +186,15 @@ interface MarketEngineCardProps {
   onSelect?: (id: string) => void;
   isGolden?: boolean;
   expiryTimestamp?: number;
+  lastSignalTime?: number;
 }
 
-function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGolden, expiryTimestamp }: MarketEngineCardProps) {
+function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGolden, expiryTimestamp, lastSignalTime }: MarketEngineCardProps) {
   const [countdown, setCountdown] = useState(5);
   const [lifeRemaining, setLifeRemaining] = useState(30);
   const prices = data?.prices || [];
   
-  const analysis = useMemo(() => getMarketAnalysis(data, strategy), [data, strategy]);
+  const analysis = useMemo(() => getMarketAnalysis(data, strategy, lastSignalTime), [data, strategy, lastSignalTime]);
   const isFlashy = analysis.isHit; 
 
   useEffect(() => {
@@ -311,6 +349,7 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
                   strategy={strategy}
                   isGolden={goldenIds.includes(id)}
                   expiryTimestamp={signalRegistry[id]}
+                  lastSignalTime={signalRegistry[id]}
                 />
               );
             })}
@@ -358,20 +397,16 @@ export default function DigitFlowApp() {
       let changed = false;
 
       Object.entries(marketData).forEach(([id, data]) => {
-        const analysis = getMarketAnalysis(data, activeStrategy);
+        const lastSignalTime = currentRegistry[id];
+        const analysis = getMarketAnalysis(data, activeStrategy, lastSignalTime);
         if (analysis.isHit) {
           if (!currentRegistry[id]) {
             currentRegistry[id] = now;
             changed = true;
           }
-        } else {
-          // Expiry logic: if it was active but no longer meets criteria, start countdown
-          // For simplicity in this engine, if criteria fails, we remove it shortly 
-          // but the 30s life starts from first hit.
         }
       });
 
-      // Cleanup signals older than 30s
       Object.entries(currentRegistry).forEach(([id, timestamp]) => {
         if (now - timestamp > 30000) {
           delete currentRegistry[id];
@@ -394,11 +429,11 @@ export default function DigitFlowApp() {
     if (persistentSignalIds.length === 0) return [];
     const scored = persistentSignalIds.map(id => ({ 
       id, 
-      score: getMarketAnalysis(marketData[id], activeStrategy).score 
+      score: getMarketAnalysis(marketData[id], activeStrategy, currentStrategyRegistry[id]).score 
     }));
     scored.sort((a, b) => b.score - a.score);
     return scored.slice(0, 4).map(s => s.id);
-  }, [persistentSignalIds, marketData, activeStrategy]);
+  }, [persistentSignalIds, marketData, activeStrategy, currentStrategyRegistry]);
 
   const stats = useMemo(() => {
     const sorted = [...distribution].sort((a, b) => b.percentage - a.percentage);
@@ -525,6 +560,7 @@ export default function DigitFlowApp() {
                         onSelect={(id) => handleMarketSelect(id)} 
                         isGolden={goldenMarketIds.includes(market.id)} 
                         expiryTimestamp={currentStrategyRegistry[market.id]} 
+                        lastSignalTime={currentStrategyRegistry[market.id]}
                       />
                     ))}
                   </div>
