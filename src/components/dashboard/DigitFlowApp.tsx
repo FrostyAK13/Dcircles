@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -36,67 +35,75 @@ export const CONTINUOUS_INDICES = [
   { id: 'JD100', name: 'Jump 100 Index', short: 'J100' },
 ];
 
+/**
+ * Shared logic for market analysis based on specific strategies
+ */
+function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
+  const ticks = data?.ticks || [];
+  
+  if (ticks.length < 150) return { signal: 'CALIBRATING', color: 'text-muted-foreground/30', led: 'bg-muted/20', flash: false, timing: 'WAITING', isHit: false };
+
+  const window150 = ticks.slice(-150);
+  const window10 = ticks.slice(-10);
+
+  if (strategy === 'OVER_UNDER') {
+    const over4Count = window150.filter(d => d >= 5).length;
+    const under5Count = window150.filter(d => d <= 4).length;
+
+    const last10OverCount = window10.filter(d => d >= 5).length;
+    const last10UnderCount = window10.filter(d => d <= 4).length;
+
+    if (over4Count >= 90 && last10OverCount >= 6) {
+      return { 
+        signal: 'OVER 4', 
+        color: 'text-primary font-black', 
+        led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', 
+        flash: true,
+        timing: 'ENTRY NOW',
+        isHit: true
+      };
+    }
+    if (under5Count >= 90 && last10UnderCount >= 6) {
+      return { 
+        signal: 'UNDER 5', 
+        color: 'text-rose-500 font-black', 
+        led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', 
+        flash: true,
+        timing: 'ENTRY NOW',
+        isHit: true
+      };
+    }
+  }
+
+  if (strategy === 'EVEN_ODD') {
+    const evenCount = window150.filter(d => d % 2 === 0).length;
+    const last10EvenCount = window10.filter(d => d % 2 === 0).length;
+    const last10OddCount = window10.filter(d => d % 2 !== 0).length;
+
+    if (evenCount >= 90 && last10EvenCount >= 6) {
+      return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary', flash: true, timing: 'ENTRY NOW', isHit: true };
+    }
+    if (evenCount <= 60 && last10OddCount >= 6) {
+      return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500', flash: true, timing: 'ENTRY NOW', isHit: true };
+    }
+  }
+
+  return { signal: 'MONITORING', color: 'text-muted-foreground/40', led: 'bg-muted-foreground/20', flash: false, timing: 'STANDBY', isHit: false };
+}
+
 interface MarketEngineCardProps {
   market: { id: string; name: string };
   data: MarketData | undefined;
   strategy: string;
-  isSelected: boolean;
-  onSelect: (id: string) => void;
+  isSelected?: boolean;
+  onSelect?: (id: string) => void;
 }
 
 function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: MarketEngineCardProps) {
   const [countdown, setCountdown] = useState(5);
-  const ticks = data?.ticks || [];
   const prices = data?.prices || [];
   
-  const analysis = useMemo(() => {
-    if (ticks.length < 150) return { signal: 'CALIBRATING', color: 'text-muted-foreground/30', led: 'bg-muted/20', flash: false, timing: 'WAITING' };
-
-    const window150 = ticks.slice(-150);
-    const window10 = ticks.slice(-10);
-
-    if (strategy === 'OVER_UNDER') {
-      const over4Count = window150.filter(d => d >= 5).length;
-      const under5Count = window150.filter(d => d <= 4).length;
-
-      const last10OverCount = window10.filter(d => d >= 5).length;
-      const last10UnderCount = window10.filter(d => d <= 4).length;
-
-      if (over4Count >= 90 && last10OverCount >= 6) {
-        return { 
-          signal: 'OVER 4', 
-          color: 'text-primary font-black', 
-          led: 'bg-primary shadow-[0_0_15px_rgba(0,166,166,0.8)]', 
-          flash: true,
-          timing: 'ENTRY NOW'
-        };
-      }
-      if (under5Count >= 90 && last10UnderCount >= 6) {
-        return { 
-          signal: 'UNDER 5', 
-          color: 'text-rose-500 font-black', 
-          led: 'bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.8)]', 
-          flash: true,
-          timing: 'ENTRY NOW'
-        };
-      }
-    }
-
-    if (strategy === 'EVEN_ODD') {
-      const evenCount = window150.filter(d => d % 2 === 0).length;
-      const last10EvenCount = window10.filter(d => d % 2 === 0).length;
-      const last10OddCount = window10.filter(d => d % 2 !== 0).length;
-
-      if (evenCount >= 90 && last10EvenCount >= 6) {
-        return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary', flash: true, timing: 'ENTRY NOW' };
-      }
-      if (evenCount <= 60 && last10OddCount >= 6) {
-        return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500', flash: true, timing: 'ENTRY NOW' };
-      }
-    }
-
-    return { signal: 'MONITORING', color: 'text-muted-foreground/40', led: 'bg-muted-foreground/20', flash: false, timing: 'STANDBY' };
-  }, [ticks, strategy]);
+  const analysis = useMemo(() => getMarketAnalysis(data, strategy), [data, strategy]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -133,34 +140,34 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
 
   return (
     <div
-      onClick={() => onSelect(market.id)}
+      onClick={() => onSelect?.(market.id)}
       className={cn(
-        "group relative flex flex-col items-center justify-between p-4 sm:p-5 rounded-[1.5rem] border-2 transition-all duration-500 min-h-[160px] sm:min-h-[180px] cursor-default overflow-hidden",
+        "group relative flex flex-col items-center justify-between p-4 sm:p-5 rounded-[2rem] border-2 transition-all duration-500 min-h-[160px] sm:min-h-[180px] cursor-default overflow-hidden",
         isEntryActive 
-          ? "bg-card border-primary shadow-[0_0_30px_rgba(0,166,166,0.3)] z-10 scale-[1.02] dark:bg-primary/5" 
+          ? "bg-card border-primary shadow-[0_0_40px_rgba(0,166,166,0.4)] z-10 scale-[1.02] dark:bg-primary/10 ring-2 ring-primary/20" 
           : isSelected
             ? "bg-card border-primary/40 shadow-[0_0_20px_rgba(0,166,166,0.05)] z-10 scale-[1.01]"
             : "bg-muted/5 border-border/10 hover:border-border/30 hover:bg-muted/10 scale-100"
       )}
     >
-      <div className="w-full flex justify-between items-start mb-2">
+      <div className="w-full flex justify-between items-start mb-2 z-10">
         <div className={cn(
-          "w-10 h-10 rounded-[0.75rem] flex items-center justify-center transition-all duration-500",
+          "w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500",
           isSelected || isEntryActive ? "bg-primary text-white" : "bg-muted/50 text-muted-foreground/30"
         )}>
           <StrategyIcon className={cn("w-5 h-5", analysis.flash && "animate-pulse")} />
         </div>
         
         <div className={cn(
-          "px-2.5 py-1 rounded-lg text-[7px] font-black uppercase tracking-[0.2em] border flex items-center gap-1.5 transition-all duration-300",
-          isEntryActive ? "bg-primary text-white border-primary shadow-[0_0_10px_rgba(0,166,166,0.5)] animate-pulse" : "bg-black/20 text-muted-foreground/50 border-transparent"
+          "px-2.5 py-1 rounded-xl text-[7px] font-black uppercase tracking-[0.2em] border flex items-center gap-1.5 transition-all duration-300",
+          isEntryActive ? "bg-primary text-white border-primary shadow-[0_0_15px_rgba(0,166,166,0.5)] animate-pulse" : "bg-black/20 text-muted-foreground/50 border-transparent"
         )}>
           <Clock className="w-2.5 h-2.5" />
           {isEntryActive ? `${analysis.timing} (${countdown}s)` : analysis.timing}
         </div>
       </div>
       
-      <div className="flex flex-col items-center gap-1.5 w-full">
+      <div className="flex flex-col items-center gap-1.5 w-full z-10">
         <span className={cn(
           "text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-center px-1 truncate w-full",
           isSelected || isEntryActive ? "text-primary" : "text-muted-foreground/40"
@@ -187,139 +194,58 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
         </div>
       </div>
 
-      <div className="absolute top-4 right-4 flex items-center gap-1">
-        <div className={cn("w-1.5 h-1.5 rounded-full bg-primary", ticks.length > 0 && "animate-ping")} />
+      <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
+        <div className={cn("w-1.5 h-1.5 rounded-full bg-primary", prices.length > 0 && "animate-ping")} />
       </div>
+
+      {isEntryActive && (
+        <div className="absolute inset-0 bg-primary/5 dark:bg-primary/10 animate-pulse-subtle pointer-events-none" />
+      )}
     </div>
   );
 }
 
 function SignalScanner({ marketData, strategy }: { marketData: Record<string, MarketData>, strategy: string }) {
-  const [signalTimers, setSignalTimers] = useState<Record<string, number>>({});
-  
   const activeSignals = useMemo(() => {
-    return Object.entries(marketData).map(([id, data]) => {
-      const ticks = data.ticks;
-      if (ticks.length < 150) return null;
-      
-      const window150 = ticks.slice(-150);
-      const window10 = ticks.slice(-10);
-      
-      let signal = null;
-      let color = '';
-
-      if (strategy === 'OVER_UNDER') {
-        const over4Count = window150.filter(d => d >= 5).length;
-        const under5Count = window150.filter(d => d <= 4).length;
-        const last10Over = window10.filter(d => d >= 5).length;
-        const last10Under = window10.filter(d => d <= 4).length;
-
-        if (over4Count >= 90 && last10Over >= 6) {
-          signal = 'OVER 4';
-          color = 'text-primary';
-        } else if (under5Count >= 90 && last10Under >= 6) {
-          signal = 'UNDER 5';
-          color = 'text-rose-500';
-        }
-      } else if (strategy === 'EVEN_ODD') {
-        const evenCount = window150.filter(d => d % 2 === 0).length;
-        const last10Even = window10.filter(d => d % 2 === 0).length;
-        const last10Odd = window10.filter(d => d % 2 !== 0).length;
-
-        if (evenCount >= 90 && last10Even >= 6) {
-          signal = 'EVEN';
-          color = 'text-primary';
-        } else if (evenCount <= 60 && last10Odd >= 6) {
-          signal = 'ODD';
-          color = 'text-rose-500';
-        }
-      }
-
-      if (!signal) return null;
-
-      const market = CONTINUOUS_INDICES.find(m => m.id === id);
-      return { id, name: market?.short || id, signal, color };
-    }).filter(Boolean);
+    return Object.entries(marketData).filter(([id, data]) => {
+      const analysis = getMarketAnalysis(data, strategy);
+      return analysis.isHit;
+    }).map(([id]) => id);
   }, [marketData, strategy]);
 
-  useEffect(() => {
-    const newTimers = { ...signalTimers };
-    let changed = false;
-
-    // Add new signals
-    activeSignals.forEach((sig: any) => {
-      if (newTimers[sig.id] === undefined) {
-        newTimers[sig.id] = 5;
-        changed = true;
-      }
-    });
-
-    // Remove expired signals or those no longer detected
-    Object.keys(newTimers).forEach(id => {
-      if (!activeSignals.find((s: any) => s.id === id)) {
-        delete newTimers[id];
-        changed = true;
-      }
-    });
-
-    if (changed) setSignalTimers(newTimers);
-  }, [activeSignals]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSignalTimers(prev => {
-        const next = { ...prev };
-        let updated = false;
-        Object.keys(next).forEach(id => {
-          if (next[id] > 0) {
-            next[id] -= 1;
-            updated = true;
-          }
-        });
-        return updated ? next : prev;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <Card className="mb-6 bg-card border-primary/20 shadow-2xl icy-glow overflow-hidden rounded-[2rem]">
+    <Card className="mb-6 bg-card border-primary/20 shadow-2xl icy-glow overflow-hidden rounded-[2.5rem]">
       <CardHeader className="py-4 px-6 border-b border-border/40 flex flex-row items-center justify-between bg-muted/20">
         <div className="flex items-center gap-3">
           <Radio className="w-5 h-5 text-primary animate-pulse" />
           <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Live Signal Scanner</h3>
         </div>
         <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.2em] bg-primary/10 text-primary border-primary/20">
-          {activeSignals.length} Detected
+          {activeSignals.length} Active Signals
         </Badge>
       </CardHeader>
-      <CardContent className="p-4 min-h-[100px] flex items-center justify-center">
+      <CardContent className="p-4 sm:p-6 min-h-[120px] flex items-center justify-center">
         {activeSignals.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 w-full">
-            {activeSignals.map((sig: any) => (
-              <div 
-                key={`${sig.id}-${sig.signal}`} 
-                className="flex flex-col gap-2 p-3 rounded-2xl bg-muted/40 border border-primary/30 animate-in fade-in zoom-in duration-300 relative overflow-hidden group shadow-[0_0_15px_rgba(0,166,166,0.1)]"
-              >
-                <div className="flex justify-between items-start">
-                  <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">{sig.name}</span>
-                  <div className={cn("px-1.5 py-0.5 rounded text-[7px] font-black flex items-center gap-1 bg-black/20 text-white")}>
-                    <Clock className="w-2.5 h-2.5" />
-                    {signalTimers[sig.id] || 0}s
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className={cn("w-2 h-2 rounded-full animate-ping", sig.color.replace('text-', 'bg-'))} />
-                  <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] leading-none", sig.color)}>{sig.signal}</span>
-                </div>
-                <div className="absolute bottom-0 left-0 h-[2px] bg-primary/50 transition-all duration-1000" style={{ width: `${(signalTimers[sig.id] / 5) * 100}%` }} />
-              </div>
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full">
+            {activeSignals.map((id) => {
+              const market = CONTINUOUS_INDICES.find(m => m.id === id);
+              if (!market) return null;
+              return (
+                <MarketEngineCard 
+                  key={id}
+                  market={market}
+                  data={marketData[id]}
+                  strategy={strategy}
+                />
+              );
+            })}
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-2 opacity-30">
-            <AlertCircle className="w-6 h-6" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Scanning for tactical entries...</span>
+          <div className="flex flex-col items-center gap-3 opacity-20">
+            <AlertCircle className="w-8 h-8" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-center">
+              Scanning indices for tactical confirmations...
+            </span>
           </div>
         )}
       </CardContent>
@@ -445,8 +371,8 @@ export default function DigitFlowApp() {
                       </SelectTrigger>
                       <SelectContent className="bg-card border-border/50">
                         <SelectItem value="none" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">General</SelectItem>
-                        <SelectItem value="over" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary">Bullish Focus</SelectItem>
-                        <SelectItem value="under" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-rose-500">Bearish Focus</SelectItem>
+                        <SelectItem value="over" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary">OVER Focus</SelectItem>
+                        <SelectItem value="under" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-rose-500">UNDER Focus</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -480,7 +406,7 @@ export default function DigitFlowApp() {
           <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
             <SignalScanner marketData={marketData} strategy={activeStrategy} />
             
-            <Card className="border border-border/50 bg-card rounded-[2.5rem] shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
+            <Card className="border border-border/50 bg-card rounded-[3rem] shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
               <Tabs value={activeStrategy} onValueChange={setActiveStrategy} className="w-full h-full flex flex-col">
                 <CardHeader className="border-b border-border/40 bg-muted/20 p-2 sm:p-4 shrink-0">
                   <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1">
@@ -504,7 +430,7 @@ export default function DigitFlowApp() {
                   </TabsList>
                 </CardHeader>
                 
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-muted/5">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-muted/5">
                   {['OVER_UNDER', 'EVEN_ODD', 'MATCHES', 'RISE_FALL', 'HIGHER_LOWER', 'ONLY_UPS_DOWNS'].map((tabId) => (
                     <TabsContent key={tabId} value={tabId} className="mt-0 outline-none">
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
