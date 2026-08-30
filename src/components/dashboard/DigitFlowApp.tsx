@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -9,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2, Loader2, BrainCircuit, TrendingUp, Hash, ArrowUpDown, Layers } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
@@ -224,6 +225,45 @@ function DetailedComparison({
   );
 }
 
+function MarketCardGrid({ currentSymbol, onSelect }: { currentSymbol: string, onSelect: (id: string) => void }) {
+  return (
+    <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3 p-4">
+      {CONTINUOUS_INDICES.map((market) => (
+        <button
+          key={market.id}
+          onClick={() => onSelect(market.id)}
+          className={cn(
+            "group relative flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all duration-300",
+            currentSymbol === market.id 
+              ? "bg-primary/20 border-primary shadow-[0_0_15px_rgba(0,166,166,0.3)] scale-[1.05]" 
+              : "bg-muted/30 border-border/50 hover:border-primary/50 hover:bg-muted/50"
+          )}
+        >
+          <div className={cn(
+            "w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs mb-1.5 transition-colors",
+            currentSymbol === market.id ? "bg-primary text-white" : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary"
+          )}>
+            {market.short}
+          </div>
+          <span className={cn(
+            "text-[8px] sm:text-[9px] font-bold uppercase tracking-tighter text-center line-clamp-1",
+            currentSymbol === market.id ? "text-primary" : "text-muted-foreground"
+          )}>
+            {market.name.replace(' Index', '')}
+          </span>
+          {currentSymbol === market.id && (
+            <div className="absolute -top-1 -right-1">
+              <div className="w-4 h-4 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+              </div>
+            </div>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function DigitFlowApp() {
   const [symbol, setSymbol] = useState('1HZ10V');
   const [tradeSide, setTradeSide] = useState('none');
@@ -397,6 +437,13 @@ export default function DigitFlowApp() {
                   >
                     <BarChart2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
                     Analysis
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="navigator-ai" 
+                    className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_15px_rgba(0,166,166,0.4)] shrink-0"
+                  >
+                    <BrainCircuit className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 sm:mr-2" />
+                    Navigator AI
                   </TabsTrigger>
                   <TabsTrigger 
                     value="scanner" 
@@ -602,6 +649,74 @@ export default function DigitFlowApp() {
                     pattern={stats.patterns.rf}
                   />
                 </div>
+              </TabsContent>
+
+              <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
+                <Card className="border border-border/50 bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
+                  <Tabs defaultValue="OVER_UNDER" className="w-full h-full flex flex-col">
+                    <CardHeader className="border-b border-border/40 bg-muted/20 p-2 sm:p-4 shrink-0">
+                      <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1">
+                        {[
+                          { id: 'OVER_UNDER', label: 'Over/Under', icon: ArrowUpDown },
+                          { id: 'EVEN_ODD', label: 'Even/Odd', icon: Hash },
+                          { id: 'MATCHES', label: 'Matches', icon: Target },
+                          { id: 'RISE_FALL', label: 'Rise/Fall', icon: TrendingUp },
+                          { id: 'HIGHER_LOWER', label: 'Higher/Lower', icon: Layers },
+                          { id: 'ONLY_UPS_DOWNS', label: 'Only Ups/Downs', icon: Zap },
+                        ].map((tab) => (
+                          <TabsTrigger 
+                            key={tab.id}
+                            value={tab.id} 
+                            className="rounded-xl px-2 sm:px-4 py-1.5 font-bold uppercase tracking-widest text-[7px] sm:text-[9px] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shrink-0 flex items-center gap-1.5"
+                          >
+                            <tab.icon className="w-3 h-3" />
+                            {tab.label}
+                          </TabsTrigger>
+                        ))}
+                      </TabsList>
+                    </CardHeader>
+                    
+                    <div className="flex-1 overflow-y-auto">
+                      {[
+                        'OVER_UNDER', 'EVEN_ODD', 'MATCHES', 'RISE_FALL', 'HIGHER_LOWER', 'ONLY_UPS_DOWNS'
+                      ].map((tabId) => (
+                        <TabsContent key={tabId} value={tabId} className="mt-0 outline-none">
+                          <div className="p-4 space-y-6">
+                            <div className="flex flex-col gap-2">
+                              <h3 className="text-[10px] sm:text-[12px] font-black uppercase tracking-[0.2em] text-primary px-2">Select Market for {tabId.replace('_', ' ')}</h3>
+                              <MarketCardGrid currentSymbol={symbol} onSelect={setSymbol} />
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <Card className="bg-muted/20 border-border/40 rounded-2xl p-4">
+                                <h4 className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Market Stats</h4>
+                                <div className="space-y-4">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-bold text-foreground">Active Market</span>
+                                    <span className="text-[10px] font-black text-primary">{currentMarket.name}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-bold text-foreground">Current Strategy</span>
+                                    <span className="text-[10px] font-black text-primary">{tabId.replace('_', ' ')}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-[10px] font-bold text-foreground">Live Digit</span>
+                                    <span className="text-xl font-black text-primary">{latestDigit}</span>
+                                  </div>
+                                </div>
+                              </Card>
+                              <Card className="bg-muted/20 border-border/40 rounded-2xl p-4 flex flex-col justify-center items-center text-center">
+                                <Activity className="w-8 h-8 text-primary/40 mb-3 animate-pulse" />
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Strategy Activated</p>
+                                <p className="text-[9px] text-muted-foreground/60 mt-1 italic">Navigator is monitoring {currentMarket.short} for strategic opportunities.</p>
+                              </Card>
+                            </div>
+                          </div>
+                        </TabsContent>
+                      ))}
+                    </div>
+                  </Tabs>
+                </Card>
               </TabsContent>
 
               <TabsContent value="scanner" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
