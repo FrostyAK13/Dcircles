@@ -9,10 +9,11 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle, Radio, Star, Timer, AreaChart as AreaChartIcon } from 'lucide-react';
+import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle, Radio, Star, Timer, AreaChart as AreaChartIcon, ChevronRight } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
+import { Progress } from "@/components/ui/progress";
 import { 
   Bar, 
   BarChart, 
@@ -485,6 +486,100 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
   );
 }
 
+interface TacticalAnalysisCardProps {
+  title: string;
+  labels: [string, string];
+  counts: [number, number];
+  history: number[];
+  colorSchema: 'cyan-rose' | 'amber-cyan';
+  type: 'over-under' | 'even-odd' | 'matches' | 'rise-fall';
+  targetDigit?: number;
+  onTargetChange?: (val: number) => void;
+}
+
+function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, type, targetDigit, onTargetChange }: TacticalAnalysisCardProps) {
+  const total = counts[0] + counts[1];
+  const p1 = total > 0 ? Math.round((counts[0] / total) * 100) : 0;
+  const p2 = total > 0 ? Math.round((counts[1] / total) * 100) : 0;
+
+  const getDotColor = (val: number) => {
+    if (type === 'over-under') return val > (targetDigit ?? 4) ? 'bg-primary' : 'bg-rose-500';
+    if (type === 'even-odd') return val % 2 === 0 ? 'bg-primary' : 'bg-rose-500';
+    if (type === 'matches') return val === (targetDigit ?? 0) ? 'bg-primary' : 'bg-rose-500';
+    if (type === 'rise-fall') return val > 0 ? 'bg-primary' : 'bg-rose-500';
+    return 'bg-muted';
+  };
+
+  return (
+    <Card className="bg-card border-border/20 shadow-xl rounded-3xl overflow-hidden icy-glass flex flex-col">
+      <CardHeader className="py-4 px-6 border-b border-border/10">
+        <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">{title}</h3>
+      </CardHeader>
+      <CardContent className="p-5 flex flex-col gap-6">
+        {onTargetChange && (
+          <div className="flex flex-col gap-2">
+            <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Selecting Digit</span>
+            <div className="flex gap-1 overflow-x-auto pb-2 scrollbar-hide">
+              {[0,1,2,3,4,5,6,7,8,9].map(d => (
+                <button
+                  key={d}
+                  onClick={() => onTargetChange(d)}
+                  className={cn(
+                    "w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black transition-all",
+                    targetDigit === d ? "bg-primary text-white shadow-lg scale-110" : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
+                  )}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1">
+             <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{labels[0]}</span>
+             <span className={cn("text-2xl font-black tabular-nums", colorSchema === 'cyan-rose' ? "text-primary" : "text-amber-500")}>{counts[0]}</span>
+          </div>
+          <div className="flex flex-col items-end gap-1">
+             <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{labels[1]}</span>
+             <span className="text-2xl font-black tabular-nums text-rose-500">{counts[1]}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between items-center">
+            <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Digit History</span>
+            <span className="text-[6px] font-bold text-muted-foreground/40 uppercase">Next <ChevronRight className="inline w-2 h-2" /></span>
+          </div>
+          <div className="flex gap-1.5 justify-center py-2">
+            {history.slice(-10).map((val, i) => (
+              <div key={i} className={cn("w-3 h-3 rounded-full shadow-sm", getDotColor(val))} />
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-[0.1em]">
+              <span>{labels[0]}</span>
+              <span>{p1}%</span>
+            </div>
+            <Progress value={p1} className={cn("h-1.5", colorSchema === 'cyan-rose' ? "[&>div]:bg-primary" : "[&>div]:bg-amber-500")} />
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-[0.1em]">
+              <span>{labels[1]}</span>
+              <span>{p2}%</span>
+            </div>
+            <Progress value={p2} className="h-1.5 [&>div]:bg-rose-500" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function DigitFlowApp() {
   const [strategySelections, setStrategySelections] = useState<Record<string, string>>({
     'OVER_UNDER': '1HZ10V', 'EVEN_ODD': 'R_10', 'MATCHES': '1HZ15V', 'RISE_FALL': 'R_15', 'HIGHER_LOWER': '1HZ25V', 'ONLY_UPS_DOWNS': 'R_25',
@@ -495,6 +590,9 @@ export default function DigitFlowApp() {
   const [activeMainTab, setActiveMainTab] = useState('dashboard');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
+  const [ouTarget, setOuTarget] = useState(4);
+  const [matchTarget, setMatchTarget] = useState(0);
+
   const [multiSignalRegistry, setMultiSignalRegistry] = useState<Record<string, Record<string, { timestamp: number; analysis: AnalysisResult }>>>({
     'OVER_UNDER': {}, 'EVEN_ODD': {}, 'MATCHES': {}, 'RISE_FALL': {}, 'HIGHER_LOWER': {}, 'ONLY_UPS_DOWNS': {},
   });
@@ -503,7 +601,7 @@ export default function DigitFlowApp() {
   const { marketData, status } = useMultiMarketAnalysis(marketIds);
 
   const currentSymbol = strategySelections[activeStrategy] || 'R_10';
-  const { distribution, latestDigit, latestPrice, totalTicks, prices } = useDigitAnalysis(currentSymbol);
+  const { distribution, latestDigit, latestPrice, totalTicks, prices, ticks } = useDigitAnalysis(currentSymbol);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -562,16 +660,23 @@ export default function DigitFlowApp() {
     return getMarketAnalysis(marketData[currentSymbol], activeStrategy);
   }, [marketData, currentSymbol, activeStrategy]);
 
-  const priceChartData = useMemo(() => {
-    return prices.slice(-50).map((p, i) => ({
-      index: i,
-      price: p
-    }));
-  }, [prices]);
+  const tacticalStats = useMemo(() => {
+    const last100 = ticks.slice(-100);
+    const last100Prices = prices.slice(-100);
+    
+    const ouCounts: [number, number] = [last100.filter(d => d > ouTarget).length, last100.filter(d => d < (ouTarget + 1)).length];
+    const eoCounts: [number, number] = [last100.filter(d => d % 2 === 0).length, last100.filter(d => d % 2 !== 0).length];
+    const matchCounts: [number, number] = [last100.filter(d => d === matchTarget).length, last100.filter(d => d !== matchTarget).length];
+    
+    const rfHistory = last100Prices.slice(-10).map((p, i, arr) => i === 0 ? 0 : (p > arr[i-1] ? 1 : -1));
+    const riseCount = last100Prices.filter((p, i, arr) => i > 0 && p > arr[i-1]).length;
+    const fallCount = last100Prices.filter((p, i, arr) => i > 0 && p < arr[i-1]).length;
+
+    return { ouCounts, eoCounts, matchCounts, riseCount, fallCount, rfHistory };
+  }, [ticks, prices, ouTarget, matchTarget]);
 
   const analysisTrigger = useMemo(() => {
     if (tradeSide === 'none') return null;
-
     let targetAvg = 0;
     if (tradeSide === 'over') {
       const p0 = distribution.find(d => d.digit === 0)?.percentage || 0;
@@ -584,10 +689,8 @@ export default function DigitFlowApp() {
       const p7 = distribution.find(d => d.digit === 7)?.percentage || 0;
       targetAvg = (p9 + p8 + p7) / 3;
     }
-
     let closestDigit = 0;
     let minDiff = Infinity;
-
     distribution.forEach(d => {
       const diff = Math.abs(d.percentage - targetAvg);
       if (diff < minDiff) {
@@ -595,7 +698,6 @@ export default function DigitFlowApp() {
         closestDigit = d.digit;
       }
     });
-
     return { digit: closestDigit, side: tradeSide.toUpperCase() };
   }, [tradeSide, distribution]);
 
@@ -625,17 +727,17 @@ export default function DigitFlowApp() {
             </TabsList>
           </div>
 
-          <TabsContent value="dashboard" className="space-y-6 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-2 border-none bg-card rounded-3xl shadow-2xl icy-glow overflow-hidden relative">
-                <CardContent className="p-4 sm:p-8 lg:p-12 space-y-6 sm:space-y-8">
-                  <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 justify-between w-full">
+          <TabsContent value="dashboard" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none pb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
+              <Card className="border-none bg-card rounded-[3rem] shadow-2xl icy-glow overflow-hidden relative">
+                <CardContent className="p-4 sm:p-12 space-y-8">
+                  <div className="flex flex-col sm:flex-row items-center gap-4 justify-between w-full">
                     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                       <PopoverTrigger asChild>
-                        <div className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2 rounded-xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
+                        <div className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2.5 rounded-2xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
                           <BarChart2 className="w-5 h-5 text-primary" />
                           <div className="flex flex-col">
-                            <span className="text-[10px] sm:text-[11px] font-bold text-foreground group-hover:text-primary transition-colors truncate">
+                            <span className="text-[10px] sm:text-[11px] font-black text-foreground group-hover:text-primary transition-colors truncate">
                               {CONTINUOUS_INDICES.find(m => m.id === currentSymbol)?.name}
                             </span>
                             <span className="text-[9px] font-bold text-muted-foreground uppercase flex items-center gap-1">
@@ -656,7 +758,7 @@ export default function DigitFlowApp() {
                       </PopoverContent>
                     </Popover>
                     <Select value={tradeSide} onValueChange={setTradeSide}>
-                      <SelectTrigger className="w-full sm:w-32 h-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
+                      <SelectTrigger className="w-full sm:w-32 h-10 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-border/40 bg-muted/40 focus:ring-0 rounded-xl">
                         <SelectValue placeholder="Focus" />
                       </SelectTrigger>
                       <SelectContent className="bg-card border-border/50">
@@ -667,24 +769,24 @@ export default function DigitFlowApp() {
                     </Select>
                   </div>
                   
-                  <div className="flex flex-col items-center justify-center py-4 gap-6">
-                    <div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-primary">
+                  <div className="flex flex-col items-center justify-center py-6 gap-8">
+                    <div className="text-6xl sm:text-9xl font-black tracking-tighter flex items-baseline tabular-nums text-primary brand-glow">
                       {latestPrice?.toFixed(2) || "---"}
                     </div>
                     
                     <div className={cn(
-                      "flex flex-col items-center gap-3 px-8 py-4 rounded-[2.5rem] border-2 transition-all duration-700 animate-in fade-in zoom-in",
+                      "flex flex-col items-center gap-4 px-10 py-5 rounded-[2.5rem] border-2 transition-all duration-700 animate-in fade-in zoom-in shadow-2xl",
                       (currentMarketAnalysis.isHit || analysisTrigger)
-                        ? "bg-primary/10 border-primary shadow-[0_0_50px_rgba(0,166,166,0.3)] scale-110" 
+                        ? "bg-primary/10 border-primary shadow-[0_0_60px_rgba(0,166,166,0.3)] scale-110" 
                         : "bg-muted/10 border-border/20 opacity-40 scale-100"
                     )}>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-4">
                         <div className={cn(
-                          "w-4 h-4 rounded-full transition-all duration-300",
+                          "w-5 h-5 rounded-full transition-all duration-300",
                           (currentMarketAnalysis.isHit || analysisTrigger) ? "bg-primary animate-ping" : "bg-muted-foreground/30"
                         )} />
                         <span className={cn(
-                          "text-xs sm:text-xl font-black uppercase tracking-[0.4em] transition-colors",
+                          "text-sm sm:text-2xl font-black uppercase tracking-[0.5em] transition-colors",
                           (currentMarketAnalysis.isHit || analysisTrigger) ? "text-primary" : "text-muted-foreground/60"
                         )}>
                           {analysisTrigger 
@@ -695,14 +797,14 @@ export default function DigitFlowApp() {
                         </span>
                       </div>
                       {(currentMarketAnalysis.isHit || analysisTrigger) && (
-                        <Badge variant="outline" className="bg-primary text-white border-primary text-[8px] sm:text-[10px] font-black tracking-[0.2em] px-4 py-1 rounded-xl animate-pulse">
+                        <Badge variant="outline" className="bg-primary text-white border-primary text-[10px] sm:text-[12px] font-black tracking-[0.3em] px-6 py-1.5 rounded-2xl animate-pulse shadow-lg">
                           HIGH CONFIDENCE ENTRY
                         </Badge>
                       )}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-5 gap-2 sm:gap-8 max-w-4xl mx-auto px-1 sm:px-4">
+                  <div className="grid grid-cols-5 gap-3 sm:gap-10 max-w-5xl mx-auto px-1 sm:px-6">
                     {distribution.map((d) => (
                       <DigitCard key={d.digit} digit={d.digit} percentage={d.percentage} isHigh={d.digit === stats.high} isSecondHigh={d.digit === stats.secondHigh} isLow={d.digit === stats.low} isSecondLow={d.digit === stats.secondLow} isLatest={d.digit === latestDigit} onClick={() => {}} />
                     ))}
@@ -710,81 +812,49 @@ export default function DigitFlowApp() {
                 </CardContent>
               </Card>
 
-              <div className="space-y-6">
-                <Card className="border border-border/40 bg-card rounded-3xl shadow-xl overflow-hidden icy-glass">
-                  <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-                      <AreaChartIcon className="w-3.5 h-3.5 text-primary" /> Price History
-                    </h3>
-                    <Badge variant="outline" className="text-[8px] px-2 py-0 border-primary/20 text-primary">LIVE</Badge>
-                  </CardHeader>
-                  <CardContent className="p-4">
-                    <ChartContainer config={chartConfig} className="h-40 w-full">
-                      <AreaChart data={priceChartData}>
-                        <defs>
-                          <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.2} />
-                        <XAxis dataKey="index" hide />
-                        <YAxis hide domain={['auto', 'auto']} />
-                        <Tooltip content={<ChartTooltipContent hideLabel />} />
-                        <Area 
-                          type="monotone" 
-                          dataKey="price" 
-                          stroke="hsl(var(--primary))" 
-                          fillOpacity={1} 
-                          fill="url(#colorPrice)" 
-                          strokeWidth={2}
-                          animationDuration={500}
-                        />
-                      </AreaChart>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
-
-                <Card className="border border-border/40 bg-card rounded-3xl shadow-xl overflow-hidden icy-glass">
-                  <CardHeader className="py-4 px-6 border-b border-border/10">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground flex items-center gap-2">
-                      <BarChart2 className="w-3.5 h-3.5 text-primary" /> Distribution (%)
-                    </h3>
-                  </CardHeader>
-                  <CardContent className="p-4">
-                    <ChartContainer config={chartConfig} className="h-40 w-full">
-                      <BarChart data={distribution}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.2} />
-                        <XAxis 
-                          dataKey="digit" 
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fontSize: 10, fontWeight: 'bold' }}
-                        />
-                        <YAxis hide domain={[0, 'auto']} />
-                        <Tooltip content={<ChartTooltipContent hideLabel />} />
-                        <Bar 
-                          dataKey="percentage" 
-                          radius={[4, 4, 0, 0]}
-                          animationDuration={1000}
-                        >
-                          {distribution.map((entry, index) => (
-                            <rect 
-                              key={`cell-${index}`} 
-                              fill={entry.digit === stats.high ? 'hsl(var(--primary))' : entry.digit === stats.low ? 'hsl(var(--destructive))' : 'hsl(var(--muted-foreground))'} 
-                              opacity={0.6}
-                            />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
+              {/* Advanced Tactical Analysis Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <TacticalAnalysisCard 
+                  title="Over / Under Analysis" 
+                  labels={["Over", "Under"]} 
+                  counts={tacticalStats.ouCounts} 
+                  history={ticks.slice(-10)} 
+                  colorSchema="cyan-rose" 
+                  type="over-under"
+                  targetDigit={ouTarget}
+                  onTargetChange={setOuTarget}
+                />
+                <TacticalAnalysisCard 
+                  title="Even / Odd Analysis" 
+                  labels={["Even", "Odd"]} 
+                  counts={tacticalStats.eoCounts} 
+                  history={ticks.slice(-10)} 
+                  colorSchema="cyan-rose" 
+                  type="even-odd"
+                />
+                <TacticalAnalysisCard 
+                  title="Matches / Differs" 
+                  labels={["Match", "No Match"]} 
+                  counts={tacticalStats.matchCounts} 
+                  history={ticks.slice(-10)} 
+                  colorSchema="amber-cyan" 
+                  type="matches"
+                  targetDigit={matchTarget}
+                  onTargetChange={setMatchTarget}
+                />
+                <TacticalAnalysisCard 
+                  title="Rise / Fall Trend" 
+                  labels={["Rise", "Fall"]} 
+                  counts={[tacticalStats.riseCount, tacticalStats.fallCount]} 
+                  history={tacticalStats.rfHistory} 
+                  colorSchema="cyan-rose" 
+                  type="rise-fall"
+                />
               </div>
             </div>
           </TabsContent>
 
-          <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
+          <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none pb-20">
             <Tabs value={activeStrategy} onValueChange={setActiveStrategy} className="flex flex-col gap-6">
               <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md py-2 px-1">
                 <TabsList className="bg-card/80 p-1.5 rounded-[1.5rem] border border-primary/20 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1.5 shadow-lg backdrop-blur-xl">
@@ -838,9 +908,9 @@ export default function DigitFlowApp() {
             </Tabs>
           </TabsContent>
           
-          <TabsContent value="scanner" className="mt-0 outline-none"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/signals" className="w-full h-full" /></Card></TabsContent>
-          <TabsContent value="digits" className="mt-0 outline-none"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/digitshome" className="w-full h-full" /></Card></TabsContent>
-          <TabsContent value="percentage" className="mt-0 outline-none"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://api.binarytool.site" className="w-full h-full" /></Card></TabsContent>
+          <TabsContent value="scanner" className="mt-0 outline-none pb-20"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/signals" className="w-full h-full" /></Card></TabsContent>
+          <TabsContent value="digits" className="mt-0 outline-none pb-20"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/digitshome" className="w-full h-full" /></Card></TabsContent>
+          <TabsContent value="percentage" className="mt-0 outline-none pb-20"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://api.binarytool.site" className="w-full h-full" /></Card></TabsContent>
         </Tabs>
 
         {/* Brand Footer Signature */}
