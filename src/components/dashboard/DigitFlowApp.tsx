@@ -41,6 +41,7 @@ export const CONTINUOUS_INDICES = [
  */
 function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const ticks = data?.ticks || [];
+  const prices = data?.prices || [];
   
   if (ticks.length < 150) return { signal: 'CALIBRATING', color: 'text-muted-foreground/30', led: 'bg-muted/20', flash: false, timing: 'WAITING', isHit: false, score: 0 };
 
@@ -48,91 +49,49 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const window10 = ticks.slice(-10);
 
   if (strategy === 'OVER_UNDER') {
-    const overCount = window150.filter(d => d >= 4).length;
-    const underCount = window150.filter(d => d <= 5).length;
-    const last10OverCount = window10.filter(d => d >= 4).length;
-    const last10UnderCount = window10.filter(d => d <= 5).length;
+    const overCount = window150.filter(d => d > 3).length; // Over 3: 4,5,6,7,8,9
+    const underCount = window150.filter(d => d < 6).length; // Under 6: 0,1,2,3,4,5
+    const last10Over = window10.filter(d => d > 3).length;
+    const last10Under = window10.filter(d => d < 6).length;
 
-    if (overCount >= 90 && last10OverCount >= 6) {
-      return { 
-        signal: 'OVER 3', 
-        color: 'text-primary font-black', 
-        led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', 
-        flash: true,
-        timing: 'ENTRY NOW',
-        isHit: true,
-        score: overCount
-      };
+    if (overCount >= 90 && last10Over >= 6) {
+      return { signal: 'OVER', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: overCount };
     }
-    if (underCount >= 90 && last10UnderCount >= 6) {
-      return { 
-        signal: 'UNDER 6', 
-        color: 'text-rose-500 font-black', 
-        led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', 
-        flash: true,
-        timing: 'ENTRY NOW',
-        isHit: true,
-        score: underCount
-      };
+    if (underCount >= 90 && last10Under >= 6) {
+      return { signal: 'UNDER', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: underCount };
     }
   }
 
   if (strategy === 'EVEN_ODD') {
     const evenCount = window150.filter(d => d % 2 === 0).length;
     const oddCount = window150.filter(d => d % 2 !== 0).length;
-    const last10EvenCount = window10.filter(d => d % 2 === 0).length;
-    const last10OddCount = window10.filter(d => d % 2 !== 0).length;
+    const last10Even = window10.filter(d => d % 2 === 0).length;
+    const last10Odd = window10.filter(d => d % 2 !== 0).length;
 
-    if (evenCount >= 90 && last10EvenCount >= 6) {
-      return { 
-        signal: 'EVEN', 
-        color: 'text-primary font-black', 
-        led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', 
-        flash: true, 
-        timing: 'ENTRY NOW', 
-        isHit: true, 
-        score: evenCount 
-      };
+    if (evenCount >= 90 && last10Even >= 6) {
+      return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: evenCount };
     }
-    if (oddCount >= 90 && last10OddCount >= 6) {
-      return { 
-        signal: 'ODD', 
-        color: 'text-rose-500 font-black', 
-        led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', 
-        flash: true, 
-        timing: 'ENTRY NOW', 
-        isHit: true, 
-        score: oddCount 
-      };
+    if (oddCount >= 90 && last10Odd >= 6) {
+      return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount };
     }
   }
 
   if (strategy === 'MATCHES') {
-    const digitCounts = new Array(10).fill(0);
-    window150.forEach(d => digitCounts[d]++);
-    const maxDigitCount = Math.max(...digitCounts);
-    const digit = digitCounts.indexOf(maxDigitCount);
-    
-    const last10DigitCount = window10.filter(d => d === digit).length;
+    const counts = new Array(10).fill(0);
+    window150.forEach(d => counts[d]++);
+    const max = Math.max(...counts);
+    const digit = counts.indexOf(max);
+    const last10Match = window10.filter(d => d === digit).length;
 
-    if (maxDigitCount >= 25 && last10DigitCount >= 2) {
-      return { 
-        signal: `MATCH ${digit}`, 
-        color: 'text-amber-500 font-black', 
-        led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', 
-        flash: true, 
-        timing: 'MATCH FOUND', 
-        isHit: true, 
-        score: maxDigitCount 
-      };
+    if (max >= 25 && last10Match >= 2) {
+      return { signal: `MATCH ${digit}`, color: 'text-amber-500 font-black', led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', flash: true, timing: 'MATCH FOUND', isHit: true, score: max };
     }
   }
 
   if (strategy === 'RISE_FALL') {
-    const prices = data?.prices || [];
     if (prices.length >= 10) {
       const diff = prices[prices.length - 1] - prices[prices.length - 10];
-      if (Math.abs(diff) > 0.5) {
+      if (Math.abs(diff) > 0.05) {
         return {
           signal: diff > 0 ? 'RISE' : 'FALL',
           color: diff > 0 ? 'text-emerald-500 font-black' : 'text-rose-500 font-black',
@@ -140,13 +99,41 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
           flash: true,
           timing: 'MOMENTUM',
           isHit: true,
-          score: Math.abs(diff) * 10
+          score: Math.abs(diff) * 100
         };
       }
     }
   }
 
-  return { signal: 'MONITORING', color: 'text-muted-foreground/40', led: 'bg-muted-foreground/20', flash: false, timing: 'STANDBY', isHit: false, score: 0 };
+  if (strategy === 'HIGHER_LOWER') {
+    if (prices.length >= 20) {
+      const current = prices[prices.length - 1];
+      const avg = prices.slice(-20).reduce((a, b) => a + b, 0) / 20;
+      if (Math.abs(current - avg) > 0.1) {
+        return {
+          signal: current > avg ? 'HIGHER' : 'LOWER',
+          color: current > avg ? 'text-primary font-black' : 'text-rose-500 font-black',
+          led: current > avg ? 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]' : 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]',
+          flash: true,
+          timing: 'POSITION',
+          isHit: true,
+          score: Math.abs(current - avg) * 50
+        };
+      }
+    }
+  }
+
+  if (strategy === 'ONLY_UPS_DOWNS') {
+    if (prices.length >= 5) {
+      const last5 = prices.slice(-5);
+      const isUp = last5.every((p, i) => i === 0 || p > last5[i - 1]);
+      const isDown = last5.every((p, i) => i === 0 || p < last5[i - 1]);
+      if (isUp) return { signal: 'ONLY UPS', color: 'text-emerald-500 font-black', led: 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]', flash: true, timing: 'VELOCITY', isHit: true, score: 95 };
+      if (isDown) return { signal: 'ONLY DOWNS', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'VELOCITY', isHit: true, score: 95 };
+    }
+  }
+
+  return { signal: 'SCANNING', color: 'text-muted-foreground/40', led: 'bg-muted-foreground/20', flash: false, timing: 'STANDBY', isHit: false, score: 0 };
 }
 
 interface MarketEngineCardProps {
@@ -390,6 +377,7 @@ export default function DigitFlowApp() {
     setMounted(true);
   }, []);
 
+  // Clear signals on tab change to ensure isolation
   useEffect(() => {
     setSignalRegistry({});
   }, [activeStrategy]);
@@ -565,7 +553,7 @@ export default function DigitFlowApp() {
               <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md py-2 px-1">
                 <TabsList className="bg-card/80 p-1.5 rounded-[1.5rem] border border-primary/20 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1.5 shadow-lg backdrop-blur-xl">
                   {[
-                    { id: 'OVER_UNDER', label: 'Over 3 / Under 6', icon: ArrowUpDown },
+                    { id: 'OVER_UNDER', label: 'Over / Under', icon: ArrowUpDown },
                     { id: 'EVEN_ODD', label: 'Even / Odd', icon: Hash },
                     { id: 'MATCHES', label: 'Matches', icon: Target },
                     { id: 'RISE_FALL', label: 'Rise / Fall', icon: TrendingUp },
