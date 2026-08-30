@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2, Loader2, BrainCircuit, TrendingUp, Hash, ArrowUpDown, Layers } from 'lucide-react';
+import { ChevronDown, ChevronUp, BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, CheckCircle2, Loader2, BrainCircuit, TrendingUp, TrendingDown, Hash, ArrowUpDown, Layers } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
@@ -66,7 +66,7 @@ function LargePriceDisplay({
         <div className={cn(
           "flex flex-col items-center justify-center p-4 sm:p-6 rounded-3xl border transition-all duration-300 icy-glow animate-in zoom-in-95 w-full max-w-[200px]",
           (isMatch || isHoveredMatch) 
-            ? "bg-primary/20 border-primary/50 shadow-[0_0_20px_rgba(0,166,166,0.4)]" 
+            ? "bg-primary/20 border-primary shadow-[0_0_20px_rgba(0,166,166,0.4)]" 
             : "bg-primary/10 border-primary/20"
         )}>
           <div className="flex items-center gap-2 mb-2">
@@ -224,43 +224,81 @@ function DetailedComparison({
   );
 }
 
-function MarketCardGrid({ currentSymbol, onSelect }: { currentSymbol: string, onSelect: (id: string) => void }) {
+function MarketCardGrid({ 
+  currentSymbol, 
+  onSelect, 
+  activeTrend 
+}: { 
+  currentSymbol: string, 
+  onSelect: (id: string) => void,
+  activeTrend: 'up' | 'down' | 'neutral'
+}) {
+  const getPseudoTrend = (id: string) => {
+    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return hash % 3 === 0 ? 'up' : hash % 3 === 1 ? 'down' : 'neutral';
+  };
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-10 p-4 max-w-6xl mx-auto">
-      {CONTINUOUS_INDICES.map((market) => (
-        <button
-          key={market.id}
-          onClick={() => onSelect(market.id)}
-          className={cn(
-            "group relative flex flex-col items-center justify-center p-8 sm:p-12 rounded-[3rem] border-4 transition-all duration-500",
-            currentSymbol === market.id 
-              ? "bg-primary/20 border-primary shadow-[0_0_40px_rgba(0,166,166,0.6)] scale-[1.1] z-20" 
-              : "bg-muted/20 border-border/30 hover:border-primary/40 hover:bg-muted/40 hover:scale-[1.05]"
-          )}
-        >
-          <div className={cn(
-            "w-20 h-20 sm:w-28 sm:h-28 rounded-3xl flex items-center justify-center font-black text-xl sm:text-3xl mb-4 sm:mb-6 transition-all duration-500 shadow-xl",
-            currentSymbol === market.id 
-              ? "bg-primary text-white scale-110 shadow-primary/30" 
-              : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
-          )}>
-            {market.short}
-          </div>
-          <span className={cn(
-            "text-xs sm:text-lg font-black uppercase tracking-[0.2em] text-center line-clamp-2 px-4 transition-colors duration-500",
-            currentSymbol === market.id ? "text-primary" : "text-muted-foreground/80"
-          )}>
-            {market.name.replace(' Index', '')}
-          </span>
-          {currentSymbol === market.id && (
-            <div className="absolute -top-3 -right-3">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-2xl animate-pulse">
-                <CheckCircle2 className="w-6 h-6 text-white" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-16 p-4 max-w-7xl mx-auto">
+      {CONTINUOUS_INDICES.map((market) => {
+        const isActive = currentSymbol === market.id;
+        const trend = isActive ? activeTrend : getPseudoTrend(market.id);
+        
+        return (
+          <button
+            key={market.id}
+            onClick={() => onSelect(market.id)}
+            className={cn(
+              "group relative flex flex-col items-center justify-center p-12 sm:p-20 rounded-[4rem] border-4 transition-all duration-500",
+              isActive 
+                ? "bg-primary/20 border-primary shadow-[0_0_60px_rgba(0,166,166,0.6)] scale-[1.1] z-20" 
+                : "bg-muted/20 border-border/30 hover:border-primary/40 hover:bg-muted/40 hover:scale-[1.05]"
+            )}
+          >
+            <div className={cn(
+              "w-28 h-28 sm:w-40 sm:h-40 rounded-[2.5rem] flex items-center justify-center mb-6 sm:mb-10 transition-all duration-500 shadow-2xl relative overflow-hidden",
+              isActive 
+                ? "bg-primary text-white scale-110 shadow-primary/30" 
+                : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary"
+            )}>
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-50" />
+              {trend === 'up' ? (
+                <TrendingUp className={cn("w-16 h-16 sm:w-24 sm:h-24 relative z-10", isActive && "animate-bounce")} />
+              ) : trend === 'down' ? (
+                <TrendingDown className={cn("w-16 h-16 sm:w-24 sm:h-24 relative z-10", isActive && "animate-bounce")} />
+              ) : (
+                <Activity className={cn("w-16 h-16 sm:w-24 sm:h-24 relative z-10", isActive && "animate-pulse")} />
+              )}
+            </div>
+            
+            <div className="flex flex-col items-center gap-2">
+              <span className={cn(
+                "text-sm sm:text-2xl font-black uppercase tracking-[0.3em] text-center line-clamp-2 px-4 transition-colors duration-500",
+                isActive ? "text-primary" : "text-muted-foreground/80"
+              )}>
+                {market.name.replace(' Index', '')}
+              </span>
+              
+              <div className={cn(
+                "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all duration-500",
+                isActive 
+                  ? (trend === 'up' ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-500" : trend === 'down' ? "bg-rose-500/20 border-rose-500/30 text-rose-500" : "bg-primary/20 border-primary/30 text-primary")
+                  : "bg-muted/50 border-border/50 text-muted-foreground opacity-50"
+              )}>
+                {trend === 'up' ? 'Bullish' : trend === 'down' ? 'Bearish' : 'Neutral'}
               </div>
             </div>
-          )}
-        </button>
-      ))}
+
+            {isActive && (
+              <div className="absolute -top-6 -right-6">
+                <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-2xl animate-pulse ring-8 ring-background">
+                  <CheckCircle2 className="w-8 h-8 text-white" />
+                </div>
+              </div>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -290,6 +328,15 @@ export default function DigitFlowApp() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const activeTrend = useMemo(() => {
+    if (prices.length < 10) return 'neutral';
+    const last = prices[prices.length - 1];
+    const prev = prices[prices.length - 10];
+    if (last > prev) return 'up';
+    if (last < prev) return 'down';
+    return 'neutral';
+  }, [prices]);
 
   const engineResults = useMemo(() => {
     if (distribution.length < 10) return null;
@@ -691,7 +738,11 @@ export default function DigitFlowApp() {
                                   Live Network
                                 </div>
                               </div>
-                              <MarketCardGrid currentSymbol={symbol} onSelect={setSymbol} />
+                              <MarketCardGrid 
+                                currentSymbol={symbol} 
+                                onSelect={setSymbol} 
+                                activeTrend={activeTrend} 
+                              />
                             </div>
                           </div>
                         </TabsContent>
