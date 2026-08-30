@@ -37,7 +37,8 @@ export const CONTINUOUS_INDICES = [
 ];
 
 /**
- * Strategy-Specific Tactical Engine (100/20 Rule)
+ * NAVIGATOR AI - Strategy Tactical Hub
+ * Implements independent, high-precision analysis for all strategy modes.
  */
 function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const ticks = data?.ticks || [];
@@ -45,94 +46,83 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   
   if (ticks.length < 100) return { signal: 'CALIBRATING', color: 'text-muted-foreground/30', led: 'bg-muted/20', flash: false, timing: 'WAITING', isHit: false, score: 0 };
 
+  // OVER/UNDER: 100/20 Rule (60 density, 13 momentum)
   if (strategy === 'OVER_UNDER') {
-    const window100 = ticks.slice(-100);
-    const window20 = ticks.slice(-20);
-    const overCount = window100.filter(d => d > 3).length; // Over 3 (4,5,6,7,8,9)
-    const underCount = window100.filter(d => d < 6).length; // Under 6 (0,1,2,3,4,5)
-    const last20Over = window20.filter(d => d > 3).length;
-    const last20Under = window20.filter(d => d < 6).length;
+    const w100 = ticks.slice(-100);
+    const w20 = ticks.slice(-20);
+    const overCount = w100.filter(d => d > 3).length; // 4,5,6,7,8,9
+    const underCount = w100.filter(d => d < 6).length; // 0,1,2,3,4,5
+    const last20Over = w20.filter(d => d > 3).length;
+    const last20Under = w20.filter(d => d < 6).length;
 
-    if (overCount >= 60 && last20Over >= 13) {
-      return { signal: 'OVER', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: overCount };
-    }
-    if (underCount >= 60 && last20Under >= 13) {
-      return { signal: 'UNDER', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: underCount };
-    }
+    if (overCount >= 60 && last20Over >= 13) return { signal: 'OVER', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: overCount };
+    if (underCount >= 60 && last20Under >= 13) return { signal: 'UNDER', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: underCount };
   }
 
+  // EVEN/ODD: 100/20 Rule (60 density, 13 momentum)
   if (strategy === 'EVEN_ODD') {
-    const window100 = ticks.slice(-100);
-    const window20 = ticks.slice(-20);
-    const evenCount100 = window100.filter(d => d % 2 === 0).length;
-    const oddCount100 = window100.filter(d => d % 2 !== 0).length;
-    const evenCount20 = window20.filter(d => d % 2 === 0).length;
-    const oddCount20 = window20.filter(d => d % 2 !== 0).length;
+    const w100 = ticks.slice(-100);
+    const w20 = ticks.slice(-20);
+    const evenCount = w100.filter(d => d % 2 === 0).length;
+    const oddCount = w100.filter(d => d % 2 !== 0).length;
+    const last20Even = w20.filter(d => d % 2 === 0).length;
+    const last20Odd = w20.filter(d => d % 2 !== 0).length;
 
-    if (evenCount100 >= 60 && evenCount20 >= 13) {
-      return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: evenCount100 };
-    }
-    if (oddCount100 >= 60 && oddCount20 >= 13) {
-      return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount100 };
-    }
+    if (evenCount >= 60 && last20Even >= 13) return { signal: 'EVEN', color: 'text-primary font-black', led: 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: evenCount };
+    if (oddCount >= 60 && last20Odd >= 13) return { signal: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount };
   }
 
+  // MATCHES: High Frequency Detection
   if (strategy === 'MATCHES') {
-    const window100 = ticks.slice(-100);
-    const window20 = ticks.slice(-20);
+    const w100 = ticks.slice(-100);
+    const w20 = ticks.slice(-20);
     const counts = new Array(10).fill(0);
-    window100.forEach(d => counts[d]++);
-    const max = Math.max(...counts);
-    const digit = counts.indexOf(max);
-    const last20Match = window20.filter(d => d === digit).length;
+    w100.forEach(d => counts[d]++);
+    const maxVal = Math.max(...counts);
+    const digit = counts.indexOf(maxVal);
+    const last20Match = w20.filter(d => d === digit).length;
 
-    if (max >= 20 && last20Match >= 3) {
-      return { signal: `MATCH ${digit}`, color: 'text-amber-500 font-black', led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', flash: true, timing: 'MATCH FOUND', isHit: true, score: max };
-    }
+    if (maxVal >= 18 && last20Match >= 5) return { signal: `MATCH ${digit}`, color: 'text-amber-500 font-black', led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', flash: true, timing: 'MATCH FOUND', isHit: true, score: maxVal * 2 };
   }
 
+  // RISE/FALL: Price Velocity + Digit Bias
   if (strategy === 'RISE_FALL') {
     if (prices.length >= 20) {
       const diff = prices[prices.length - 1] - prices[prices.length - 20];
-      if (Math.abs(diff) > 0.05) {
-        return {
-          signal: diff > 0 ? 'RISE' : 'FALL',
-          color: diff > 0 ? 'text-emerald-500 font-black' : 'text-rose-500 font-black',
-          led: diff > 0 ? 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]' : 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]',
-          flash: true,
-          timing: 'MOMENTUM',
-          isHit: true,
-          score: Math.abs(diff) * 100
-        };
-      }
+      const w20 = ticks.slice(-20);
+      const highDigits = w20.filter(d => d > 4).length;
+      const lowDigits = w20.filter(d => d < 5).length;
+      
+      if (diff > 0.02 && highDigits >= 13) return { signal: 'RISE', color: 'text-emerald-500 font-black', led: 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]', flash: true, timing: 'UP MOMENTUM', isHit: true, score: highDigits * 3 };
+      if (diff < -0.02 && lowDigits >= 13) return { signal: 'FALL', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'DOWN MOMENTUM', isHit: true, score: lowDigits * 3 };
     }
   }
 
+  // HIGHER/LOWER: Moving Average Positioning
   if (strategy === 'HIGHER_LOWER') {
-    if (prices.length >= 20) {
+    if (prices.length >= 50) {
       const current = prices[prices.length - 1];
-      const avg = prices.slice(-20).reduce((a, b) => a + b, 0) / 20;
-      if (Math.abs(current - avg) > 0.1) {
-        return {
-          signal: current > avg ? 'HIGHER' : 'LOWER',
-          color: current > avg ? 'text-primary font-black' : 'text-rose-500 font-black',
-          led: current > avg ? 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]' : 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]',
-          flash: true,
-          timing: 'POSITION',
-          isHit: true,
-          score: Math.abs(current - avg) * 50
+      const sma = prices.slice(-20).reduce((a, b) => a + b, 0) / 20;
+      const dev = Math.abs(current - sma);
+      if (dev > 0.05) {
+        return { 
+          signal: current > sma ? 'HIGHER' : 'LOWER', 
+          color: current > sma ? 'text-primary font-black' : 'text-rose-500 font-black', 
+          led: current > sma ? 'bg-primary shadow-[0_0_20px_rgba(0,166,166,1)]' : 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]',
+          flash: true, timing: 'TREND POS', isHit: true, score: dev * 1000 
         };
       }
     }
   }
 
+  // ONLY UPS/DOWNS: Consecutive Velocity
   if (strategy === 'ONLY_UPS_DOWNS') {
-    if (prices.length >= 5) {
-      const last5 = prices.slice(-5);
-      const isUp = last5.every((p, i) => i === 0 || p > last5[i - 1]);
-      const isDown = last5.every((p, i) => i === 0 || p < last5[i - 1]);
-      if (isUp) return { signal: 'ONLY UPS', color: 'text-emerald-500 font-black', led: 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]', flash: true, timing: 'VELOCITY', isHit: true, score: 95 };
-      if (isDown) return { signal: 'ONLY DOWNS', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'VELOCITY', isHit: true, score: 95 };
+    if (prices.length >= 6) {
+      const last6 = prices.slice(-6);
+      const isUp = last6.every((p, i) => i === 0 || p > last6[i - 1]);
+      const isDown = last6.every((p, i) => i === 0 || p < last6[i - 1]);
+      if (isUp) return { signal: 'ONLY UPS', color: 'text-emerald-400 font-black', led: 'bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,1)]', flash: true, timing: 'VELOCITY UP', isHit: true, score: 95 };
+      if (isDown) return { signal: 'ONLY DOWNS', color: 'text-rose-400 font-black', led: 'bg-rose-400 shadow-[0_0_20px_rgba(251,113,133,1)]', flash: true, timing: 'VELOCITY DOWN', isHit: true, score: 95 };
     }
   }
 
@@ -195,7 +185,6 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
     }
   }, [strategy]);
 
-  // Flash logic: Remain flashy if signal is safe (isHit is true)
   const isFlashy = isHit;
 
   return (
@@ -212,9 +201,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
               : "bg-muted/5 border-border/10 hover:border-border/30 hover:bg-muted/10 scale-100"
       )}
     >
-      {isGolden && (
-        <div className="absolute top-0 left-0 w-full h-1 bg-amber-400 animate-pulse" />
-      )}
+      {isGolden && <div className="absolute top-0 left-0 w-full h-1 bg-amber-400 animate-pulse" />}
 
       <div className="w-full flex justify-between items-start mb-2 z-10">
         <div className={cn(
@@ -230,10 +217,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
             isGolden ? "bg-amber-400 text-black border-amber-500" : isFlashy ? "bg-primary text-white border-primary shadow-[0_0_15px_rgba(0,166,166,0.5)]" : "bg-black/20 text-muted-foreground/50 border-transparent"
           )}>
             <Clock className="w-2.5 h-2.5" />
-            {isFlashy 
-              ? (countdown > 0 ? `ENTRY NOW (${countdown}s)` : "ACTIVE SIGNAL") 
-              : analysis.timing
-            }
+            {isFlashy ? (countdown > 0 ? `ENTRY NOW (${countdown}s)` : "ACTIVE SIGNAL") : analysis.timing}
           </div>
           {expiryTimestamp && (
             <div className={cn(
@@ -252,7 +236,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
           "text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-center px-1 truncate w-full",
           isGolden ? "text-amber-500" : isSelected || isFlashy ? "text-primary" : "text-muted-foreground/40"
         )}>
-          {isGolden && "⭐ "}{market.name.replace('Index', '').trim()}
+          {market.name.replace('Index', '').trim()}
         </span>
         
         <div className={cn(
@@ -270,16 +254,12 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
         </div>
       </div>
 
-      <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
-        <div className={cn("w-1.5 h-1.5 rounded-full", isGolden ? "bg-amber-400" : "bg-primary", prices.length > 0 && "animate-ping")} />
+      <div className="absolute bottom-2 right-2 flex items-center gap-1 z-10 opacity-30">
+        <div className={cn("w-1 h-1 rounded-full", prices.length > 0 ? "bg-primary animate-ping" : "bg-muted")} />
+        <span className="text-[6px] font-bold uppercase tracking-tighter">Live Link</span>
       </div>
 
-      {(isFlashy || isGolden) && (
-        <div className={cn(
-          "absolute inset-0 animate-pulse-subtle pointer-events-none",
-          isGolden ? "bg-amber-400/5" : "bg-primary/5 dark:bg-primary/10"
-        )} />
-      )}
+      {(isFlashy || isGolden) && <div className={cn("absolute inset-0 animate-pulse-subtle pointer-events-none", isGolden ? "bg-amber-400/5" : "bg-primary/5 dark:bg-primary/10")} />}
     </div>
   );
 }
@@ -312,26 +292,22 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
       <CardContent className="p-4 sm:p-6 min-h-[120px] flex items-center justify-center">
         {sortedSignals.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full">
-            {sortedSignals.map((id) => {
-              const market = CONTINUOUS_INDICES.find(m => m.id === id);
-              if (!market) return null;
-              return (
-                <MarketEngineCard 
-                  key={id}
-                  market={market}
-                  data={marketData[id]}
-                  strategy={strategy}
-                  isGolden={goldenIds.includes(id)}
-                  expiryTimestamp={signalRegistry[id]}
-                />
-              );
-            })}
+            {sortedSignals.map((id) => (
+              <MarketEngineCard 
+                key={id}
+                market={CONTINUOUS_INDICES.find(m => m.id === id)!}
+                data={marketData[id]}
+                strategy={strategy}
+                isGolden={goldenIds.includes(id)}
+                expiryTimestamp={signalRegistry[id]}
+              />
+            ))}
           </div>
         ) : (
           <div className="flex flex-col items-center gap-3 opacity-20">
             <AlertCircle className="w-8 h-8" />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-center">
-              Scanning indices for tactical confirmations...
+              Scanning 19 indices for tactical confirmations...
             </span>
           </div>
         )}
@@ -355,14 +331,8 @@ export default function DigitFlowApp() {
   const [activeMainTab, setActiveMainTab] = useState('dashboard');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
-  // Isolated signal registries for each strategy
   const [multiSignalRegistry, setMultiSignalRegistry] = useState<Record<string, Record<string, number>>>({
-    'OVER_UNDER': {},
-    'EVEN_ODD': {},
-    'MATCHES': {},
-    'RISE_FALL': {},
-    'HIGHER_LOWER': {},
-    'ONLY_UPS_DOWNS': {},
+    'OVER_UNDER': {}, 'EVEN_ODD': {}, 'MATCHES': {}, 'RISE_FALL': {}, 'HIGHER_LOWER': {}, 'ONLY_UPS_DOWNS': {},
   });
 
   const marketIds = useMemo(() => CONTINUOUS_INDICES.map(m => m.id), []);
@@ -371,11 +341,9 @@ export default function DigitFlowApp() {
   const currentSymbol = strategySelections[activeStrategy];
   const { distribution, latestDigit, latestPrice, totalTicks } = useDigitAnalysis(currentSymbol);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
-  // Registry Update Loop
+  // Central Registry Loop: Manages signal persistence and expiry for the active tab
   useEffect(() => {
     const now = Date.now();
     setMultiSignalRegistry(prev => {
@@ -383,18 +351,14 @@ export default function DigitFlowApp() {
       const currentRegistry = { ...next[activeStrategy] };
       let changed = false;
 
-      // Update active hits
       Object.entries(marketData).forEach(([id, data]) => {
         const analysis = getMarketAnalysis(data, activeStrategy);
         if (analysis.isHit) {
-          // While hit is active, we keep updating the timestamp to "now"
-          // This keeps the life timer at 30s as long as it's safe
           currentRegistry[id] = now;
           changed = true;
         }
       });
 
-      // Cleanup expired (Life <= 0)
       Object.entries(currentRegistry).forEach(([id, timestamp]) => {
         if (now - timestamp > 30000) {
           delete currentRegistry[id];
@@ -413,43 +377,26 @@ export default function DigitFlowApp() {
   const currentStrategyRegistry = multiSignalRegistry[activeStrategy] || {};
   const persistentSignalIds = useMemo(() => Object.keys(currentStrategyRegistry), [currentStrategyRegistry]);
 
-  // Golden Signal Logic (Top 4 Highest Probabilities)
   const goldenMarketIds = useMemo(() => {
     if (persistentSignalIds.length === 0) return [];
-    
-    const scoredSignals = persistentSignalIds.map(id => ({
-      id,
-      score: getMarketAnalysis(marketData[id], activeStrategy).score
-    }));
-
-    scoredSignals.sort((a, b) => b.score - a.score);
-    return scoredSignals.slice(0, 4).map(s => s.id);
+    const scored = persistentSignalIds.map(id => ({ id, score: getMarketAnalysis(marketData[id], activeStrategy).score }));
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, 4).map(s => s.id);
   }, [persistentSignalIds, marketData, activeStrategy]);
 
   const stats = useMemo(() => {
     const sorted = [...distribution].sort((a, b) => b.percentage - a.percentage);
-    return {
-      high: sorted[0]?.digit,
-      secondHigh: sorted[1]?.digit,
-      low: sorted[9]?.digit,
-      secondLow: sorted[8]?.digit,
-    };
+    return { high: sorted[0]?.digit, secondHigh: sorted[1]?.digit, low: sorted[9]?.digit, secondLow: sorted[8]?.digit };
   }, [distribution]);
 
-  const handleMarketSelect = (marketId: string) => {
-    setStrategySelections(prev => ({ ...prev, [activeStrategy]: marketId }));
-  };
-
-  const currentMarket = CONTINUOUS_INDICES.find(m => m.id === currentSymbol) || CONTINUOUS_INDICES[0];
+  const handleMarketSelect = (marketId: string) => setStrategySelections(prev => ({ ...prev, [activeStrategy]: marketId }));
 
   if (!mounted) return null;
 
   return (
     <div className="flex flex-col min-h-screen w-full bg-background text-foreground relative overflow-hidden">
       <div className="fixed inset-0 pointer-events-none flex items-center justify-center z-0 opacity-[0.03] select-none">
-        <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-primary/30">
-          INDEXNAV
-        </span>
+        <span className="text-[15vw] font-black tracking-tighter uppercase -rotate-12 whitespace-nowrap text-primary/30">INDEXNAV</span>
       </div>
 
       <DashboardHeader status={status} />
@@ -465,13 +412,8 @@ export default function DigitFlowApp() {
                 { value: 'digits', label: 'Digits', icon: LayoutGrid },
                 { value: 'percentage', label: 'Percentage', icon: Percent },
               ].map((tab) => (
-                <TabsTrigger 
-                  key={tab.value}
-                  value={tab.value} 
-                  className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white shrink-0"
-                >
-                  <tab.icon className="w-3.5 h-3.5 mr-2" />
-                  {tab.label}
+                <TabsTrigger key={tab.value} value={tab.value} className="rounded-xl px-3 sm:px-6 py-2 font-bold uppercase tracking-widest text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white shrink-0">
+                  <tab.icon className="w-3.5 h-3.5 mr-2" />{tab.label}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -487,11 +429,10 @@ export default function DigitFlowApp() {
                         <BarChart2 className="w-5 h-5 text-primary" />
                         <div className="flex flex-col">
                           <span className="text-[10px] sm:text-[11px] font-bold text-foreground group-hover:text-primary transition-colors truncate">
-                            {currentMarket.name}
+                            {CONTINUOUS_INDICES.find(m => m.id === currentSymbol)?.name}
                           </span>
                           <span className="text-[9px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                            <Database className="w-2.5 h-2.5" />
-                            {totalTicks} Ticks
+                            <Database className="w-2.5 h-2.5" />{totalTicks} Ticks
                           </span>
                         </div>
                       </div>
@@ -500,114 +441,73 @@ export default function DigitFlowApp() {
                       <div className="p-3 border-b border-border/40"><span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2">Market Selector</span></div>
                       <div className="max-h-[50vh] overflow-y-auto p-1">
                         {CONTINUOUS_INDICES.map((market) => (
-                          <button
-                            key={market.id}
-                            onClick={() => { handleMarketSelect(market.id); setIsPopoverOpen(false); }}
-                            className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors", currentSymbol === market.id ? "bg-primary/10 text-primary" : "hover:bg-muted/40 text-foreground")}
-                          >
+                          <button key={market.id} onClick={() => { handleMarketSelect(market.id); setIsPopoverOpen(false); }} className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors", currentSymbol === market.id ? "bg-primary/10 text-primary" : "hover:bg-muted/40 text-foreground")}>
                             <span className="text-xs font-semibold">{market.name}</span>
                           </button>
                         ))}
                       </div>
                     </PopoverContent>
                   </Popover>
-                  
-                  <div className="w-full sm:w-auto flex items-center gap-3 p-2 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
-                    <Select value={tradeSide} onValueChange={setTradeSide}>
-                      <SelectTrigger className="flex-1 sm:w-28 h-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
-                        <SelectValue placeholder="Trade Focus" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-card border-border/50">
-                        <SelectItem value="none" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">General</SelectItem>
-                        <SelectItem value="over" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary">OVER Focus</SelectItem>
-                        <SelectItem value="under" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-rose-500">UNDER Focus</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Select value={tradeSide} onValueChange={setTradeSide}>
+                    <SelectTrigger className="w-full sm:w-28 h-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
+                      <SelectValue placeholder="Trade Focus" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border/50">
+                      <SelectItem value="none" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest">General</SelectItem>
+                      <SelectItem value="over" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-primary">OVER Focus</SelectItem>
+                      <SelectItem value="under" className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-rose-500">UNDER Focus</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-
-                <div className="flex flex-col items-center justify-center gap-6 py-4">
-                  <div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-primary">
-                    {latestPrice?.toFixed(2) || "---"}
-                  </div>
-                </div>
-
+                <div className="flex flex-col items-center justify-center py-4"><div className="text-5xl sm:text-8xl font-black tracking-tighter flex items-baseline tabular-nums text-primary">{latestPrice?.toFixed(2) || "---"}</div></div>
                 <div className="grid grid-cols-5 gap-2 sm:gap-8 max-w-4xl mx-auto px-1 sm:px-4">
                   {distribution.map((d) => (
-                    <DigitCard
-                      key={d.digit}
-                      digit={d.digit}
-                      percentage={d.percentage}
-                      isHigh={d.digit === stats.high}
-                      isSecondHigh={d.digit === stats.secondHigh}
-                      isLow={d.digit === stats.low}
-                      isSecondLow={d.digit === stats.secondLow}
-                      isLatest={d.digit === latestDigit}
-                      onClick={() => {}}
-                    />
+                    <DigitCard key={d.digit} digit={d.digit} percentage={d.percentage} isHigh={d.digit === stats.high} isSecondHigh={d.digit === stats.secondHigh} isLow={d.digit === stats.low} isSecondLow={d.digit === stats.secondLow} isLatest={d.digit === latestDigit} onClick={() => {}} />
                   ))}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
-            <Tabs value={activeStrategy} onValueChange={setActiveStrategy} className="w-full flex flex-col gap-6">
-              <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md py-2 px-1">
-                <TabsList className="bg-card/80 p-1.5 rounded-[1.5rem] border border-primary/20 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1.5 shadow-lg backdrop-blur-xl">
-                  {[
-                    { id: 'OVER_UNDER', label: 'Over / Under', icon: ArrowUpDown },
-                    { id: 'EVEN_ODD', label: 'Even / Odd', icon: Hash },
-                    { id: 'MATCHES', label: 'Matches', icon: Target },
-                    { id: 'RISE_FALL', label: 'Rise / Fall', icon: TrendingUp },
-                    { id: 'HIGHER_LOWER', label: 'Higher / Lower', icon: Layers },
-                    { id: 'ONLY_UPS_DOWNS', label: 'Only Ups / Downs', icon: Zap },
-                  ].map((tab) => (
-                    <TabsTrigger 
-                      key={tab.id}
-                      value={tab.id} 
-                      className="rounded-2xl px-3 sm:px-5 py-2.5 font-black uppercase tracking-[0.2em] text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white shrink-0 flex items-center gap-2 transition-all"
-                    >
-                      <tab.icon className="w-3.5 h-3.5" />
-                      {tab.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
+          <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none flex flex-col gap-6">
+            <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md py-2 px-1">
+              <TabsList className="bg-card/80 p-1.5 rounded-[1.5rem] border border-primary/20 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1.5 shadow-lg backdrop-blur-xl">
+                {[
+                  { id: 'OVER_UNDER', label: 'Over / Under', icon: ArrowUpDown },
+                  { id: 'EVEN_ODD', label: 'Even / Odd', icon: Hash },
+                  { id: 'MATCHES', label: 'Matches', icon: Target },
+                  { id: 'RISE_FALL', label: 'Rise / Fall', icon: TrendingUp },
+                  { id: 'HIGHER_LOWER', label: 'Higher / Lower', icon: Layers },
+                  { id: 'ONLY_UPS_DOWNS', label: 'Only Ups / Downs', icon: Zap },
+                ].map((tab) => (
+                  <TabsTrigger key={tab.id} value={tab.id} onClick={() => setActiveStrategy(tab.id)} className="rounded-2xl px-3 sm:px-5 py-2.5 font-black uppercase tracking-[0.2em] text-[8px] sm:text-[10px] data-[state=active]:bg-primary data-[state=active]:text-white shrink-0 flex items-center gap-2 transition-all">
+                    <tab.icon className="w-3.5 h-3.5" />{tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
 
-              <SignalScanner 
-                marketData={marketData} 
-                strategy={activeStrategy} 
-                signals={persistentSignalIds} 
-                goldenIds={goldenMarketIds}
-                signalRegistry={currentStrategyRegistry}
-              />
-              
-              <Card className="border border-border/50 bg-card rounded-[3rem] shadow-2xl icy-glow overflow-hidden min-h-[50vh] flex flex-col">
-                <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-muted/5">
-                  {['OVER_UNDER', 'EVEN_ODD', 'MATCHES', 'RISE_FALL', 'HIGHER_LOWER', 'ONLY_UPS_DOWNS'].map((tabId) => (
-                    <TabsContent key={tabId} value={tabId} className="mt-0 outline-none">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
-                        {CONTINUOUS_INDICES.map((market) => (
-                          <MarketEngineCard 
-                            key={market.id}
-                            market={market}
-                            data={marketData[market.id]}
-                            strategy={tabId}
-                            isSelected={strategySelections[tabId] === market.id}
-                            onSelect={(id) => handleMarketSelect(id)}
-                            isGolden={goldenMarketIds.includes(market.id)}
-                            expiryTimestamp={currentStrategyRegistry[market.id]}
-                          />
-                        ))}
-                      </div>
-                    </TabsContent>
+            <SignalScanner marketData={marketData} strategy={activeStrategy} signals={persistentSignalIds} goldenIds={goldenMarketIds} signalRegistry={currentStrategyRegistry} />
+            
+            <Card className="border border-border/50 bg-card rounded-[3rem] shadow-2xl icy-glow overflow-hidden min-h-[50vh] flex flex-col">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-muted/5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
+                  {CONTINUOUS_INDICES.map((market) => (
+                    <MarketEngineCard 
+                      key={market.id} 
+                      market={market} 
+                      data={marketData[market.id]} 
+                      strategy={activeStrategy} 
+                      isSelected={strategySelections[activeStrategy] === market.id} 
+                      onSelect={(id) => handleMarketSelect(id)} 
+                      isGolden={goldenMarketIds.includes(market.id)} 
+                      expiryTimestamp={currentStrategyRegistry[market.id]} 
+                    />
                   ))}
                 </div>
-              </Card>
-            </Tabs>
+              </div>
+            </Card>
           </TabsContent>
-
           <TabsContent value="scanner" className="mt-0 outline-none"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/signals" className="w-full h-full" /></Card></TabsContent>
           <TabsContent value="digits" className="mt-0 outline-none"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/digitshome" className="w-full h-full" /></Card></TabsContent>
           <TabsContent value="percentage" className="mt-0 outline-none"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://api.binarytool.site" className="w-full h-full" /></Card></TabsContent>
