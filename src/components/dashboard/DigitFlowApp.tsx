@@ -52,7 +52,7 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   
   if (ticks.length < 100) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
 
-  // 100/20 Rule for Over/Under and Even/Odd
+  // 100/20 Rule: Density 60/100, Momentum 13/20
   const w100 = ticks.slice(-100);
   const w20 = ticks.slice(-20);
 
@@ -76,7 +76,7 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
     if (oddCount >= 60 && last20Odd >= 13) return { signal: 'ODD', direction: 'ODD', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: oddCount };
   }
 
-  // 200/50 Rule for Matches
+  // MATCHES: 200/50 Rule
   if (strategy === 'MATCHES') {
     if (ticks.length < 200) return { ...defaultState, signal: 'CALIBRATING', timing: 'WAITING' };
     const w200 = ticks.slice(-200);
@@ -89,13 +89,12 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
     const maxDigits: number[] = [];
     counts.forEach((c, d) => { if (c === maxVal) maxDigits.push(d); });
 
-    // Condition 3: At least 32 times
-    // Condition 6: No tie
+    // Condition: At least 32 times in last 200 + No tie
     if (maxDigits.length === 1 && maxVal >= 32) {
       const targetDigit = maxDigits[0];
       const match50 = w50.filter(d => d === targetDigit).length;
       
-      // Condition 4: At least 9 times in last 50
+      // Confirmation: At least 9 times in last 50
       if (match50 >= 9) {
         return { 
           signal: `MATCH ${targetDigit}`, 
@@ -103,7 +102,7 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
           color: 'text-amber-500 font-black', 
           led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', 
           flash: true, 
-          timing: 'MATCH FOUND', 
+          timing: 'RUN BOT', 
           isHit: true, 
           score: maxVal 
         };
@@ -112,13 +111,10 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   }
 
   if (strategy === 'RISE_FALL') {
-    if (prices.length >= 20) {
-      const diff = prices[prices.length - 1] - prices[prices.length - 20];
-      const highDigits = w20.filter(d => d > 4).length;
-      const lowDigits = w20.filter(d => d < 5).length;
-      if (diff > 0.0002 && highDigits >= 13) return { signal: 'RISE', direction: 'RISE', color: 'text-emerald-500 font-black', led: 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]', flash: true, timing: 'UP MOMENTUM', isHit: true, score: highDigits * 3 };
-      if (diff < -0.0002 && lowDigits >= 13) return { signal: 'FALL', direction: 'FALL', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'DOWN MOMENTUM', isHit: true, score: lowDigits * 3 };
-    }
+    const riseCount = w100.filter((d, i) => i > 0 && prices[i] > prices[i-1]).length;
+    const fallCount = w100.filter((i) => i > 0 && prices[i] < prices[i-1]).length;
+    if (riseCount >= 60 && last20Over >= 13) return { signal: 'RISE', direction: 'RISE', color: 'text-emerald-500 font-black', led: 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: riseCount };
+    if (fallCount >= 60 && last20Under >= 13) return { signal: 'FALL', direction: 'FALL', color: 'text-rose-500 font-black', led: 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]', flash: true, timing: 'ENTRY NOW', isHit: true, score: fallCount };
   }
 
   if (strategy === 'HIGHER_LOWER') {
@@ -231,7 +227,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
             isGolden ? "bg-amber-400 text-black border-amber-500" : isFlashy ? "bg-primary text-white border-primary shadow-[0_0_15px_rgba(0,166,166,0.5)]" : "bg-black/20 text-muted-foreground/50 border-transparent"
           )}>
             <Clock className="w-2.5 h-2.5" />
-            {isFlashy ? (countdown > 0 ? `ENTRY NOW (${countdown}s)` : "ACTIVE SIGNAL") : analysis.timing}
+            {isFlashy ? (countdown > 0 ? `${strategy === 'MATCHES' ? 'RUN BOT' : 'ENTRY NOW'} (${countdown}s)` : "ACTIVE SIGNAL") : analysis.timing}
           </div>
           {expiryTimestamp && (
             <div className={cn(
@@ -364,11 +360,18 @@ export default function DigitFlowApp() {
       Object.entries(marketData).forEach(([id, data]) => {
         const analysis = getMarketAnalysis(data, activeStrategy);
         if (analysis.isHit) {
-          currentRegistry[id] = now;
-          changed = true;
+          if (!currentRegistry[id]) {
+            currentRegistry[id] = now;
+            changed = true;
+          }
+        } else {
+          // Expiry logic: if it was active but no longer meets criteria, start countdown
+          // For simplicity in this engine, if criteria fails, we remove it shortly 
+          // but the 30s life starts from first hit.
         }
       });
 
+      // Cleanup signals older than 30s
       Object.entries(currentRegistry).forEach(([id, timestamp]) => {
         if (now - timestamp > 30000) {
           delete currentRegistry[id];
