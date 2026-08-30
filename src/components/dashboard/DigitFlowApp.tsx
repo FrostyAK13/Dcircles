@@ -100,47 +100,47 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
     <div
       onClick={() => onSelect(market.id)}
       className={cn(
-        "group relative flex flex-col items-center justify-between p-6 rounded-[2rem] border-2 transition-all duration-500 min-h-[200px] cursor-pointer",
+        "group relative flex flex-col items-center justify-between p-4 rounded-[1.5rem] border-2 transition-all duration-500 min-h-[160px] cursor-default",
         isSelected 
-          ? "bg-card border-primary shadow-[0_0_40px_rgba(0,166,166,0.1)] z-10" 
-          : "bg-muted/5 border-border/10 hover:border-border/30 hover:bg-muted/10 scale-[0.98] hover:scale-100"
+          ? "bg-card border-primary shadow-[0_0_30px_rgba(0,166,166,0.1)] z-10 scale-[1.02]" 
+          : "bg-muted/5 border-border/10 hover:border-border/30 hover:bg-muted/10 scale-100"
       )}
     >
       <div className={cn(
-        "w-12 h-12 rounded-[1rem] flex items-center justify-center transition-all duration-500",
+        "w-10 h-10 rounded-[0.75rem] flex items-center justify-center transition-all duration-500",
         isSelected ? "bg-primary text-white" : "bg-muted/50 text-muted-foreground/30"
       )}>
-        <StrategyIcon className={cn("w-6 h-6", isSelected && "animate-pulse")} />
+        <StrategyIcon className={cn("w-5 h-5", isSelected && analysis.flash && "animate-pulse")} />
       </div>
       
-      <div className="flex flex-col items-center gap-2 w-full">
+      <div className="flex flex-col items-center gap-1.5 w-full">
         <span className={cn(
-          "text-[10px] font-black uppercase tracking-[0.2em] text-center px-2 truncate w-full",
+          "text-[9px] font-black uppercase tracking-[0.2em] text-center px-1 truncate w-full",
           isSelected ? "text-primary" : "text-muted-foreground/40"
         )}>
           {market.name.replace('Index', '').trim()}
         </span>
         
         <div className={cn(
-          "px-3 py-1 rounded-full text-[7px] font-black uppercase tracking-[0.2em] border flex items-center gap-1.5",
+          "px-2 py-0.5 rounded-full text-[6px] font-black uppercase tracking-[0.2em] border flex items-center gap-1",
           trend === 'up' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : trend === 'down' ? "bg-rose-500/10 border-rose-500/20 text-rose-500" : "bg-primary/10 border-primary/20 text-primary"
         )}>
           {trend === 'up' ? 'Bullish' : trend === 'down' ? 'Bearish' : 'Neutral'}
         </div>
 
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-black/5 dark:bg-white/5 border border-border/10 mt-1 w-full justify-center">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-black/5 dark:bg-white/5 border border-border/10 mt-1 w-full justify-center">
           <div className={cn(
-            "w-2 h-2 rounded-full transition-all duration-300",
+            "w-1.5 h-1.5 rounded-full transition-all duration-300",
             analysis.led,
             analysis.flash && "animate-pulse"
           )} />
-          <span className={cn("text-[8px] font-black uppercase tracking-[0.3em]", analysis.color)}>
+          <span className={cn("text-[7px] font-black uppercase tracking-[0.2em]", analysis.color)}>
             {analysis.signal}
           </span>
         </div>
       </div>
 
-      <div className="absolute top-4 right-4 flex items-center gap-1">
+      <div className="absolute top-3 right-3 flex items-center gap-1">
         <div className={cn("w-1 h-1 rounded-full bg-primary", ticks.length > 0 && "animate-ping")} />
       </div>
     </div>
@@ -166,8 +166,6 @@ export default function DigitFlowApp() {
   const { marketData, status } = useMultiMarketAnalysis(marketIds);
 
   const currentSymbol = strategySelections[activeStrategy];
-  const currentMarketData = marketData[currentSymbol];
-  
   const { distribution, latestDigit, latestPrice, totalTicks } = useDigitAnalysis(currentSymbol);
 
   useEffect(() => {

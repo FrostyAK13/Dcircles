@@ -36,12 +36,12 @@ export class DerivWS {
   private pingInterval: NodeJS.Timeout | null = null;
 
   constructor(
-    symbols: string[], 
+    symbols: string | string[], 
     onTick: (tick: Tick) => void, 
     onStatus: (status: ConnectionStatus) => void,
     onHistory: (symbol: string, prices: number[]) => void
   ) {
-    this.symbols = symbols;
+    this.symbols = Array.isArray(symbols) ? symbols : [symbols];
     this.onTickCallback = onTick;
     this.onStatusCallback = onStatus;
     this.onHistoryCallback = onHistory;
@@ -64,7 +64,6 @@ export class DerivWS {
         const response: TickResponse = JSON.parse(event.data);
         
         if (response.error && Object.keys(response.error).length > 0) {
-          // Standard error handling without console.error
           this.onStatusCallback('error');
           return;
         }
@@ -115,7 +114,7 @@ export class DerivWS {
         this.ws?.send(JSON.stringify({
           ticks_history: symbol,
           style: 'ticks',
-          count: 150,
+          count: 200,
           end: 'latest',
           subscribe: 1
         }));
