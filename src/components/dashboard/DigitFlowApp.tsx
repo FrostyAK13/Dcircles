@@ -48,11 +48,8 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
   const window10 = ticks.slice(-10);
 
   if (strategy === 'OVER_UNDER') {
-    // Strategy: OVER 3 (digits 4-9) and UNDER 6 (digits 0-5)
-    // Criteria: Density >= 90 (Macro), Momentum >= 6 (Micro)
     const overCount = window150.filter(d => d >= 4).length;
     const underCount = window150.filter(d => d <= 5).length;
-
     const last10OverCount = window10.filter(d => d >= 4).length;
     const last10UnderCount = window10.filter(d => d <= 5).length;
 
@@ -110,22 +107,42 @@ function getMarketAnalysis(data: MarketData | undefined, strategy: string) {
     }
   }
 
-  // Placeholder for other strategies to keep them separate
   if (strategy === 'MATCHES') {
     const digitCounts = new Array(10).fill(0);
     window150.forEach(d => digitCounts[d]++);
-    const maxDigit = Math.max(...digitCounts);
-    const digit = digitCounts.indexOf(maxDigit);
-    if (maxDigit >= 30) { // High frequency single digit
+    const maxDigitCount = Math.max(...digitCounts);
+    const digit = digitCounts.indexOf(maxDigitCount);
+    
+    const last10DigitCount = window10.filter(d => d === digit).length;
+
+    if (maxDigitCount >= 25 && last10DigitCount >= 2) {
       return { 
         signal: `MATCH ${digit}`, 
         color: 'text-amber-500 font-black', 
         led: 'bg-amber-500 shadow-[0_0_20px_rgba(251,191,36,1)]', 
         flash: true, 
-        timing: 'POSSIBLE MATCH', 
+        timing: 'MATCH FOUND', 
         isHit: true, 
-        score: maxDigit 
+        score: maxDigitCount 
       };
+    }
+  }
+
+  if (strategy === 'RISE_FALL') {
+    const prices = data?.prices || [];
+    if (prices.length >= 10) {
+      const diff = prices[prices.length - 1] - prices[prices.length - 10];
+      if (Math.abs(diff) > 0.5) {
+        return {
+          signal: diff > 0 ? 'RISE' : 'FALL',
+          color: diff > 0 ? 'text-emerald-500 font-black' : 'text-rose-500 font-black',
+          led: diff > 0 ? 'bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,1)]' : 'bg-rose-500 shadow-[0_0_20px_rgba(244,63,94,1)]',
+          flash: true,
+          timing: 'MOMENTUM',
+          isHit: true,
+          score: Math.abs(diff) * 10
+        };
+      }
     }
   }
 
@@ -150,7 +167,6 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
   const analysis = useMemo(() => getMarketAnalysis(data, strategy), [data, strategy]);
   const isHit = analysis.isHit;
 
-  // 5s Entry Countdown
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isHit) {
@@ -163,7 +179,6 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
     return () => clearTimeout(timer);
   }, [isHit, countdown]);
 
-  // 30s Signal Life Countdown
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (expiryTimestamp) {
@@ -260,7 +275,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
           "px-3 py-0.5 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-[0.15em] border flex items-center gap-1",
           trend === 'up' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" : trend === 'down' ? "bg-rose-500/10 border-rose-500/20 text-rose-500" : "bg-primary/10 border-primary/20 text-primary"
         )}>
-          {trend === 'up' ? 'OVER' : trend === 'down' ? 'UNDER' : 'NEUTRAL'}
+          {trend === 'up' ? 'UP TREND' : trend === 'down' ? 'DOWN TREND' : 'NEUTRAL'}
         </div>
 
         <div className={cn(
@@ -293,7 +308,6 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
 }
 
 function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistry }: { marketData: Record<string, MarketData>, strategy: string, signals: string[], goldenIds: string[], signalRegistry: Record<string, number> }) {
-  // Sort signals: Top goldenIds first, then other signals
   const sortedSignals = useMemo(() => {
     const goldens = signals.filter(id => goldenIds.includes(id));
     const rest = signals.filter(id => !goldenIds.includes(id));
@@ -376,7 +390,6 @@ export default function DigitFlowApp() {
     setMounted(true);
   }, []);
 
-  // CRITICAL: Clear signals when switching strategies to ensure isolation
   useEffect(() => {
     setSignalRegistry({});
   }, [activeStrategy]);
@@ -390,7 +403,6 @@ export default function DigitFlowApp() {
       Object.entries(marketData).forEach(([id, data]) => {
         const analysis = getMarketAnalysis(data, activeStrategy);
         if (analysis.isHit) {
-          // Only set if not already present to preserve initial hit time
           if (!next[id]) {
             next[id] = now;
             changed = true;
@@ -398,7 +410,6 @@ export default function DigitFlowApp() {
         }
       });
 
-      // Maintain signals for 30 seconds
       Object.entries(next).forEach(([id, timestamp]) => {
         if (now - timestamp > 30000) {
           delete next[id];
@@ -412,7 +423,6 @@ export default function DigitFlowApp() {
 
   const persistentSignalIds = useMemo(() => Object.keys(signalRegistry), [signalRegistry]);
 
-  // Identify Golden Markets (Top 4 by Score)
   const goldenMarketIds = useMemo(() => {
     if (persistentSignalIds.length === 0) return [];
     
@@ -421,7 +431,6 @@ export default function DigitFlowApp() {
       score: getMarketAnalysis(marketData[id], activeStrategy).score
     }));
 
-    // Sort by score descending and take top 4
     scoredSignals.sort((a, b) => b.score - a.score);
     return scoredSignals.slice(0, 4).map(s => s.id);
   }, [persistentSignalIds, marketData, activeStrategy]);
@@ -511,7 +520,7 @@ export default function DigitFlowApp() {
                       </div>
                     </PopoverContent>
                   </Popover>
-
+                  
                   <div className="w-full sm:w-auto flex items-center gap-3 p-2 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
                     <Select value={tradeSide} onValueChange={setTradeSide}>
                       <SelectTrigger className="flex-1 sm:w-28 h-8 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border-none bg-muted/40 focus:ring-0 rounded-lg">
