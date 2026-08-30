@@ -9,9 +9,10 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle } from 'lucide-react';
+import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle, Radio } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from '@/components/ui/badge';
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -189,6 +190,90 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect }: Mark
   );
 }
 
+function SignalScanner({ marketData, strategy }: { marketData: Record<string, MarketData>, strategy: string }) {
+  const activeSignals = useMemo(() => {
+    return Object.entries(marketData).map(([id, data]) => {
+      const ticks = data.ticks;
+      if (ticks.length < 150) return null;
+      
+      const window150 = ticks.slice(-150);
+      const window10 = ticks.slice(-10);
+      
+      let signal = null;
+      let color = '';
+
+      if (strategy === 'OVER_UNDER') {
+        const over4Count = window150.filter(d => d >= 5).length;
+        const under5Count = window150.filter(d => d <= 4).length;
+        const last10Over = window10.filter(d => d >= 5).length;
+        const last10Under = window10.filter(d => d <= 4).length;
+
+        if (over4Count >= 90 && last10Over >= 6) {
+          signal = 'OVER 4';
+          color = 'text-primary';
+        } else if (under5Count >= 90 && last10Under >= 6) {
+          signal = 'UNDER 5';
+          color = 'text-rose-500';
+        }
+      } else if (strategy === 'EVEN_ODD') {
+        const evenCount = window150.filter(d => d % 2 === 0).length;
+        const last10Even = window10.filter(d => d % 2 === 0).length;
+        const last10Odd = window10.filter(d => d % 2 !== 0).length;
+
+        if (evenCount >= 90 && last10Even >= 6) {
+          signal = 'EVEN';
+          color = 'text-primary';
+        } else if (evenCount <= 60 && last10Odd >= 6) {
+          signal = 'ODD';
+          color = 'text-rose-500';
+        }
+      }
+
+      if (!signal) return null;
+
+      const market = CONTINUOUS_INDICES.find(m => m.id === id);
+      return { id, name: market?.short || id, signal, color };
+    }).filter(Boolean);
+  }, [marketData, strategy]);
+
+  return (
+    <Card className="mb-6 bg-card border-primary/20 shadow-2xl icy-glow overflow-hidden rounded-[2rem]">
+      <CardHeader className="py-4 px-6 border-b border-border/40 flex flex-row items-center justify-between bg-muted/20">
+        <div className="flex items-center gap-3">
+          <Radio className="w-5 h-5 text-primary animate-pulse" />
+          <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Live Signal Scanner</h3>
+        </div>
+        <Badge variant="outline" className="text-[9px] font-black uppercase tracking-[0.2em] bg-primary/10 text-primary border-primary/20">
+          {activeSignals.length} Active
+        </Badge>
+      </CardHeader>
+      <CardContent className="p-4 min-h-[80px] flex items-center justify-center">
+        {activeSignals.length > 0 ? (
+          <div className="flex flex-wrap gap-3 w-full">
+            {activeSignals.map((sig: any) => (
+              <div 
+                key={`${sig.id}-${sig.signal}`} 
+                className="flex items-center gap-3 px-4 py-2 rounded-xl bg-muted/40 border border-primary/20 animate-in fade-in zoom-in duration-300"
+              >
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-wider">{sig.name}</span>
+                  <span className={cn("text-xs font-black uppercase tracking-widest", sig.color)}>{sig.signal}</span>
+                </div>
+                <div className={cn("w-2 h-2 rounded-full animate-ping", sig.color.replace('text-', 'bg-'))} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2 opacity-30">
+            <AlertCircle className="w-6 h-6" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Scanning for tactical entries...</span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function DigitFlowApp() {
   const [strategySelections, setStrategySelections] = useState<Record<string, string>>({
     'OVER_UNDER': '1HZ10V',
@@ -340,6 +425,8 @@ export default function DigitFlowApp() {
           </TabsContent>
 
           <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none">
+            <SignalScanner marketData={marketData} strategy={activeStrategy} />
+            
             <Card className="border border-border/50 bg-card rounded-[2.5rem] shadow-2xl icy-glow overflow-hidden min-h-[70vh] flex flex-col">
               <Tabs value={activeStrategy} onValueChange={setActiveStrategy} className="w-full h-full flex flex-col">
                 <CardHeader className="border-b border-border/40 bg-muted/20 p-2 sm:p-4 shrink-0">
