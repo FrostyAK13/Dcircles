@@ -1,4 +1,3 @@
-
 export const APP_ID = '84799';
 // Using the recommended public trading endpoint for better stability
 export const DERIV_WS_URL = `wss://api.derivws.com/trading/v1/options/ws/public?app_id=${APP_ID}`;
@@ -63,13 +62,9 @@ export class DerivWS {
         const response: TickResponse = JSON.parse(event.data);
         
         if (response.error && Object.keys(response.error).length > 0) {
-          console.error('Deriv API Error:', response.error.message || response.error.code);
-          
-          if (response.error.code === 'AppIdInvalid' || 
-              response.error.code === 'PermissionDenied' || 
-              response.error.code === 'InvalidSymbol') {
-             this.onStatusCallback('error');
-          }
+          // Removed console.error to prevent Next.js development error overlay
+          // The error state is handled via the status callback
+          this.onStatusCallback('error');
           return;
         }
 
@@ -114,8 +109,7 @@ export class DerivWS {
   }
 
   private subscribeToTicks() {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      // Streamlined request: Fetch history and subscribe in one call as per guidelines
+    if (this.ws?.readyState === WebSocket.OPEN && this.symbol) {
       this.ws.send(JSON.stringify({
         ticks_history: this.symbol,
         style: 'ticks',
