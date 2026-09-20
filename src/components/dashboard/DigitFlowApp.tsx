@@ -660,7 +660,6 @@ export default function DigitFlowApp() {
   }, [marketData, currentSymbol, activeStrategy]);
 
   const tacticalStats = useMemo(() => {
-    // Corrected to use 1000 ticks for analysis as requested
     const lastWindow = ticks.slice(-1000);
     const lastWindowPrices = prices.slice(-1000);
     
@@ -770,7 +769,8 @@ export default function DigitFlowApp() {
                   </div>
                   
                   <div className="flex flex-col items-center justify-center py-6 gap-8">
-                    <div className="text-6xl sm:text-9xl font-black tracking-tighter flex items-baseline tabular-nums text-primary brand-glow">
+                    {/* REDUCED PRICE DISPLAY SIZE HERE */}
+                    <div className="text-4xl sm:text-7xl font-black tracking-tighter flex items-baseline tabular-nums text-primary brand-glow">
                       {latestPrice?.toFixed(2) || "---"}
                     </div>
                     
@@ -812,7 +812,6 @@ export default function DigitFlowApp() {
                 </CardContent>
               </Card>
 
-              {/* Advanced Tactical Analysis Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <TacticalAnalysisCard 
                   title="Over / Under Analysis" 
@@ -913,7 +912,6 @@ export default function DigitFlowApp() {
           <TabsContent value="percentage" className="mt-0 outline-none pb-20"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://api.binarytool.site" className="w-full h-full" /></Card></TabsContent>
         </Tabs>
 
-        {/* Brand Footer Signature */}
         <div className="w-full pt-12 pb-8 flex flex-col items-center justify-center gap-2 border-t border-border/10 mt-8 opacity-60">
           <div className="flex items-center gap-2 text-[10px] sm:text-[12px] font-black uppercase tracking-[0.3em] text-[#A67C52] transition-all hover:opacity-100 hover:scale-105">
             <div className="w-2 h-2 rounded-full bg-[#A67C52] animate-pulse" />
