@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -461,7 +462,7 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
     <Card className="bg-card border-border/20 shadow-xl rounded-3xl overflow-hidden icy-glass flex flex-col w-full">
       <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between">
         <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">{title}</h3>
-        <div className="px-2 py-0.5 rounded-lg border border-primary/20 bg-black/40 text-[9px] font-mono font-bold text-primary tracking-tight tabular-nums shadow-sm animate-pulse-subtle">
+        <div className="px-4 py-2 rounded-xl border-2 border-primary/40 bg-primary/20 text-sm sm:text-xl font-black text-primary tracking-wider tabular-nums shadow-[0_0_15px_rgba(0,166,166,0.3)] animate-pulse-subtle">
           ${livePrice?.toFixed(2) || "---"}
         </div>
       </CardHeader>
@@ -715,14 +716,14 @@ export default function DigitFlowApp() {
                   </div>
                   
                   <div className="flex flex-col items-center justify-center py-1 gap-2">
-                    <div className="px-4 py-1.5 border-2 border-primary/40 rounded-xl bg-black/60 flex items-center justify-center shadow-[0_0_15px_rgba(0,166,166,0.2)] backdrop-blur-lg scale-90">
-                      <span className="text-xs font-black tracking-tighter text-primary brand-glow tabular-nums">
+                    <div className="w-[180px] h-[64px] border-2 border-primary/40 rounded-xl bg-black/60 flex items-center justify-center shadow-[0_0_20px_rgba(0,166,166,0.25)] backdrop-blur-lg">
+                      <span className="text-xl sm:text-3xl font-black tracking-tighter text-primary brand-glow tabular-nums">
                         {latestPrice?.toFixed(2) || "---"}
                       </span>
                     </div>
                     
                     <div className={cn(
-                      "flex flex-col items-center gap-1 px-2.5 py-0.5 text-[7px] rounded-lg border transition-all duration-500 shadow-sm",
+                      "flex flex-col items-center gap-1 px-4 py-1 text-[8px] rounded-lg border transition-all duration-500 shadow-sm",
                       (currentMarketAnalysis.isHit || analysisTrigger)
                         ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(0,166,166,0.15)]" 
                         : "bg-muted/5 border-border/10 opacity-50"
@@ -755,7 +756,7 @@ export default function DigitFlowApp() {
                 <TacticalAnalysisCard 
                   title="Over / Under Analysis" 
                   labels={["Over", "Under"]} 
-                  counts={customAnalysisCounts => tacticalStats.ouCounts} 
+                  counts={tacticalStats.ouCounts} 
                   history={ticks.slice(-10)} 
                   colorSchema="cyan-rose" 
                   type="over-under"
