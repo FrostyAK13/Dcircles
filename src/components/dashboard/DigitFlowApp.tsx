@@ -487,11 +487,11 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
   };
 
   return (
-    <Card className="bg-card border-border/20 shadow-xl rounded-3xl overflow-hidden icy-glass flex flex-col">
+    <Card className="bg-card border-border/20 shadow-xl rounded-3xl overflow-hidden icy-glass flex flex-col h-full">
       <CardHeader className="py-4 px-6 border-b border-border/10">
         <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">{title}</h3>
       </CardHeader>
-      <CardContent className="p-5 flex flex-col gap-6">
+      <CardContent className="p-5 flex flex-col gap-6 justify-between flex-1">
         {onTargetChange && (
           <div className="flex flex-col gap-2">
             <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Selecting Digit</span>
@@ -501,7 +501,7 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
                   key={d}
                   onClick={() => onTargetChange(d)}
                   className={cn(
-                    "w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black transition-all",
+                    "w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black transition-all shrink-0",
                     targetDigit === d ? "bg-primary text-white shadow-lg scale-110" : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
                   )}
                 >
@@ -535,7 +535,7 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 mt-auto">
           <div className="space-y-1.5">
             <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-[0.1em]">
               <span>{labels[0]}</span>
@@ -704,7 +704,7 @@ export default function DigitFlowApp() {
           </div>
 
           <TabsContent value="dashboard" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none pb-20">
-            <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
+            <div className="grid grid-cols-1 gap-8">
               <Card className="border-none bg-card rounded-[3rem] shadow-2xl icy-glow overflow-hidden relative">
                 <CardContent className="p-4 sm:p-12 space-y-6">
                   <div className="flex flex-col sm:flex-row items-center gap-4 justify-between w-full">
@@ -753,18 +753,18 @@ export default function DigitFlowApp() {
                     </div>
                     
                     <div className={cn(
-                      "flex flex-col items-center gap-2 px-5 py-2.5 rounded-xl border transition-all duration-500 animate-in fade-in zoom-in shadow-lg",
+                      "flex flex-col items-center gap-1.5 px-4 py-1.5 text-[10px] rounded-lg border transition-all duration-500 animate-in fade-in zoom-in shadow-md",
                       (currentMarketAnalysis.isHit || analysisTrigger)
-                        ? "bg-primary/10 border-primary shadow-[0_0_30px_rgba(0,166,166,0.2)] scale-105" 
+                        ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(0,166,166,0.15)] scale-102" 
                         : "bg-muted/5 border-border/10 opacity-50 scale-100"
                     )}>
                       <div className="flex items-center gap-2.5">
                         <div className={cn(
-                          "w-3 h-3 rounded-full transition-all duration-300",
+                          "w-2 h-2 rounded-full transition-all duration-300",
                           (currentMarketAnalysis.isHit || analysisTrigger) ? "bg-primary animate-ping" : "bg-muted-foreground/20"
                         )} />
                         <span className={cn(
-                          "text-xs font-black uppercase tracking-[0.2em] transition-colors",
+                          "font-black uppercase tracking-[0.2em] transition-colors",
                           (currentMarketAnalysis.isHit || analysisTrigger) ? "text-primary" : "text-muted-foreground/50"
                         )}>
                           {analysisTrigger 
@@ -775,7 +775,7 @@ export default function DigitFlowApp() {
                         </span>
                       </div>
                       {(currentMarketAnalysis.isHit || analysisTrigger) && (
-                        <Badge variant="outline" className="bg-primary text-white border-primary text-[8px] font-black tracking-[0.15em] px-3 py-0.5 rounded-lg animate-pulse shadow-md">
+                        <Badge variant="outline" className="bg-primary text-white border-primary text-[8px] font-black tracking-[0.15em] px-3 py-0.5 rounded-lg animate-pulse shadow-sm">
                           CONFIRMED ENTRY
                         </Badge>
                       )}
@@ -790,7 +790,7 @@ export default function DigitFlowApp() {
                 </CardContent>
               </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <TacticalAnalysisCard 
                   title="Over / Under Analysis" 
                   labels={["Over", "Under"]} 
@@ -887,7 +887,7 @@ export default function DigitFlowApp() {
           
           <TabsContent value="scanner" className="mt-0 outline-none pb-20"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/signals" className="w-full h-full" /></Card></TabsContent>
           <TabsContent value="digits" className="mt-0 outline-none pb-20"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/digitshome" className="w-full h-full" /></Card></TabsContent>
-          <TabsContent value="percentage" className="mt-0 outline-none pb-20"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://api.binarytool.site" className="w-full h-full" /></Card></TabsContent>
+          <TabsContent value="percentage" className="mt-0 outline-none pb-20"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/percentage" className="w-full h-full" /></Card></TabsContent>
         </Tabs>
 
         <div className="w-full pt-12 pb-8 flex flex-col items-center justify-center gap-2 border-t border-border/10 mt-8 opacity-70">
