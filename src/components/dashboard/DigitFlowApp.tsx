@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect, useRef } from 'react';
@@ -746,21 +747,21 @@ export default function DigitFlowApp() {
                   </div>
                   
                   <div className="flex flex-col items-center justify-center py-2 gap-3">
-                    <div className="w-[190px] h-[64px] border border-primary/40 rounded-xl bg-black/60 flex items-center justify-center shadow-[0_0_15px_rgba(0,166,166,0.15)] backdrop-blur-lg">
-                      <span className="text-xl sm:text-2xl font-black tracking-tight text-primary brand-glow tabular-nums">
+                    <div className="w-[144px] h-[48px] border border-primary/40 rounded-xl bg-black/60 flex items-center justify-center shadow-[0_0_15px_rgba(0,166,166,0.15)] backdrop-blur-lg">
+                      <span className="text-sm font-black tracking-tight text-primary brand-glow tabular-nums">
                         {latestPrice?.toFixed(2) || "---"}
                       </span>
                     </div>
                     
                     <div className={cn(
-                      "flex flex-col items-center gap-1.5 px-4 py-1.5 text-[10px] rounded-lg border transition-all duration-500 animate-in fade-in zoom-in shadow-md",
+                      "flex flex-col items-center gap-1.5 px-3 py-1 text-[8px] rounded-lg border transition-all duration-500 animate-in fade-in zoom-in shadow-md",
                       (currentMarketAnalysis.isHit || analysisTrigger)
                         ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(0,166,166,0.15)] scale-102" 
                         : "bg-muted/5 border-border/10 opacity-50 scale-100"
                     )}>
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-2">
                         <div className={cn(
-                          "w-2 h-2 rounded-full transition-all duration-300",
+                          "w-1.5 h-1.5 rounded-full transition-all duration-300",
                           (currentMarketAnalysis.isHit || analysisTrigger) ? "bg-primary animate-ping" : "bg-muted-foreground/20"
                         )} />
                         <span className={cn(
@@ -774,11 +775,6 @@ export default function DigitFlowApp() {
                               : "SCANNING ENGINE ACTIVE"}
                         </span>
                       </div>
-                      {(currentMarketAnalysis.isHit || analysisTrigger) && (
-                        <Badge variant="outline" className="bg-primary text-white border-primary text-[8px] font-black tracking-[0.15em] px-3 py-0.5 rounded-lg animate-pulse shadow-sm">
-                          CONFIRMED ENTRY
-                        </Badge>
-                      )}
                     </div>
                   </div>
 
@@ -790,7 +786,7 @@ export default function DigitFlowApp() {
                 </CardContent>
               </Card>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="flex flex-col gap-6">
                 <TacticalAnalysisCard 
                   title="Over / Under Analysis" 
                   labels={["Over", "Under"]} 
