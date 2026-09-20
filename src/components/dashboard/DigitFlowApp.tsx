@@ -769,8 +769,7 @@ export default function DigitFlowApp() {
                   </div>
                   
                   <div className="flex flex-col items-center justify-center py-6 gap-8">
-                    {/* REDUCED PRICE DISPLAY SIZE HERE */}
-                    <div className="text-4xl sm:text-7xl font-black tracking-tighter flex items-baseline tabular-nums text-primary brand-glow">
+                    <div className="text-2xl sm:text-4xl font-black tracking-tighter flex items-baseline tabular-nums text-primary brand-glow">
                       {latestPrice?.toFixed(2) || "---"}
                     </div>
                     
