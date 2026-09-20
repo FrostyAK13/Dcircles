@@ -462,8 +462,8 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
     <Card className="bg-card border-border/20 shadow-xl rounded-3xl overflow-hidden icy-glass flex flex-col w-full">
       <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between">
         <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">{title}</h3>
-        <div className="px-4 py-2 rounded-xl border-2 border-primary/40 bg-primary/20 text-sm sm:text-xl font-black text-primary tracking-wider tabular-nums shadow-[0_0_15px_rgba(0,166,166,0.3)] animate-pulse-subtle">
-          ${livePrice?.toFixed(2) || "---"}
+        <div className="px-4 py-2 rounded-xl border-2 border-primary/40 bg-primary/20 text-xl sm:text-2xl font-black text-primary tracking-wider tabular-nums shadow-[0_0_15px_rgba(0,166,166,0.3)] animate-pulse-subtle">
+          {livePrice?.toFixed(2) || "---"}
         </div>
       </CardHeader>
       <CardContent className="p-5 flex flex-col gap-6 justify-between flex-1">
