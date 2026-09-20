@@ -746,8 +746,8 @@ export default function DigitFlowApp() {
                   </div>
                   
                   <div className="flex flex-col items-center justify-center py-4 gap-4">
-                    <div className="w-32 h-9 border border-primary/30 rounded-xl bg-black/40 flex items-center justify-center shadow-lg backdrop-blur-md">
-                      <span className="text-[11px] font-black tracking-widest text-primary brand-glow tabular-nums">
+                    <div className="w-64 h-20 border-2 border-primary/40 rounded-2xl bg-black/60 flex items-center justify-center shadow-[0_0_20px_rgba(0,166,166,0.2)] backdrop-blur-lg">
+                      <span className="text-3xl sm:text-4xl font-black tracking-tight text-primary brand-glow tabular-nums">
                         {latestPrice?.toFixed(2) || "---"}
                       </span>
                     </div>
