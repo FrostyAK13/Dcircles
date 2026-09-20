@@ -374,10 +374,14 @@ interface SignalScannerProps {
 
 function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistry }: SignalScannerProps) {
   const sortedSignalsList = useMemo(() => {
-    const goldens = signals.filter(id => goldenIds.includes(id));
-    const rest = signals.filter(id => !goldenIds.includes(id));
-    return [...goldens, ...rest];
-  }, [signals, goldenIds]);
+    // Priority 1: Most recent timestamp first
+    // Priority 2: Golden status (optional if the user wants newest absolutely first)
+    return [...signals].sort((a, b) => {
+      const entryA = signalRegistry[a];
+      const entryB = signalRegistry[b];
+      return (entryB?.timestamp || 0) - (entryA?.timestamp || 0);
+    });
+  }, [signals, signalRegistry]);
 
   return (
     <Card className="border-primary/20 shadow-2xl icy-glow icy-glass overflow-hidden rounded-[2.5rem]">
@@ -462,7 +466,7 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
     <Card className="border-border/20 shadow-xl rounded-3xl overflow-hidden icy-glass flex flex-col w-full">
       <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between bg-black/20">
         <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">{title}</h3>
-        <div className="px-6 py-2.5 rounded-2xl border-2 border-primary/40 bg-primary/20 text-2xl sm:text-3xl font-black text-primary tracking-wider tabular-nums shadow-[0_0_20px_rgba(0,166,166,0.4)] animate-pulse-subtle">
+        <div className="px-6 py-2.5 rounded-2xl border-2 border-primary/40 bg-primary/20 text-lg sm:text-2xl font-black text-primary tracking-wider tabular-nums shadow-[0_0_20px_rgba(0,166,166,0.4)] animate-pulse-subtle">
           {livePrice?.toFixed(2) || "---"}
         </div>
       </CardHeader>
@@ -609,8 +613,8 @@ export default function DigitFlowApp() {
   }, [marketData, currentSymbol, activeStrategy]);
 
   const tacticalStats = useMemo(() => {
-    const lastWindow = ticks.slice(-1000);
-    const lastWindowPrices = prices.slice(-1000);
+    const lastWindow = ticks.slice(-100);
+    const lastWindowPrices = prices.slice(-100);
     
     const ouCounts: [number, number] = [lastWindow.filter(d => d > ouTarget).length, lastWindow.filter(d => d < (ouTarget + 1)).length];
     const eoCounts: [number, number] = [lastWindow.filter(d => d % 2 === 0).length, lastWindow.filter(d => d % 2 !== 0).length];
@@ -716,24 +720,24 @@ export default function DigitFlowApp() {
                   </div>
                   
                   <div className="flex flex-col items-center justify-center py-1 gap-2">
-                    <div className="w-[144px] h-[48px] border-2 border-primary/40 rounded-xl bg-black/80 flex items-center justify-center shadow-[0_0_30px_rgba(0,166,166,0.5)] backdrop-blur-lg">
-                      <span className="text-2xl sm:text-3xl font-black tracking-tighter text-primary brand-glow tabular-nums">
+                    <div className="w-[100px] sm:w-[144px] h-[35px] sm:h-[48px] border-2 border-primary/40 rounded-xl bg-black/80 flex items-center justify-center shadow-[0_0_30px_rgba(0,166,166,0.5)] backdrop-blur-lg">
+                      <span className="text-xl sm:text-2xl font-black tracking-tighter text-primary brand-glow tabular-nums">
                         {latestPrice?.toFixed(2) || "---"}
                       </span>
                     </div>
                     
                     <div className={cn(
-                      "flex flex-col items-center gap-1 px-4 py-1 text-[8px] rounded-lg border transition-all duration-500 shadow-sm",
+                      "flex flex-col items-center gap-1 px-3 py-0.5 text-[7px] rounded-lg border transition-all duration-500 shadow-sm",
                       (currentMarketAnalysis.isHit || analysisTrigger)
                         ? "bg-primary/20 border-primary shadow-[0_0_20px_rgba(0,166,166,0.3)]" 
                         : "bg-black/20 border-white/10 opacity-50"
                     )}>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1">
                         <div className={cn(
                           "w-1 h-1 rounded-full",
                           (currentMarketAnalysis.isHit || analysisTrigger) ? "bg-primary animate-ping" : "bg-muted-foreground/20"
                         )} />
-                        <span className="font-black uppercase tracking-[0.15em] text-muted-foreground">
+                        <span className="font-black uppercase tracking-[0.1em] text-muted-foreground">
                           {analysisTrigger 
                             ? `${analysisTrigger.side} TRIGGER: DIGIT ${analysisTrigger.digit}`
                             : currentMarketAnalysis.isHit 
@@ -879,3 +883,4 @@ export default function DigitFlowApp() {
     </div>
   );
 }
+
