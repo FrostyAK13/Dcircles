@@ -13,18 +13,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
 import { Progress } from "@/components/ui/progress";
-import { 
-  Bar, 
-  BarChart, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  Area,
-  AreaChart
-} from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -47,17 +35,6 @@ export const CONTINUOUS_INDICES = [
   { id: 'JD75', name: 'Jump 75 Index', short: 'J75' },
   { id: 'JD100', name: 'Jump 100 Index', short: 'J100' },
 ];
-
-const chartConfig = {
-  percentage: {
-    label: "Frequency %",
-    color: "hsl(var(--primary))",
-  },
-  price: {
-    label: "Price",
-    color: "hsl(var(--primary))",
-  }
-} satisfies ChartConfig;
 
 function calculateEMA(prices: number[], period: number) {
   if (prices.length < period) return null;
@@ -768,9 +745,12 @@ export default function DigitFlowApp() {
                     </Select>
                   </div>
                   
-                  <div className="flex flex-col items-center justify-center py-6 gap-8">
-                    <div className="text-2xl sm:text-4xl font-black tracking-tighter flex items-baseline tabular-nums text-primary brand-glow">
-                      {latestPrice?.toFixed(2) || "---"}
+                  <div className="flex flex-col items-center justify-center py-4 gap-4">
+                    {/* Explicit physical dimensions: 1.5 inches wide by 0.5 inches high (144px x 48px) */}
+                    <div className="w-[144px] h-[48px] border border-primary/30 rounded-xl bg-black/40 flex items-center justify-center shadow-lg backdrop-blur-md">
+                      <span className="text-sm font-black tracking-widest text-primary brand-glow tabular-nums">
+                        {latestPrice?.toFixed(2) || "---"}
+                      </span>
                     </div>
                     
                     <div className={cn(
