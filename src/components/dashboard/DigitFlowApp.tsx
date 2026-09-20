@@ -746,9 +746,8 @@ export default function DigitFlowApp() {
                   </div>
                   
                   <div className="flex flex-col items-center justify-center py-4 gap-4">
-                    {/* Explicit physical dimensions: 1.5 inches wide by 0.5 inches high (144px x 48px) */}
-                    <div className="w-[144px] h-[48px] border border-primary/30 rounded-xl bg-black/40 flex items-center justify-center shadow-lg backdrop-blur-md">
-                      <span className="text-sm font-black tracking-widest text-primary brand-glow tabular-nums">
+                    <div className="w-32 h-9 border border-primary/30 rounded-xl bg-black/40 flex items-center justify-center shadow-lg backdrop-blur-md">
+                      <span className="text-[11px] font-black tracking-widest text-primary brand-glow tabular-nums">
                         {latestPrice?.toFixed(2) || "---"}
                       </span>
                     </div>
