@@ -373,7 +373,7 @@ interface SignalScannerProps {
 }
 
 function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistry }: SignalScannerProps) {
-  const sortedSignals = useMemo(() => {
+  const sortedSignalsList = useMemo(() => {
     const goldens = signals.filter(id => goldenIds.includes(id));
     const rest = signals.filter(id => !goldenIds.includes(id));
     return [...goldens, ...rest];
@@ -400,9 +400,9 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
         </div>
       </CardHeader>
       <CardContent className="p-4 sm:p-6 min-h-[120px] flex items-center justify-center">
-        {sortedSignals.length > 0 ? (
+        {sortedSignalsList.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full">
-            {sortedSignals.map((id) => {
+            {sortedSignalsList.map((id) => {
               const market = CONTINUOUS_INDICES.find(m => m.id === id);
               if (!market) return null;
               const entry = signalRegistry[id];
@@ -460,9 +460,9 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
 
   return (
     <Card className="bg-card border-border/20 shadow-xl rounded-3xl overflow-hidden icy-glass flex flex-col w-full">
-      <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between">
+      <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between bg-muted/5">
         <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">{title}</h3>
-        <div className="px-4 py-2 rounded-xl border-2 border-primary/40 bg-primary/20 text-xl sm:text-2xl font-black text-primary tracking-wider tabular-nums shadow-[0_0_15px_rgba(0,166,166,0.3)] animate-pulse-subtle">
+        <div className="px-6 py-2.5 rounded-2xl border-2 border-primary/40 bg-primary/20 text-2xl sm:text-3xl font-black text-primary tracking-wider tabular-nums shadow-[0_0_20px_rgba(0,166,166,0.4)] animate-pulse-subtle">
           {livePrice?.toFixed(2) || "---"}
         </div>
       </CardHeader>
@@ -716,8 +716,8 @@ export default function DigitFlowApp() {
                   </div>
                   
                   <div className="flex flex-col items-center justify-center py-1 gap-2">
-                    <div className="w-[180px] h-[64px] border-2 border-primary/40 rounded-xl bg-black/60 flex items-center justify-center shadow-[0_0_20px_rgba(0,166,166,0.25)] backdrop-blur-lg">
-                      <span className="text-xl sm:text-3xl font-black tracking-tighter text-primary brand-glow tabular-nums">
+                    <div className="w-[144px] h-[48px] border-2 border-primary/40 rounded-xl bg-black/60 flex items-center justify-center shadow-[0_0_30px_rgba(0,166,166,0.35)] backdrop-blur-lg">
+                      <span className="text-2xl sm:text-3xl font-black tracking-tighter text-primary brand-glow tabular-nums">
                         {latestPrice?.toFixed(2) || "---"}
                       </span>
                     </div>
@@ -851,9 +851,21 @@ export default function DigitFlowApp() {
             </Tabs>
           </TabsContent>
           
-          <TabsContent value="scanner" className="mt-0 outline-none pb-20"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/signals" className="w-full h-full" /></Card></TabsContent>
-          <TabsContent value="digits" className="mt-0 outline-none pb-20"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/digitshome" className="w-full h-full" /></Card></TabsContent>
-          <TabsContent value="percentage" className="mt-0 outline-none pb-20"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://tracktool.netlify.app/percentage" className="w-full h-full" /></Card></TabsContent>
+          <TabsContent value="scanner" className="mt-0 outline-none pb-10">
+            <Card className="h-[85vh] min-h-[600px] overflow-hidden rounded-[2.5rem] border-primary/20 shadow-2xl icy-glow">
+              <iframe src="https://tracktool.netlify.app/signals" className="w-full h-full border-none" />
+            </Card>
+          </TabsContent>
+          <TabsContent value="digits" className="mt-0 outline-none pb-10">
+            <Card className="h-[85vh] min-h-[600px] overflow-hidden rounded-[2.5rem] border-primary/20 shadow-2xl icy-glow">
+              <iframe src="https://tracktool.netlify.app/digitshome" className="w-full h-full border-none" />
+            </Card>
+          </TabsContent>
+          <TabsContent value="percentage" className="mt-0 outline-none pb-10">
+            <Card className="h-[85vh] min-h-[600px] overflow-hidden rounded-[2.5rem] border-primary/20 shadow-2xl icy-glow">
+              <iframe src="https://api.binarytool.site" className="w-full h-full border-none" />
+            </Card>
+          </TabsContent>
         </Tabs>
 
         <div className="w-full pt-12 pb-8 flex flex-col items-center justify-center gap-2 border-t border-border/10 mt-8 opacity-70">
