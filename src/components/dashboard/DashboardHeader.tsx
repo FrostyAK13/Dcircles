@@ -43,10 +43,10 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
   };
 
   return (
-    <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
-      <div className="flex items-center gap-2 sm:gap-4">
+    <div className="flex items-center justify-between px-4 sm:px-6 py-2 sm:py-3 border-b border-border bg-card/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
+      <div className="flex items-center gap-2 sm:gap-3">
         {logo && (
-          <div className="relative w-7 h-7 sm:w-9 h-9 rounded-xl overflow-hidden border border-primary/30 icy-glow shrink-0 animate-pulse-subtle">
+          <div className="relative w-6 h-6 sm:w-8 h-8 rounded-lg overflow-hidden border border-primary/30 icy-glow shrink-0 animate-pulse-subtle">
             <Image 
               src={logo.imageUrl} 
               alt={logo.description} 
@@ -63,7 +63,7 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
             rel="noopener noreferrer"
             className="block hover:opacity-90 transition-all cursor-pointer no-underline group"
           >
-            <h1 className="text-sm sm:text-2xl font-black tracking-[0.1em] text-primary uppercase italic shiny-effect brand-glow brand-vibrate px-2 sm:px-4 py-1 rounded-xl whitespace-nowrap bg-primary/10 border-2 border-primary/20 transition-all group-hover:bg-primary/20 group-hover:scale-105">
+            <h1 className="text-[9px] sm:text-sm font-black tracking-[0.1em] text-primary uppercase italic shiny-effect brand-glow brand-vibrate px-2 sm:px-3 py-0.5 rounded-lg whitespace-nowrap bg-primary/10 border-2 border-primary/20 transition-all group-hover:bg-primary/20 group-hover:scale-105">
               INDEX NAVIGATOR
             </h1>
           </a>
@@ -80,14 +80,14 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
               className="rounded-xl w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
             >
               {theme === "light" ? (
-                <Moon className="w-4 h-4 sm:w-6 sm:h-6" />
+                <Moon className="w-4 h-4 sm:w-5 sm:h-5" />
               ) : (
-                <Sun className="w-4 h-4 sm:w-6 sm:h-6" />
+                <Sun className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
             </Button>
             
-            <Badge variant="outline" className={cn("px-2 sm:px-5 py-1.5 flex items-center gap-1.5 sm:gap-2 text-[8px] sm:text-[11px] font-black uppercase tracking-[0.2em] rounded-xl transition-all border-2", statusColors[status])}>
-              <div className={cn("w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full animate-ping", status === 'connected' ? "bg-primary" : "bg-current")} />
+            <Badge variant="outline" className={cn("px-2 sm:px-4 py-1 flex items-center gap-1 sm:gap-2 text-[7px] sm:text-[9px] font-black uppercase tracking-[0.2em] rounded-lg transition-all border-2", statusColors[status])}>
+              <div className={cn("w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full animate-ping", status === 'connected' ? "bg-primary" : "bg-current")} />
               <span className="hidden xs:inline">{status}</span>
             </Badge>
           </div>
