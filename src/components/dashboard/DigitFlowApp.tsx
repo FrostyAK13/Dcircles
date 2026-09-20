@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useDigitAnalysis } from '@/hooks/use-digit-analysis';
 import { useMultiMarketAnalysis, type MarketData } from '@/hooks/use-multi-market-analysis';
 import { DashboardHeader } from './DashboardHeader';
@@ -9,7 +8,7 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle, Radio, Star, Timer, AreaChart as AreaChartIcon, ChevronRight } from 'lucide-react';
+import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle, Radio, Star, Timer, ChevronRight } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
@@ -339,9 +338,6 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
           )}>
             {market.name.replace('Index', '').trim()}
           </span>
-          {strategy === 'RISE_FALL' && (
-            <span className="text-[6px] font-bold text-muted-foreground/40 uppercase tracking-[0.1em] mt-0.5">100T | 5T Target</span>
-          )}
         </div>
         
         <div className={cn(
@@ -357,20 +353,6 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
             {isGolden ? (analysis.direction || "GOLDEN") : (isFlashy ? analysis.signal : "SCANNING")}
           </span>
         </div>
-
-        {strategy === 'HIGHER_LOWER' && analysis.barrier && (
-           <div className="mt-3 w-full flex flex-col items-center gap-1 animate-in fade-in zoom-in duration-500">
-             <span className="text-[6px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">Calculated Barrier</span>
-             <div className={cn(
-               "px-4 py-1.5 rounded-xl font-black text-[11px] tabular-nums border shadow-lg transition-all",
-               analysis.direction === 'HIGHER' 
-                 ? "bg-primary/10 border-primary/40 text-primary shadow-[0_0_15px_rgba(0,166,166,0.2)]" 
-                 : "bg-rose-500/10 border-rose-500/40 text-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.2)]"
-             )}>
-               {analysis.barrier}
-             </div>
-           </div>
-        )}
       </div>
 
       <div className="absolute bottom-2 right-2 flex items-center gap-1 z-10 opacity-30">
@@ -396,18 +378,6 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
     return [...goldens, ...rest];
   }, [signals, goldenIds]);
 
-  const strategyMeta = useMemo(() => {
-    switch(strategy) {
-      case 'OVER_UNDER': return '100 Ticks Density / 20 Ticks Momentum';
-      case 'EVEN_ODD': return '100 Ticks Density / 20 Ticks Momentum';
-      case 'MATCHES': return '200 Ticks Density / 50 Ticks Momentum';
-      case 'RISE_FALL': return '100 Ticks Analysis / 5 Ticks Duration';
-      case 'HIGHER_LOWER': return '50 Ticks SMA & ATR Analysis';
-      case 'ONLY_UPS_DOWNS': return 'EMA & Velocity & Breakout Analysis';
-      default: return 'Real-time Statistical Engine';
-    }
-  }, [strategy]);
-
   return (
     <Card className="bg-card border-primary/20 shadow-2xl icy-glow overflow-hidden rounded-[2.5rem]">
       <CardHeader className="py-4 px-6 border-b border-border/40 flex flex-row items-center justify-between bg-muted/20">
@@ -416,7 +386,6 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
             <Radio className="w-5 h-5 text-primary animate-pulse" />
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">Live Signal Scanner</h3>
           </div>
-          <span className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.1em] ml-8">{strategyMeta}</span>
         </div>
         <div className="flex items-center gap-2">
           {goldenIds.length > 0 && (
@@ -470,11 +439,12 @@ interface TacticalAnalysisCardProps {
   history: number[];
   colorSchema: 'cyan-rose' | 'amber-cyan';
   type: 'over-under' | 'even-odd' | 'matches' | 'rise-fall';
+  livePrice: number | null;
   targetDigit?: number;
   onTargetChange?: (val: number) => void;
 }
 
-function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, type, targetDigit, onTargetChange }: TacticalAnalysisCardProps) {
+function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, type, livePrice, targetDigit, onTargetChange }: TacticalAnalysisCardProps) {
   const total = counts[0] + counts[1];
   const p1 = total > 0 ? Math.round((counts[0] / total) * 100) : 0;
   const p2 = total > 0 ? Math.round((counts[1] / total) * 100) : 0;
@@ -488,9 +458,12 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
   };
 
   return (
-    <Card className="bg-card border-border/20 shadow-xl rounded-3xl overflow-hidden icy-glass flex flex-col h-full">
-      <CardHeader className="py-4 px-6 border-b border-border/10">
+    <Card className="bg-card border-border/20 shadow-xl rounded-3xl overflow-hidden icy-glass flex flex-col w-full">
+      <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between">
         <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">{title}</h3>
+        <div className="px-2 py-0.5 rounded-lg border border-primary/20 bg-black/40 text-[9px] font-mono font-bold text-primary tracking-tight tabular-nums shadow-sm animate-pulse-subtle">
+          ${livePrice?.toFixed(2) || "---"}
+        </div>
       </CardHeader>
       <CardContent className="p-5 flex flex-col gap-6 justify-between flex-1">
         {onTargetChange && (
@@ -563,7 +536,6 @@ export default function DigitFlowApp() {
   });
   const [activeStrategy, setActiveStrategy] = useState('OVER_UNDER');
   const [tradeSide, setTradeSide] = useState('none');
-  const [mounted, setMounted] = useState(false);
   const [activeMainTab, setActiveMainTab] = useState('dashboard');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
@@ -579,8 +551,6 @@ export default function DigitFlowApp() {
 
   const currentSymbol = strategySelections[activeStrategy] || 'R_10';
   const { distribution, latestDigit, latestPrice, totalTicks, prices, ticks } = useDigitAnalysis(currentSymbol);
-
-  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     const now = Date.now();
@@ -680,8 +650,6 @@ export default function DigitFlowApp() {
 
   const handleMarketSelect = (marketId: string) => setStrategySelections(prev => ({ ...prev, [activeStrategy]: marketId }));
 
-  if (!mounted) return null;
-
   return (
     <div className="flex flex-col min-h-screen w-full bg-background text-foreground relative overflow-hidden">
       <DashboardHeader status={status} />
@@ -746,28 +714,25 @@ export default function DigitFlowApp() {
                     </Select>
                   </div>
                   
-                  <div className="flex flex-col items-center justify-center py-2 gap-3">
-                    <div className="w-[144px] h-[48px] border border-primary/40 rounded-xl bg-black/60 flex items-center justify-center shadow-[0_0_15px_rgba(0,166,166,0.15)] backdrop-blur-lg">
-                      <span className="text-sm font-black tracking-tight text-primary brand-glow tabular-nums">
+                  <div className="flex flex-col items-center justify-center py-1 gap-2">
+                    <div className="px-4 py-1.5 border-2 border-primary/40 rounded-xl bg-black/60 flex items-center justify-center shadow-[0_0_15px_rgba(0,166,166,0.2)] backdrop-blur-lg scale-90">
+                      <span className="text-xs font-black tracking-tighter text-primary brand-glow tabular-nums">
                         {latestPrice?.toFixed(2) || "---"}
                       </span>
                     </div>
                     
                     <div className={cn(
-                      "flex flex-col items-center gap-1.5 px-3 py-1 text-[8px] rounded-lg border transition-all duration-500 animate-in fade-in zoom-in shadow-md",
+                      "flex flex-col items-center gap-1 px-2.5 py-0.5 text-[7px] rounded-lg border transition-all duration-500 shadow-sm",
                       (currentMarketAnalysis.isHit || analysisTrigger)
-                        ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(0,166,166,0.15)] scale-102" 
-                        : "bg-muted/5 border-border/10 opacity-50 scale-100"
+                        ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(0,166,166,0.15)]" 
+                        : "bg-muted/5 border-border/10 opacity-50"
                     )}>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <div className={cn(
-                          "w-1.5 h-1.5 rounded-full transition-all duration-300",
+                          "w-1 h-1 rounded-full",
                           (currentMarketAnalysis.isHit || analysisTrigger) ? "bg-primary animate-ping" : "bg-muted-foreground/20"
                         )} />
-                        <span className={cn(
-                          "font-black uppercase tracking-[0.2em] transition-colors",
-                          (currentMarketAnalysis.isHit || analysisTrigger) ? "text-primary" : "text-muted-foreground/50"
-                        )}>
+                        <span className="font-black uppercase tracking-[0.15em] text-muted-foreground">
                           {analysisTrigger 
                             ? `${analysisTrigger.side} TRIGGER: DIGIT ${analysisTrigger.digit}`
                             : currentMarketAnalysis.isHit 
@@ -786,14 +751,15 @@ export default function DigitFlowApp() {
                 </CardContent>
               </Card>
 
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-6 max-w-5xl mx-auto w-full">
                 <TacticalAnalysisCard 
                   title="Over / Under Analysis" 
                   labels={["Over", "Under"]} 
-                  counts={tacticalStats.ouCounts} 
+                  counts={customAnalysisCounts => tacticalStats.ouCounts} 
                   history={ticks.slice(-10)} 
                   colorSchema="cyan-rose" 
                   type="over-under"
+                  livePrice={latestPrice}
                   targetDigit={ouTarget}
                   onTargetChange={setOuTarget}
                 />
@@ -804,6 +770,7 @@ export default function DigitFlowApp() {
                   history={ticks.slice(-10)} 
                   colorSchema="cyan-rose" 
                   type="even-odd"
+                  livePrice={latestPrice}
                 />
                 <TacticalAnalysisCard 
                   title="Matches / Differs" 
@@ -812,6 +779,7 @@ export default function DigitFlowApp() {
                   history={ticks.slice(-10)} 
                   colorSchema="amber-cyan" 
                   type="matches"
+                  livePrice={latestPrice}
                   targetDigit={matchTarget}
                   onTargetChange={setMatchTarget}
                 />
@@ -822,6 +790,7 @@ export default function DigitFlowApp() {
                   history={tacticalStats.rfHistory} 
                   colorSchema="cyan-rose" 
                   type="rise-fall"
+                  livePrice={latestPrice}
                 />
               </div>
             </div>
