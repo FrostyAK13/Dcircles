@@ -706,7 +706,7 @@ export default function DigitFlowApp() {
           <TabsContent value="dashboard" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none pb-20">
             <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
               <Card className="border-none bg-card rounded-[3rem] shadow-2xl icy-glow overflow-hidden relative">
-                <CardContent className="p-4 sm:p-12 space-y-8">
+                <CardContent className="p-4 sm:p-12 space-y-6">
                   <div className="flex flex-col sm:flex-row items-center gap-4 justify-between w-full">
                     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                       <PopoverTrigger asChild>
@@ -745,27 +745,27 @@ export default function DigitFlowApp() {
                     </Select>
                   </div>
                   
-                  <div className="flex flex-col items-center justify-center py-4 gap-4">
-                    <div className="w-64 h-20 border-2 border-primary/40 rounded-2xl bg-black/60 flex items-center justify-center shadow-[0_0_20px_rgba(0,166,166,0.2)] backdrop-blur-lg">
-                      <span className="text-3xl sm:text-4xl font-black tracking-tight text-primary brand-glow tabular-nums">
+                  <div className="flex flex-col items-center justify-center py-2 gap-3">
+                    <div className="w-[190px] h-[64px] border border-primary/40 rounded-xl bg-black/60 flex items-center justify-center shadow-[0_0_15px_rgba(0,166,166,0.15)] backdrop-blur-lg">
+                      <span className="text-xl sm:text-2xl font-black tracking-tight text-primary brand-glow tabular-nums">
                         {latestPrice?.toFixed(2) || "---"}
                       </span>
                     </div>
                     
                     <div className={cn(
-                      "flex flex-col items-center gap-4 px-10 py-5 rounded-[2.5rem] border-2 transition-all duration-700 animate-in fade-in zoom-in shadow-2xl",
+                      "flex flex-col items-center gap-2 px-5 py-2.5 rounded-xl border transition-all duration-500 animate-in fade-in zoom-in shadow-lg",
                       (currentMarketAnalysis.isHit || analysisTrigger)
-                        ? "bg-primary/10 border-primary shadow-[0_0_60px_rgba(0,166,166,0.3)] scale-110" 
-                        : "bg-muted/10 border-border/20 opacity-40 scale-100"
+                        ? "bg-primary/10 border-primary shadow-[0_0_30px_rgba(0,166,166,0.2)] scale-105" 
+                        : "bg-muted/5 border-border/10 opacity-50 scale-100"
                     )}>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2.5">
                         <div className={cn(
-                          "w-5 h-5 rounded-full transition-all duration-300",
-                          (currentMarketAnalysis.isHit || analysisTrigger) ? "bg-primary animate-ping" : "bg-muted-foreground/30"
+                          "w-3 h-3 rounded-full transition-all duration-300",
+                          (currentMarketAnalysis.isHit || analysisTrigger) ? "bg-primary animate-ping" : "bg-muted-foreground/20"
                         )} />
                         <span className={cn(
-                          "text-sm sm:text-2xl font-black uppercase tracking-[0.5em] transition-colors",
-                          (currentMarketAnalysis.isHit || analysisTrigger) ? "text-primary" : "text-muted-foreground/60"
+                          "text-xs font-black uppercase tracking-[0.2em] transition-colors",
+                          (currentMarketAnalysis.isHit || analysisTrigger) ? "text-primary" : "text-muted-foreground/50"
                         )}>
                           {analysisTrigger 
                             ? `${analysisTrigger.side} TRIGGER: DIGIT ${analysisTrigger.digit}`
@@ -775,8 +775,8 @@ export default function DigitFlowApp() {
                         </span>
                       </div>
                       {(currentMarketAnalysis.isHit || analysisTrigger) && (
-                        <Badge variant="outline" className="bg-primary text-white border-primary text-[10px] sm:text-[12px] font-black tracking-[0.3em] px-6 py-1.5 rounded-2xl animate-pulse shadow-lg">
-                          HIGH CONFIDENCE ENTRY
+                        <Badge variant="outline" className="bg-primary text-white border-primary text-[8px] font-black tracking-[0.15em] px-3 py-0.5 rounded-lg animate-pulse shadow-md">
+                          CONFIRMED ENTRY
                         </Badge>
                       )}
                     </div>
@@ -890,9 +890,9 @@ export default function DigitFlowApp() {
           <TabsContent value="percentage" className="mt-0 outline-none pb-20"><Card className="h-[80vh] overflow-hidden rounded-3xl"><iframe src="https://api.binarytool.site" className="w-full h-full" /></Card></TabsContent>
         </Tabs>
 
-        <div className="w-full pt-12 pb-8 flex flex-col items-center justify-center gap-2 border-t border-border/10 mt-8 opacity-60">
-          <div className="flex items-center gap-2 text-[10px] sm:text-[12px] font-black uppercase tracking-[0.3em] text-[#A67C52] transition-all hover:opacity-100 hover:scale-105">
-            <div className="w-2 h-2 rounded-full bg-[#A67C52] animate-pulse" />
+        <div className="w-full pt-12 pb-8 flex flex-col items-center justify-center gap-2 border-t border-border/10 mt-8 opacity-70">
+          <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.3em] text-[#A67C52] transition-all hover:opacity-100 brand-vibrate">
+            <div className="w-2 h-2 rounded-full bg-[#A67C52] animate-pulse shadow-[0_0_10px_rgba(166,124,82,0.5)]" />
             Created by Alex
           </div>
           <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.1em]">© 2025 INDEX NAVIGATOR TAC HUB</span>
