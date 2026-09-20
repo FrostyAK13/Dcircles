@@ -1,3 +1,4 @@
+
 {
   "placeholderImages": [
     {
@@ -5,6 +6,12 @@
       "description": "Official INDEX NAVIGATOR branding logo with jungle emerald 'I' and data peaks.",
       "imageUrl": "https://picsum.photos/seed/indexnav-jungle/400/400",
       "imageHint": "emerald logo"
+    },
+    {
+      "id": "app-background",
+      "description": "Cybernetic trading robot background theme.",
+      "imageUrl": "https://storage.googleapis.com/fetch-and-generate-images/343c9b71-b847-49f9-9ea2-30cb32ce5f7f.png",
+      "imageHint": "cyber trading"
     }
   ]
 }

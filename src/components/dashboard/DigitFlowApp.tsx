@@ -291,14 +291,14 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
     <div
       onClick={() => onSelect?.(market.id)}
       className={cn(
-        "group relative flex flex-col items-center justify-between p-4 sm:p-5 rounded-[2.5rem] border-2 transition-all duration-500 min-h-[180px] sm:min-h-[200px] cursor-default overflow-hidden",
+        "group relative flex flex-col items-center justify-between p-4 sm:p-5 rounded-[2.5rem] border-2 transition-all duration-500 min-h-[180px] sm:min-h-[200px] cursor-default overflow-hidden icy-glass",
         isGolden 
-          ? "bg-amber-400/10 border-amber-400 shadow-[0_0_40px_rgba(251,191,36,0.5)] z-20 scale-[1.05]" 
+          ? "border-amber-400 shadow-[0_0_40px_rgba(251,191,36,0.5)] z-20 scale-[1.05]" 
           : isFlashy 
-            ? "bg-card border-primary shadow-[0_0_40px_rgba(0,166,166,0.4)] z-10 scale-[1.02] dark:bg-primary/10" 
+            ? "border-primary shadow-[0_0_40px_rgba(0,166,166,0.4)] z-10 scale-[1.02]" 
             : isSelected
-              ? "bg-card border-primary/40 shadow-[0_0_20px_rgba(0,166,166,0.05)] z-10 scale-[1.01]"
-              : "bg-muted/5 border-border/10 hover:border-border/30 hover:bg-muted/10 scale-100"
+              ? "border-primary/40 z-10 scale-[1.01]"
+              : "border-border/10 hover:border-border/30 scale-100"
       )}
     >
       {isGolden && <div className="absolute top-0 left-0 w-full h-1 bg-amber-400 animate-pulse" />}
@@ -335,7 +335,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
         <div className="flex flex-col items-center">
            <span className={cn(
             "text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-center px-1 truncate w-full",
-            isGolden ? "text-amber-500" : isSelected || isFlashy ? "text-primary" : "text-muted-foreground/40"
+            isGolden ? "text-amber-500" : isSelected || isFlashy ? "text-primary" : "text-muted-foreground/60"
           )}>
             {market.name.replace('Index', '').trim()}
           </span>
@@ -343,7 +343,7 @@ function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGold
         
         <div className={cn(
           "flex items-center gap-2 px-3 py-1.5 rounded-xl border mt-1 w-full justify-center transition-all duration-500",
-          isGolden ? "bg-amber-400/20 border-amber-400/50" : "bg-black/5 dark:bg-white/5 border-border/10"
+          isGolden ? "bg-amber-400/20 border-amber-400/50" : "bg-black/20 border-border/10"
         )}>
           <div className={cn(
             "w-2 h-2 rounded-full transition-all duration-300",
@@ -380,8 +380,8 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
   }, [signals, goldenIds]);
 
   return (
-    <Card className="bg-card border-primary/20 shadow-2xl icy-glow overflow-hidden rounded-[2.5rem]">
-      <CardHeader className="py-4 px-6 border-b border-border/40 flex flex-row items-center justify-between bg-muted/20">
+    <Card className="border-primary/20 shadow-2xl icy-glow icy-glass overflow-hidden rounded-[2.5rem]">
+      <CardHeader className="py-4 px-6 border-b border-border/40 flex flex-row items-center justify-between bg-black/20">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <Radio className="w-5 h-5 text-primary animate-pulse" />
@@ -459,8 +459,8 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
   };
 
   return (
-    <Card className="bg-card border-border/20 shadow-xl rounded-3xl overflow-hidden icy-glass flex flex-col w-full">
-      <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between bg-muted/5">
+    <Card className="border-border/20 shadow-xl rounded-3xl overflow-hidden icy-glass flex flex-col w-full">
+      <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between bg-black/20">
         <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">{title}</h3>
         <div className="px-6 py-2.5 rounded-2xl border-2 border-primary/40 bg-primary/20 text-2xl sm:text-3xl font-black text-primary tracking-wider tabular-nums shadow-[0_0_20px_rgba(0,166,166,0.4)] animate-pulse-subtle">
           {livePrice?.toFixed(2) || "---"}
@@ -469,7 +469,7 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
       <CardContent className="p-5 flex flex-col gap-6 justify-between flex-1">
         {onTargetChange && (
           <div className="flex flex-col gap-2">
-            <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Selecting Digit</span>
+            <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Selecting Digit</span>
             <div className="flex gap-1 overflow-x-auto pb-2 scrollbar-hide">
               {[0,1,2,3,4,5,6,7,8,9].map(d => (
                 <button
@@ -477,7 +477,7 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
                   onClick={() => onTargetChange(d)}
                   className={cn(
                     "w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black transition-all shrink-0",
-                    targetDigit === d ? "bg-primary text-white shadow-lg scale-110" : "bg-muted/30 text-muted-foreground hover:bg-muted/50"
+                    targetDigit === d ? "bg-primary text-white shadow-lg scale-110" : "bg-black/40 text-muted-foreground hover:bg-black/60"
                   )}
                 >
                   {d}
@@ -489,19 +489,19 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
-             <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{labels[0]}</span>
+             <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">{labels[0]}</span>
              <span className={cn("text-2xl font-black tabular-nums", colorSchema === 'cyan-rose' ? "text-primary" : "text-amber-500")}>{counts[0]}</span>
           </div>
           <div className="flex flex-col items-end gap-1">
-             <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">{labels[1]}</span>
+             <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">{labels[1]}</span>
              <span className="text-2xl font-black tabular-nums text-rose-500">{counts[1]}</span>
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center">
-            <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Digit History</span>
-            <span className="text-[6px] font-bold text-muted-foreground/40 uppercase">Next <ChevronRight className="inline w-2 h-2" /></span>
+            <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Digit History</span>
+            <span className="text-[6px] font-bold text-muted-foreground/60 uppercase">Next <ChevronRight className="inline w-2 h-2" /></span>
           </div>
           <div className="flex gap-1.5 justify-center py-2">
             {history.slice(-10).map((val, i) => (
@@ -652,13 +652,13 @@ export default function DigitFlowApp() {
   const handleMarketSelect = (marketId: string) => setStrategySelections(prev => ({ ...prev, [activeStrategy]: marketId }));
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-background text-foreground relative overflow-hidden">
+    <div className="flex flex-col min-h-screen w-full relative overflow-hidden">
       <DashboardHeader status={status} />
       
       <main className="relative z-10 flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6 sm:space-y-8 overflow-y-auto">
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-          <div className="flex justify-center mb-6 sm:mb-8 sticky top-0 z-40 bg-background/80 backdrop-blur-md py-2 px-3">
-            <TabsList className="bg-muted/40 p-1 rounded-2xl border border-border/50 h-auto flex-nowrap overflow-x-auto justify-start sm:justify-center w-full max-w-fit scrollbar-hide">
+          <div className="flex justify-center mb-6 sm:mb-8 sticky top-0 z-40 py-2 px-3">
+            <TabsList className="bg-black/40 p-1 rounded-2xl border border-white/10 h-auto flex-nowrap overflow-x-auto justify-start sm:justify-center w-full max-w-fit scrollbar-hide backdrop-blur-xl">
               {[
                 { value: 'dashboard', label: 'Analysis', icon: BarChart2 },
                 { value: 'navigator-ai', label: 'Navigator Hub', icon: ArrowUpDown },
@@ -675,12 +675,12 @@ export default function DigitFlowApp() {
 
           <TabsContent value="dashboard" className="space-y-8 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none pb-20">
             <div className="grid grid-cols-1 gap-8">
-              <Card className="border-none bg-card rounded-[3rem] shadow-2xl icy-glow overflow-hidden relative">
+              <Card className="border-none rounded-[3rem] shadow-2xl icy-glow icy-glass overflow-hidden relative">
                 <CardContent className="p-4 sm:p-12 space-y-6">
                   <div className="flex flex-col sm:flex-row items-center gap-4 justify-between w-full">
                     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                       <PopoverTrigger asChild>
-                        <div className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-muted/30 p-2.5 rounded-2xl transition-colors border border-border/50 bg-background/50 backdrop-blur-sm shadow-sm">
+                        <div className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-black/40 p-2.5 rounded-2xl transition-colors border border-white/10 bg-black/20 backdrop-blur-sm shadow-sm">
                           <BarChart2 className="w-5 h-5 text-primary" />
                           <div className="flex flex-col">
                             <span className="text-[10px] sm:text-[11px] font-black text-foreground group-hover:text-primary transition-colors truncate">
@@ -692,11 +692,11 @@ export default function DigitFlowApp() {
                           </div>
                         </div>
                       </PopoverTrigger>
-                      <PopoverContent className="w-72 p-0 bg-card border-border/50 shadow-2xl backdrop-blur-2xl text-card-foreground" align="start">
-                        <div className="p-3 border-b border-border/40"><span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2">Market Selector</span></div>
+                      <PopoverContent className="w-72 p-0 bg-black/90 border-white/10 shadow-2xl backdrop-blur-2xl text-white" align="start">
+                        <div className="p-3 border-b border-white/10"><span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2">Market Selector</span></div>
                         <div className="max-h-[50vh] overflow-y-auto p-1">
                           {CONTINUOUS_INDICES.map((market) => (
-                            <button key={market.id} onClick={() => { handleMarketSelect(market.id); setIsPopoverOpen(false); }} className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors", currentSymbol === market.id ? "bg-primary/10 text-primary" : "hover:bg-muted/40 text-foreground")}>
+                            <button key={market.id} onClick={() => { handleMarketSelect(market.id); setIsPopoverOpen(false); }} className={cn("w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors", currentSymbol === market.id ? "bg-primary/20 text-primary" : "hover:bg-white/10 text-foreground")}>
                               <span className="text-xs font-semibold">{market.name}</span>
                             </button>
                           ))}
@@ -704,11 +704,11 @@ export default function DigitFlowApp() {
                       </PopoverContent>
                     </Popover>
                     <Select value={tradeSide} onValueChange={setTradeSide}>
-                      <SelectTrigger className="w-full sm:w-32 h-10 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-border/40 bg-muted/40 focus:ring-0 rounded-xl">
+                      <SelectTrigger className="w-full sm:w-32 h-10 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-white/10 bg-black/40 focus:ring-0 rounded-xl text-white">
                         <SelectValue placeholder="Focus" />
                       </SelectTrigger>
-                      <SelectContent className="bg-card border-border/50">
-                        <SelectItem value="none" className="text-[9px] font-black uppercase tracking-widest">General</SelectItem>
+                      <SelectContent className="bg-black/90 border-white/10">
+                        <SelectItem value="none" className="text-[9px] font-black uppercase tracking-widest text-white">General</SelectItem>
                         <SelectItem value="over" className="text-[9px] font-black uppercase tracking-widest text-primary">OVER</SelectItem>
                         <SelectItem value="under" className="text-[9px] font-black uppercase tracking-widest text-rose-500">UNDER</SelectItem>
                       </SelectContent>
@@ -716,7 +716,7 @@ export default function DigitFlowApp() {
                   </div>
                   
                   <div className="flex flex-col items-center justify-center py-1 gap-2">
-                    <div className="w-[144px] h-[48px] border-2 border-primary/40 rounded-xl bg-black/60 flex items-center justify-center shadow-[0_0_30px_rgba(0,166,166,0.35)] backdrop-blur-lg">
+                    <div className="w-[144px] h-[48px] border-2 border-primary/40 rounded-xl bg-black/80 flex items-center justify-center shadow-[0_0_30px_rgba(0,166,166,0.5)] backdrop-blur-lg">
                       <span className="text-2xl sm:text-3xl font-black tracking-tighter text-primary brand-glow tabular-nums">
                         {latestPrice?.toFixed(2) || "---"}
                       </span>
@@ -725,8 +725,8 @@ export default function DigitFlowApp() {
                     <div className={cn(
                       "flex flex-col items-center gap-1 px-4 py-1 text-[8px] rounded-lg border transition-all duration-500 shadow-sm",
                       (currentMarketAnalysis.isHit || analysisTrigger)
-                        ? "bg-primary/10 border-primary shadow-[0_0_20px_rgba(0,166,166,0.15)]" 
-                        : "bg-muted/5 border-border/10 opacity-50"
+                        ? "bg-primary/20 border-primary shadow-[0_0_20px_rgba(0,166,166,0.3)]" 
+                        : "bg-black/20 border-white/10 opacity-50"
                     )}>
                       <div className="flex items-center gap-1.5">
                         <div className={cn(
@@ -799,8 +799,8 @@ export default function DigitFlowApp() {
 
           <TabsContent value="navigator-ai" className="mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 outline-none pb-20">
             <Tabs value={activeStrategy} onValueChange={setActiveStrategy} className="flex flex-col gap-6">
-              <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md py-2 px-1">
-                <TabsList className="bg-card/80 p-1.5 rounded-[1.5rem] border border-primary/20 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1.5 shadow-lg backdrop-blur-xl">
+              <div className="sticky top-0 z-40 py-2 px-1">
+                <TabsList className="bg-black/40 p-1.5 rounded-[1.5rem] border border-white/10 h-auto flex-nowrap overflow-x-auto justify-start w-full scrollbar-hide gap-1.5 shadow-lg backdrop-blur-xl">
                   {[
                     { id: 'OVER_UNDER', label: 'Over / Under', icon: ArrowUpDown },
                     { id: 'EVEN_ODD', label: 'Even / Odd', icon: Hash },
@@ -828,8 +828,8 @@ export default function DigitFlowApp() {
                 signalRegistry={currentStrategyRegistry} 
               />
               
-              <Card className="border border-border/50 bg-card rounded-[3rem] shadow-2xl icy-glow overflow-hidden min-h-[50vh] flex flex-col">
-                <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-muted/5">
+              <Card className="border border-white/10 rounded-[3rem] shadow-2xl icy-glow icy-glass overflow-hidden min-h-[50vh] flex flex-col">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-black/10">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
                     {CONTINUOUS_INDICES.map((market) => (
                       <MarketEngineCard 
@@ -852,23 +852,23 @@ export default function DigitFlowApp() {
           </TabsContent>
           
           <TabsContent value="scanner" className="mt-0 outline-none pb-10">
-            <Card className="h-[85vh] min-h-[600px] overflow-hidden rounded-[2.5rem] border-primary/20 shadow-2xl icy-glow">
+            <Card className="h-[85vh] min-h-[600px] overflow-hidden rounded-[2.5rem] border-primary/20 shadow-2xl icy-glow icy-glass">
               <iframe src="https://tracktool.netlify.app/signals" className="w-full h-full border-none" />
             </Card>
           </TabsContent>
           <TabsContent value="digits" className="mt-0 outline-none pb-10">
-            <Card className="h-[85vh] min-h-[600px] overflow-hidden rounded-[2.5rem] border-primary/20 shadow-2xl icy-glow">
+            <Card className="h-[85vh] min-h-[600px] overflow-hidden rounded-[2.5rem] border-primary/20 shadow-2xl icy-glow icy-glass">
               <iframe src="https://tracktool.netlify.app/digitshome" className="w-full h-full border-none" />
             </Card>
           </TabsContent>
           <TabsContent value="percentage" className="mt-0 outline-none pb-10">
-            <Card className="h-[85vh] min-h-[600px] overflow-hidden rounded-[2.5rem] border-primary/20 shadow-2xl icy-glow">
+            <Card className="h-[85vh] min-h-[600px] overflow-hidden rounded-[2.5rem] border-primary/20 shadow-2xl icy-glow icy-glass">
               <iframe src="https://api.binarytool.site" className="w-full h-full border-none" />
             </Card>
           </TabsContent>
         </Tabs>
 
-        <div className="w-full pt-12 pb-8 flex flex-col items-center justify-center gap-2 border-t border-border/10 mt-8 opacity-70">
+        <div className="w-full pt-12 pb-8 flex flex-col items-center justify-center gap-2 border-t border-white/10 mt-8 opacity-70">
           <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.3em] text-[#A67C52] transition-all hover:opacity-100 brand-vibrate">
             <div className="w-2 h-2 rounded-full bg-[#A67C52] animate-pulse shadow-[0_0_10px_rgba(166,124,82,0.5)]" />
             Created by Alex
