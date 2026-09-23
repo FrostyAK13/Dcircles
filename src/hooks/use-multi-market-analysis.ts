@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { DerivWS, type Tick, type ConnectionStatus } from '@/app/lib/deriv-ws';
+import { DerivWS, getQuoteDigit, type Tick, type ConnectionStatus } from '@/app/lib/deriv-ws';
 
 export interface MarketData {
   ticks: number[];
@@ -16,7 +16,9 @@ export function useMultiMarketAnalysis(symbols: string[]) {
   const wsRef = useRef<DerivWS | null>(null);
 
   const onHistory = useCallback((symbol: string, historyPrices: number[]) => {
-    const historyDigits = historyPrices.map(p => parseInt(p.toFixed(2).slice(-1))).filter(d => !isNaN(d));
+    const historyDigits = historyPrices
+      .map(price => getQuoteDigit(price, symbol))
+      .filter((digit): digit is number => digit !== null);
     setMarketData(prev => ({
       ...prev,
       [symbol]: {
@@ -29,8 +31,8 @@ export function useMultiMarketAnalysis(symbols: string[]) {
   }, []);
 
   const onTick = useCallback((tick: Tick) => {
-    const digit = parseInt(tick.quote.toFixed(2).slice(-1));
-    if (isNaN(digit)) return;
+    const digit = getQuoteDigit(tick.quote, tick.symbol);
+    if (digit === null) return;
 
     setMarketData(prev => {
       const current = prev[tick.symbol] || { ticks: [], prices: [], latestPrice: null, latestDigit: null };

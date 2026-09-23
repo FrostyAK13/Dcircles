@@ -11,6 +11,31 @@ export type Tick = {
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
 
+const DEFAULT_QUOTE_DECIMAL_PLACES = 2;
+const THREE_DECIMAL_MARKETS = new Set(['1HZ15V', '1HZ30V', '1HZ90V']);
+
+function getQuoteDecimalPlaces(symbol?: string): number {
+  return symbol && THREE_DECIMAL_MARKETS.has(symbol) ? 3 : DEFAULT_QUOTE_DECIMAL_PLACES;
+}
+
+export function getQuoteDigit(quote: number, symbol?: string): number | null {
+  if (!Number.isFinite(quote)) return null;
+
+  const scale = 10 ** getQuoteDecimalPlaces(symbol);
+  // Deriv digit contracts use the final displayed decimal without rounding it.
+  const truncatedQuote = Math.floor((Math.abs(quote) + 1e-10) * scale);
+  return truncatedQuote % 10;
+}
+
+export function formatQuote(quote: number, symbol?: string): string {
+  if (!Number.isFinite(quote)) return '---';
+
+  const decimalPlaces = getQuoteDecimalPlaces(symbol);
+  const scale = 10 ** decimalPlaces;
+  const truncatedQuote = Math.floor((Math.abs(quote) + 1e-10) * scale) / scale;
+  return `${quote < 0 ? '-' : ''}${truncatedQuote.toFixed(decimalPlaces)}`;
+}
+
 export interface TickResponse {
   tick?: Tick;
   history?: {

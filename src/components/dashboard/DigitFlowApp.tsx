@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
 import { Progress } from "@/components/ui/progress";
+import { formatQuote } from '@/app/lib/deriv-ws';
 
 export const CONTINUOUS_INDICES = [
   { id: '1HZ10V', name: 'Volatility 10 (1s) Index', short: '10 (1s)' },
@@ -235,17 +236,15 @@ interface MarketEngineCardProps {
   isGolden?: boolean;
   expiryTimestamp?: number;
   lastSignalTime?: number;
-  cachedAnalysis?: AnalysisResult | null;
 }
 
-function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGolden, expiryTimestamp, lastSignalTime, cachedAnalysis }: MarketEngineCardProps) {
+function MarketEngineCard({ market, data, strategy, isSelected, onSelect, isGolden, expiryTimestamp, lastSignalTime }: MarketEngineCardProps) {
   const [countdown, setCountdown] = useState(5);
   const [lifeRemaining, setLifeRemaining] = useState(30);
   
   const analysis = useMemo(() => {
-    if (cachedAnalysis) return cachedAnalysis;
     return getMarketAnalysis(data, strategy, lastSignalTime);
-  }, [data, strategy, lastSignalTime, cachedAnalysis]);
+  }, [data, strategy, lastSignalTime]);
 
   const isFlashy = analysis.isHit; 
 
@@ -419,7 +418,6 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
                   isGolden={goldenIds.includes(id)}
                   expiryTimestamp={entry?.timestamp}
                   lastSignalTime={entry?.timestamp}
-                  cachedAnalysis={entry?.analysis}
                 />
               );
             })}
@@ -445,11 +443,12 @@ interface TacticalAnalysisCardProps {
   colorSchema: 'cyan-rose' | 'amber-cyan';
   type: 'over-under' | 'even-odd' | 'matches' | 'rise-fall';
   livePrice: number | null;
+  symbol: string;
   targetDigit?: number;
   onTargetChange?: (val: number) => void;
 }
 
-function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, type, livePrice, targetDigit, onTargetChange }: TacticalAnalysisCardProps) {
+function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, type, livePrice, symbol, targetDigit, onTargetChange }: TacticalAnalysisCardProps) {
   const [historyLimit, setHistoryLimit] = useState(10);
   const total = counts[0] + counts[1];
   const p1 = total > 0 ? Math.round((counts[0] / total) * 100) : 0;
@@ -468,7 +467,7 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
       <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between bg-black/20">
         <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">{title}</h3>
         <div className="px-6 py-2.5 rounded-2xl border-2 border-primary/40 bg-primary/20 text-lg sm:text-2xl font-black text-primary tracking-wider tabular-nums shadow-[0_0_20px_rgba(0,166,166,0.4)] animate-pulse-subtle">
-          {livePrice?.toFixed(2) || "---"}
+          {livePrice === null ? "---" : formatQuote(livePrice, symbol)}
         </div>
       </CardHeader>
       <CardContent className="p-5 flex flex-col gap-6 justify-between flex-1">
@@ -693,7 +692,7 @@ export default function DigitFlowApp() {
                   <div className="flex flex-col sm:flex-row items-center gap-4 justify-between w-full">
                     <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                       <PopoverTrigger asChild>
-                        <div className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-black/40 p-2.5 rounded-2xl transition-colors border border-white/10 bg-black/20 backdrop-blur-sm shadow-sm">
+                        <div suppressHydrationWarning className="w-full sm:w-auto flex items-center gap-3 cursor-pointer group hover:bg-black/40 p-2.5 rounded-2xl transition-colors border border-white/10 bg-black/20 backdrop-blur-sm shadow-sm">
                           <BarChart2 className="w-5 h-5 text-primary" />
                           <div className="flex flex-col">
                             <span className="text-[10px] sm:text-[11px] font-black text-foreground group-hover:text-primary transition-colors truncate">
@@ -705,7 +704,7 @@ export default function DigitFlowApp() {
                           </div>
                         </div>
                       </PopoverTrigger>
-                      <PopoverContent className="w-72 p-0 bg-black/90 border-white/10 shadow-2xl backdrop-blur-2xl text-white" align="start">
+                      <PopoverContent id="market-selector-popover" className="w-72 p-0 bg-black/90 border-white/10 shadow-2xl backdrop-blur-2xl text-white" align="start">
                         <div className="p-3 border-b border-white/10"><span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2">Market Selector</span></div>
                         <div className="max-h-[50vh] overflow-y-auto p-1">
                           {CONTINUOUS_INDICES.map((market) => (
@@ -717,10 +716,10 @@ export default function DigitFlowApp() {
                       </PopoverContent>
                     </Popover>
                     <Select value={tradeSide} onValueChange={setTradeSide}>
-                      <SelectTrigger className="w-full sm:w-32 h-10 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-white/10 bg-black/40 focus:ring-0 rounded-xl text-white">
+                      <SelectTrigger suppressHydrationWarning className="w-full sm:w-32 h-10 text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-white/10 bg-black/40 focus:ring-0 rounded-xl text-white">
                         <SelectValue placeholder="Focus" />
                       </SelectTrigger>
-                      <SelectContent className="bg-black/90 border-white/10">
+                      <SelectContent id="trade-side-select" className="bg-black/90 border-white/10">
                         <SelectItem value="none" className="text-[9px] font-black uppercase tracking-widest text-white">General</SelectItem>
                         <SelectItem value="over" className="text-[9px] font-black uppercase tracking-widest text-primary">OVER</SelectItem>
                         <SelectItem value="under" className="text-[9px] font-black uppercase tracking-widest text-rose-500">UNDER</SelectItem>
@@ -731,7 +730,7 @@ export default function DigitFlowApp() {
                   <div className="flex flex-col items-center justify-center py-1 gap-2">
                     <div className="w-[100px] sm:w-[144px] h-[35px] sm:h-[48px] border-2 border-primary/40 rounded-xl bg-black/80 flex items-center justify-center shadow-[0_0_30px_rgba(0,166,166,0.5)] backdrop-blur-lg">
                       <span className="text-xl sm:text-2xl font-black tracking-tighter text-primary brand-glow tabular-nums">
-                        {latestPrice?.toFixed(2) || "---"}
+                        {latestPrice === null ? "---" : formatQuote(latestPrice, currentSymbol)}
                       </span>
                     </div>
                     
@@ -774,6 +773,7 @@ export default function DigitFlowApp() {
                   colorSchema="cyan-rose" 
                   type="over-under"
                   livePrice={latestPrice}
+                  symbol={currentSymbol}
                   targetDigit={ouTarget}
                   onTargetChange={setOuTarget}
                 />
@@ -785,6 +785,7 @@ export default function DigitFlowApp() {
                   colorSchema="cyan-rose" 
                   type="even-odd"
                   livePrice={latestPrice}
+                  symbol={currentSymbol}
                 />
                 <TacticalAnalysisCard 
                   title="Matches / Differs" 
@@ -794,6 +795,7 @@ export default function DigitFlowApp() {
                   colorSchema="amber-cyan" 
                   type="matches"
                   livePrice={latestPrice}
+                  symbol={currentSymbol}
                   targetDigit={matchTarget}
                   onTargetChange={setMatchTarget}
                 />
@@ -805,6 +807,7 @@ export default function DigitFlowApp() {
                   colorSchema="cyan-rose" 
                   type="rise-fall"
                   livePrice={latestPrice}
+                  symbol={currentSymbol}
                 />
               </div>
             </div>
@@ -852,9 +855,8 @@ export default function DigitFlowApp() {
                         strategy={activeStrategy} 
                         isSelected={strategySelections[activeStrategy] === market.id} 
                         onSelect={(id) => handleMarketSelect(id)} 
-                        expiryTimestamp={currentStrategyRegistry[market.id]?.timestamp} 
+                        expiryTimestamp={currentStrategyRegistry[market.id]?.timestamp}
                         lastSignalTime={currentStrategyRegistry[market.id]?.timestamp}
-                        cachedAnalysis={currentStrategyRegistry[market.id]?.analysis}
                       />
                     ))}
                   </div>

@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { DerivWS, type Tick, type ConnectionStatus } from '@/app/lib/deriv-ws';
+import { DerivWS, getQuoteDigit, type Tick, type ConnectionStatus } from '@/app/lib/deriv-ws';
 
 export const HISTORY_BUFFER_SIZE = 5000;
 
@@ -19,10 +19,9 @@ export function useDigitAnalysis(symbol: string = 'R_10') {
   const onHistory = useCallback((_symbol: string, historicalPrices: number[]) => {
     if (!Array.isArray(historicalPrices)) return;
     
-    const historicalDigits = historicalPrices.map(price => {
-      const quoteStr = price.toFixed(2);
-      return parseInt(quoteStr.slice(-1));
-    }).filter(d => !isNaN(d));
+    const historicalDigits = historicalPrices
+      .map(price => getQuoteDigit(price, _symbol))
+      .filter((digit): digit is number => digit !== null);
 
     setTicks(historicalDigits);
     setPrices(historicalPrices);
@@ -33,10 +32,8 @@ export function useDigitAnalysis(symbol: string = 'R_10') {
   }, []);
 
   const onTick = useCallback((tick: Tick) => {
-    const quoteStr = tick.quote.toFixed(2);
-    const digit = parseInt(quoteStr.slice(-1));
-    
-    if (isNaN(digit)) return;
+    const digit = getQuoteDigit(tick.quote, tick.symbol);
+    if (digit === null) return;
 
     setLatestPrice(tick.quote);
     setLatestDigit(digit);
