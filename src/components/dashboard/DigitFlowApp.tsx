@@ -9,7 +9,7 @@ import { DigitCard } from './DigitCard';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
-import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle, Radio, Star, Timer, ChevronRight } from 'lucide-react';
+import { BarChart2, Zap, Database, ExternalLink, LayoutGrid, Percent, Activity, Target, TrendingUp, Hash, ArrowUpDown, Layers, Clock, AlertCircle, Radio, Star, Timer, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
@@ -450,6 +450,7 @@ interface TacticalAnalysisCardProps {
 }
 
 function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, type, livePrice, targetDigit, onTargetChange }: TacticalAnalysisCardProps) {
+  const [historyLimit, setHistoryLimit] = useState(10);
   const total = counts[0] + counts[1];
   const p1 = total > 0 ? Math.round((counts[0] / total) * 100) : 0;
   const p2 = total > 0 ? Math.round((counts[1] / total) * 100) : 0;
@@ -505,10 +506,21 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
         <div className="flex flex-col gap-2">
           <div className="flex justify-between items-center">
             <span className="text-[7px] font-black uppercase tracking-[0.2em] text-muted-foreground/80">Digit History</span>
-            <span className="text-[6px] font-bold text-muted-foreground/60 uppercase">Next <ChevronRight className="inline w-2 h-2" /></span>
+            <button
+              type="button"
+              onClick={() => setHistoryLimit(current => current === 10 ? 25 : 10)}
+              className="text-[6px] font-bold text-muted-foreground/60 uppercase hover:text-primary transition-colors"
+              aria-label={historyLimit === 10 ? "Show more history samples" : "Show less history samples"}
+            >
+              {historyLimit === 10 ? (
+                <>More <ChevronRight className="inline w-2 h-2" /></>
+              ) : (
+                <><ChevronLeft className="inline w-2 h-2" /> Less</>
+              )}
+            </button>
           </div>
-          <div className="flex gap-1.5 justify-center py-2">
-            {history.slice(-10).map((val, i) => (
+          <div className="flex flex-wrap gap-1.5 justify-center py-2">
+            {history.slice(-historyLimit).map((val, i) => (
               <div key={i} className={cn("w-3 h-3 rounded-full shadow-sm", getDotColor(val))} />
             ))}
           </div>
@@ -595,12 +607,9 @@ export default function DigitFlowApp() {
 
   const goldenMarketIds = useMemo(() => {
     if (persistentSignalIds.length === 0) return [];
-    const scored = persistentSignalIds.map(id => ({ 
-      id, 
-      score: currentStrategyRegistry[id].analysis.score 
-    }));
-    scored.sort((a, b) => b.score - a.score);
-    return scored.slice(0, 4).map(s => s.id);
+    return [...persistentSignalIds]
+      .sort((a, b) => currentStrategyRegistry[b].timestamp - currentStrategyRegistry[a].timestamp)
+      .slice(0, 1);
   }, [persistentSignalIds, currentStrategyRegistry]);
 
   const stats = useMemo(() => {
@@ -620,7 +629,7 @@ export default function DigitFlowApp() {
     const eoCounts: [number, number] = [lastWindow.filter(d => d % 2 === 0).length, lastWindow.filter(d => d % 2 !== 0).length];
     const matchCounts: [number, number] = [lastWindow.filter(d => d === matchTarget).length, lastWindow.filter(d => d !== matchTarget).length];
     
-    const rfHistory = lastWindowPrices.slice(-10).map((p, i, arr) => i === 0 ? 0 : (p > arr[i-1] ? 1 : -1));
+    const rfHistory = lastWindowPrices.slice(-25).map((p, i, arr) => i === 0 ? 0 : (p > arr[i-1] ? 1 : -1));
     const riseCount = lastWindowPrices.filter((p, i, arr) => i > 0 && p > arr[i-1]).length;
     const fallCount = lastWindowPrices.filter((p, i, arr) => i > 0 && p < arr[i-1]).length;
 
@@ -761,7 +770,7 @@ export default function DigitFlowApp() {
                   title="Over / Under Analysis" 
                   labels={["Over", "Under"]} 
                   counts={tacticalStats.ouCounts} 
-                  history={ticks.slice(-10)} 
+                  history={ticks.slice(-25)}
                   colorSchema="cyan-rose" 
                   type="over-under"
                   livePrice={latestPrice}
@@ -772,7 +781,7 @@ export default function DigitFlowApp() {
                   title="Even / Odd Analysis" 
                   labels={["Even", "Odd"]} 
                   counts={tacticalStats.eoCounts} 
-                  history={ticks.slice(-10)} 
+                  history={ticks.slice(-25)}
                   colorSchema="cyan-rose" 
                   type="even-odd"
                   livePrice={latestPrice}
@@ -781,7 +790,7 @@ export default function DigitFlowApp() {
                   title="Matches / Differs" 
                   labels={["Match", "No Match"]} 
                   counts={tacticalStats.matchCounts} 
-                  history={ticks.slice(-10)} 
+                  history={ticks.slice(-25)}
                   colorSchema="amber-cyan" 
                   type="matches"
                   livePrice={latestPrice}
@@ -843,7 +852,6 @@ export default function DigitFlowApp() {
                         strategy={activeStrategy} 
                         isSelected={strategySelections[activeStrategy] === market.id} 
                         onSelect={(id) => handleMarketSelect(id)} 
-                        isGolden={goldenMarketIds.includes(market.id)} 
                         expiryTimestamp={currentStrategyRegistry[market.id]?.timestamp} 
                         lastSignalTime={currentStrategyRegistry[market.id]?.timestamp}
                         cachedAnalysis={currentStrategyRegistry[market.id]?.analysis}
@@ -883,4 +891,3 @@ export default function DigitFlowApp() {
     </div>
   );
 }
-
