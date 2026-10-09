@@ -7,22 +7,22 @@
   :root {
     --background: 180 20% 98%;
     --foreground: 180 45% 8%;
-    --card: 0 0% 100%;
-    --card-foreground: 180 50% 5%;
+    --card: 150 35% 97%;
+    --card-foreground: 160 45% 8%;
     --popover: 0 0% 100%;
     --popover-foreground: 180 50% 5%;
     --primary: 180 100% 33%;
     --primary-foreground: 180 40% 98%;
     --secondary: 40 56% 94%;
     --secondary-foreground: 180 50% 10%;
-    --muted: 180 10% 90%;
-    --muted-foreground: 180 20% 25%;
+    --muted: 150 22% 91%;
+    --muted-foreground: 160 22% 25%;
     --accent: 180 68% 48%;
     --accent-foreground: 180 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 180 20% 90%;
-    --input: 180 20% 90%;
+    --border: 150 22% 84%;
+    --input: 150 22% 84%;
     --ring: 180 100% 33%;
     --radius: 1rem;
   }
@@ -30,7 +30,7 @@
   .dark {
     --background: 180 40% 2%;
     --foreground: 180 10% 98%;
-    --card: 180 40% 4%;
+    --card: 155 45% 6%;
     --card-foreground: 180 10% 98%;
     --popover: 180 40% 4%;
     --popover-foreground: 180 10% 98%;
@@ -38,14 +38,14 @@
     --primary-foreground: 180 10% 4%;
     --secondary: 40 56% 25%;
     --secondary-foreground: 40 56% 90%;
-    --muted: 180 30% 8%;
+    --muted: 155 35% 10%;
     --muted-foreground: 180 10% 65%;
     --accent: 180 68% 48%;
     --accent-foreground: 180 10% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 180 30% 12%;
-    --input: 180 30% 12%;
+    --border: 155 35% 15%;
+    --input: 155 35% 15%;
     --ring: 180 100% 33%;
   }
 }
@@ -56,18 +56,27 @@
   }
   body {
     @apply bg-background text-foreground font-body antialiased selection:bg-primary/30 transition-colors duration-300;
-    background-image: 
-      linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.4)),
-      url('/wallpaper.jpeg');
-    background-size: cover;
-    background-position: center;
+    background-image: none;
+    background-color: hsl(var(--background));
     background-attachment: fixed;
-    background-repeat: no-repeat;
+  }
+
+  html.dark body {
+    background-color: #031711;
+    background-image:
+      linear-gradient(rgba(16, 185, 129, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(16, 185, 129, 0.025) 1px, transparent 1px),
+      radial-gradient(ellipse at 12% 8%, rgba(0, 115, 76, 0.22), transparent 42%),
+      radial-gradient(ellipse at 88% 76%, rgba(0, 82, 62, 0.16), transparent 44%),
+      linear-gradient(135deg, #041b16 0%, #031510 52%, #021c16 100%);
+    background-size: 48px 48px, 48px 48px, 100% 100%, 100% 100%, cover;
+    background-position: center top, center top, left top, right bottom, center;
+    background-repeat: repeat, repeat, no-repeat, no-repeat, no-repeat;
   }
 }
 
 .icy-glass {
-  @apply bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-white/20 dark:border-white/10;
+  @apply bg-emerald-50/85 dark:bg-emerald-950/55 backdrop-blur-xl border border-emerald-900/10 dark:border-emerald-100/10;
 }
 
 html:not(.dark) .icy-glass {

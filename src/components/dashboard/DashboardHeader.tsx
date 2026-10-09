@@ -64,7 +64,7 @@ export function DashboardHeader({ status }: DashboardHeaderProps) {
             className="block hover:opacity-90 transition-all cursor-pointer no-underline group"
           >
             <h1 className="text-[9px] sm:text-sm font-black tracking-[0.1em] text-primary uppercase italic shiny-effect brand-glow brand-vibrate px-2 sm:px-3 py-0.5 rounded-lg whitespace-nowrap bg-primary/10 border-2 border-primary/20 transition-all group-hover:bg-primary/20 group-hover:scale-105">
-              INDEX NAVIGATOR
+              DBOT-PULSE
             </h1>
           </a>
         </div>

@@ -2,7 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'INDEX NAVIGATOR - Advanced Digit Analysis',
+  title: 'DBOT-PULSE',
   description: 'Modern real-time digit distribution analysis for binary options trading.',
 };
 

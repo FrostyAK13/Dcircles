@@ -384,7 +384,7 @@ function SignalScanner({ marketData, strategy, signals, goldenIds, signalRegistr
 
   return (
     <Card className="border-primary/20 shadow-2xl icy-glow icy-glass overflow-hidden rounded-[2.5rem]">
-      <CardHeader className="py-4 px-6 border-b border-border/40 flex flex-row items-center justify-between bg-black/20">
+      <CardHeader className="py-4 px-6 border-b border-border/40 flex flex-row items-center justify-between bg-emerald-900/5 dark:bg-emerald-950/40">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <Radio className="w-5 h-5 text-primary animate-pulse" />
@@ -464,7 +464,7 @@ function TacticalAnalysisCard({ title, labels, counts, history, colorSchema, typ
 
   return (
     <Card className="border-border/20 shadow-xl rounded-3xl overflow-hidden icy-glass flex flex-col w-full">
-      <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between bg-black/20">
+      <CardHeader className="py-4 px-6 border-b border-border/10 flex flex-row items-center justify-between bg-emerald-900/5 dark:bg-emerald-950/40">
         <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground">{title}</h3>
         <div className="px-6 py-2.5 rounded-2xl border-2 border-primary/40 bg-primary/20 text-lg sm:text-2xl font-black text-primary tracking-wider tabular-nums shadow-[0_0_20px_rgba(0,166,166,0.4)] animate-pulse-subtle">
           {livePrice === null ? "---" : formatQuote(livePrice, symbol)}
@@ -887,7 +887,7 @@ export default function DigitFlowApp() {
             <div className="w-2 h-2 rounded-full bg-[#A67C52] animate-pulse shadow-[0_0_10px_rgba(166,124,82,0.5)]" />
             Created by Alex
           </div>
-          <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.1em]">© 2025 INDEX NAVIGATOR TAC HUB</span>
+          <span className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-[0.1em]">© 2025 DBOT-PULSE TAC HUB</span>
         </div>
       </main>
     </div>
